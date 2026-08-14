@@ -266,6 +266,7 @@ const firebaseConfig = {
 // ==============================================
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.database();
 
@@ -299,404 +300,1523 @@ const DEFAULT_WORDS = [
   "ATLAS","BUGLE","CRATER","DOMINO","EMBASSY","TALON","GALAXY","HORNET","IMPACT","JOCKEY"
 ];
 
+
+// ---------- UTILITY FUNCTIONS ----------
+
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
-function showError(msg) { document.getElementById("landingError").textContent = msg; }
-function escapeHtml(str) { const d = document.createElement("div"); d.textContent = str; return d.innerHTML; }
-function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
-function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-auth.onAuthStateChanged(user => { if (user) uid = user.uid; });
-auth.signInAnonymously().catch(e => showError("Connection error: " + e.message));
+function showError(msg) {
+  document.getElementById("landingError").textContent = msg;
+}
+
+function escapeHtml(str) {
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function capitalize(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+
+  return a;
+}
+
+
+// ---------- AUTHENTICATION ----------
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    uid = user.uid;
+    console.log("Authenticated anonymously:", uid);
+  }
+});
+
+auth.signInAnonymously().catch(e => {
+  console.error("Authentication error:", e);
+  showError("Connection error: " + e.message);
+});
+
+
+// ---------- ROOM CODE ----------
 
 function genRoomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+  for (let i = 0; i < 4; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+
   return code;
 }
 
+
 // ---------- CREATE / JOIN ----------
+
 function createGame() {
   playerName = document.getElementById("nameInput").value.trim();
-  if (!playerName) return showError("Enter your name first.");
-  if (!uid) return showError("Still connecting, try again in a second.");
+
+  if (!playerName) {
+    return showError("Enter your name first.");
+  }
+
+  if (!uid) {
+    return showError("Still connecting, try again in a second.");
+  }
+
   gameCode = genRoomCode();
   isHost = true;
   gameRef = db.ref("games/" + gameCode);
+
   gameRef.set({
     hostUid: uid,
     status: "lobby",
     wordListMode: "default",
     createdAt: firebase.database.ServerValue.TIMESTAMP,
+
     players: {
-      [uid]: { name: playerName, team: null, isSpymaster: false }
+      [uid]: {
+        name: playerName,
+        team: null,
+        isSpymaster: false
+      }
     },
-    log: { init: { text: "Game created. Waiting for players to join.", ts: firebase.database.ServerValue.TIMESTAMP } }
-  }).then(() => attachGameListener()).catch(e => showError("Could not create game: " + e.message));
+
+    log: {
+      init: {
+        text: "Game created. Waiting for players to join.",
+        ts: firebase.database.ServerValue.TIMESTAMP
+      }
+    }
+
+  }).then(() => {
+    attachGameListener();
+
+  }).catch(e => {
+    console.error("Could not create game:", e);
+    showError("Could not create game: " + e.message);
+  });
 }
+
 
 function joinGame() {
   playerName = document.getElementById("nameInput").value.trim();
-  const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
-  if (!playerName) return showError("Enter your name first.");
-  if (!code) return showError("Enter a room code.");
-  if (!uid) return showError("Still connecting, try again in a second.");
+
+  const code = document
+    .getElementById("joinCodeInput")
+    .value
+    .trim()
+    .toUpperCase();
+
+  if (!playerName) {
+    return showError("Enter your name first.");
+  }
+
+  if (!code) {
+    return showError("Enter a room code.");
+  }
+
+  if (!uid) {
+    return showError("Still connecting, try again in a second.");
+  }
+
   gameRef = db.ref("games/" + code);
-  gameRef.once("value").then(snap => {
-    const data = snap.val();
-    if (!data) return showError("No game found with that code.");
-    if (data.status !== "lobby") return showError("That game has already started.");
-    gameCode = code;
-    isHost = false;
-    return gameRef.child("players/" + uid).set({ name: playerName, team: null, isSpymaster: false });
-  }).then(() => { if (gameCode) attachGameListener(); })
-    .catch(e => showError("Could not join: " + e.message));
+
+  gameRef.once("value")
+    .then(snap => {
+      const data = snap.val();
+
+      if (!data) {
+        showError("No game found with that code.");
+        return null;
+      }
+
+      if (data.status !== "lobby") {
+        showError("That game has already started.");
+        return null;
+      }
+
+      gameCode = code;
+      isHost = false;
+
+      return gameRef.child("players/" + uid).set({
+        name: playerName,
+        team: null,
+        isSpymaster: false
+      });
+    })
+    .then(() => {
+      if (gameCode) {
+        attachGameListener();
+      }
+    })
+    .catch(e => {
+      console.error("Could not join:", e);
+      showError("Could not join: " + e.message);
+    });
 }
+
 
 // ---------- LIVE LISTENER ----------
+
 function attachGameListener() {
+
   gameRef.on("value", snap => {
     gameData = snap.val();
-    if (!gameData) return;
-    if (gameData.hostUid === uid) isHost = true;
+
+    if (!gameData) {
+      return;
+    }
+
+    // Always determine host status from Firebase.
+    if (gameData.hostUid === uid) {
+      isHost = true;
+    }
+
     render();
   });
+
+
   db.ref("cardColors/" + gameCode).on("value", snap => {
     cardColorsData = snap.val() || {};
-    if (gameData) render();
+
+    if (gameData) {
+      render();
+    }
   });
 }
+
 
 // ---------- MAIN ROUTER ----------
+
 function render() {
-  if (!gameData) return;
-  document.getElementById("topSub").textContent = "Room " + gameCode;
-  if (gameData.status === "lobby") renderLobby();
-  else if (gameData.status === "playing") renderGame();
-  else if (gameData.status === "ended") renderEnded();
-}
-
-// ---------- LOBBY ----------
-function renderLobby() {
-  showScreen("screen-lobby");
-  document.getElementById("lobbyCode").textContent = gameCode;
-  const players = gameData.players || {};
-  const me = players[uid];
-
-  const redList = Object.values(players).filter(p => p.team === "red");
-  const blueList = Object.values(players).filter(p => p.team === "blue");
-
-  document.getElementById("redPlayerList").innerHTML = redList.map(p =>
-    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
-  ).join("") || `<p class="small">No one yet.</p>`;
-  document.getElementById("bluePlayerList").innerHTML = blueList.map(p =>
-    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
-  ).join("") || `<p class="small">No one yet.</p>`;
-
-  document.getElementById("spymasterToggleBox").style.display = me && me.team ? "block" : "none";
-  if (me && me.team) {
-    document.getElementById("spymasterToggleBtn").textContent = me.isSpymaster ? "Give up Spymaster" : "Become Spymaster";
-  }
-
-  document.getElementById("hostControlsBox").style.display = isHost ? "block" : "none";
-  document.getElementById("lobbyWaitBox").style.display = isHost ? "none" : "block";
-
-  if (isHost) {
-    const mode = gameData.wordListMode || "default";
-    document.getElementById("customWordsBox").style.display = mode === "custom" ? "block" : "none";
-    document.getElementById("defaultListBtn").style.opacity = mode === "default" ? "1" : "0.5";
-    document.getElementById("customListBtn").style.opacity = mode === "custom" ? "1" : "0.5";
-
-    const total = Object.keys(players).length;
-    const redSpy = redList.filter(p => p.isSpymaster).length;
-    const blueSpy = blueList.filter(p => p.isSpymaster).length;
-    let warning = `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
-    if (total < 4) warning += " Need at least 4 total.";
-    if (redList.length < 2 || blueList.length < 2) warning += " Each team needs 1 Spymaster + 1 Operative.";
-    if (redSpy !== 1 || blueSpy !== 1) warning += " Each team needs exactly 1 Spymaster.";
-    if (mode === "custom" && (!gameData.customWords || gameData.customWords.length < 25)) warning += " Custom word list needs at least 25 words saved.";
-    document.getElementById("lobbyWarning").textContent = warning;
-  }
-}
-
-function joinTeam(team) {
-  gameRef.child("players/" + uid).update({ team, isSpymaster: false });
-}
-
-function toggleSpymaster() {
-  const players = gameData.players || {};
-  const me = players[uid];
-  if (!me || !me.team) return;
-  if (!me.isSpymaster) {
-    const existing = Object.entries(players).find(([id, p]) => p.team === me.team && p.isSpymaster);
-    if (existing) { alert("This team already has a Spymaster."); return; }
-  }
-  gameRef.child("players/" + uid + "/isSpymaster").set(!me.isSpymaster);
-}
-
-function setWordMode(mode) {
-  gameRef.update({ wordListMode: mode });
-}
-
-function saveCustomWords() {
-  const raw = document.getElementById("customWordsInput").value;
-  const words = [...new Set(raw.split(/[\n,]/).map(w => w.trim().toUpperCase()).filter(Boolean))];
-  if (words.length < 25) {
-    document.getElementById("customWordsStatus").textContent = `Only ${words.length} unique words — need at least 25.`;
+  if (!gameData) {
     return;
   }
-  gameRef.update({ customWords: words, wordListMode: "custom" }).then(() => {
-    document.getElementById("customWordsStatus").textContent = `Saved ${words.length} words.`;
-  });
+
+  document.getElementById("topSub").textContent =
+    "Room " + gameCode;
+
+  if (gameData.status === "lobby") {
+    renderLobby();
+
+  } else if (gameData.status === "playing") {
+    renderGame();
+
+  } else if (gameData.status === "ended") {
+    renderEnded();
+  }
 }
 
+
+// ---------- LOBBY ----------
+
+function renderLobby() {
+
+  showScreen("screen-lobby");
+
+  document.getElementById("lobbyCode").textContent = gameCode;
+
+  const players = gameData.players || {};
+  const me = players[uid];
+
+  const redList = Object.values(players)
+    .filter(p => p.team === "red");
+
+  const blueList = Object.values(players)
+    .filter(p => p.team === "blue");
+
+
+  document.getElementById("redPlayerList").innerHTML =
+    redList.map(p =>
+      `<div class="player-chip">
+        ${escapeHtml(p.name)}
+        ${p.isSpymaster
+          ? '<span class="tag">Spymaster</span>'
+          : ""}
+      </div>`
+    ).join("")
+    ||
+    `<p class="small">No one yet.</p>`;
+
+
+  document.getElementById("bluePlayerList").innerHTML =
+    blueList.map(p =>
+      `<div class="player-chip">
+        ${escapeHtml(p.name)}
+        ${p.isSpymaster
+          ? '<span class="tag">Spymaster</span>'
+          : ""}
+      </div>`
+    ).join("")
+    ||
+    `<p class="small">No one yet.</p>`;
+
+
+  // Spymaster controls
+
+  document.getElementById("spymasterToggleBox").style.display =
+    me && me.team ? "block" : "none";
+
+
+  if (me && me.team) {
+    document.getElementById("spymasterToggleBtn").textContent =
+      me.isSpymaster
+        ? "Give up Spymaster"
+        : "Become Spymaster";
+  }
+
+
+  // Host controls
+
+  document.getElementById("hostControlsBox").style.display =
+    isHost ? "block" : "none";
+
+  document.getElementById("lobbyWaitBox").style.display =
+    isHost ? "none" : "block";
+
+
+  if (isHost) {
+
+    const mode = gameData.wordListMode || "default";
+
+    document.getElementById("customWordsBox").style.display =
+      mode === "custom" ? "block" : "none";
+
+    document.getElementById("defaultListBtn").style.opacity =
+      mode === "default" ? "1" : "0.5";
+
+    document.getElementById("customListBtn").style.opacity =
+      mode === "custom" ? "1" : "0.5";
+
+
+    const total = Object.keys(players).length;
+
+    const redSpy = redList.filter(
+      p => p.isSpymaster
+    ).length;
+
+    const blueSpy = blueList.filter(
+      p => p.isSpymaster
+    ).length;
+
+
+    let warning =
+      `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
+
+
+    if (total < 4) {
+      warning += " Need at least 4 total.";
+    }
+
+
+    if (redList.length < 2 || blueList.length < 2) {
+      warning +=
+        " Each team needs 1 Spymaster + 1 Operative.";
+    }
+
+
+    if (redSpy !== 1 || blueSpy !== 1) {
+      warning +=
+        " Each team needs exactly 1 Spymaster.";
+    }
+
+
+    if (
+      mode === "custom" &&
+      (!gameData.customWords ||
+       gameData.customWords.length < 25)
+    ) {
+      warning +=
+        " Custom word list needs at least 25 words saved.";
+    }
+
+
+    document.getElementById("lobbyWarning").textContent =
+      warning;
+  }
+}
+
+
+// ---------- TEAM MANAGEMENT ----------
+
+function joinTeam(team) {
+
+  gameRef
+    .child("players/" + uid)
+    .update({
+      team: team,
+      isSpymaster: false
+    })
+    .catch(e => {
+      console.error("Could not join team:", e);
+      alert("Could not join team: " + e.message);
+    });
+}
+
+
+function toggleSpymaster() {
+
+  const players = gameData.players || {};
+  const me = players[uid];
+
+  if (!me || !me.team) {
+    return;
+  }
+
+
+  if (!me.isSpymaster) {
+
+    const existing = Object.entries(players).find(
+      ([id, p]) =>
+        p.team === me.team &&
+        p.isSpymaster
+    );
+
+    if (existing) {
+      alert("This team already has a Spymaster.");
+      return;
+    }
+  }
+
+
+  gameRef
+    .child("players/" + uid + "/isSpymaster")
+    .set(!me.isSpymaster)
+    .catch(e => {
+      console.error("Could not change Spymaster status:", e);
+      alert("Could not change Spymaster status: " + e.message);
+    });
+}
+
+
+// ---------- WORD LIST ----------
+
+function setWordMode(mode) {
+
+  gameRef
+    .update({
+      wordListMode: mode
+    })
+    .catch(e => {
+      console.error("Could not change word mode:", e);
+      alert("Could not change word mode: " + e.message);
+    });
+}
+
+
+function saveCustomWords() {
+
+  const raw =
+    document.getElementById("customWordsInput").value;
+
+  const words = [
+    ...new Set(
+      raw
+        .split(/[\n,]/)
+        .map(w => w.trim().toUpperCase())
+        .filter(Boolean)
+    )
+  ];
+
+
+  if (words.length < 25) {
+
+    document.getElementById("customWordsStatus").textContent =
+      `Only ${words.length} unique words — need at least 25.`;
+
+    return;
+  }
+
+
+  gameRef
+    .update({
+      customWords: words,
+      wordListMode: "custom"
+    })
+    .then(() => {
+
+      document.getElementById("customWordsStatus").textContent =
+        `Saved ${words.length} words.`;
+
+    })
+    .catch(e => {
+
+      console.error("Could not save custom words:", e);
+
+      document.getElementById("customWordsStatus").textContent =
+        "Could not save word list: " + e.message;
+    });
+}
+
+
 function getWordsForGame() {
+
   const mode = gameData.wordListMode || "default";
-  const pool = (mode === "custom" && gameData.customWords && gameData.customWords.length >= 25)
-    ? gameData.customWords
-    : DEFAULT_WORDS;
+
+  const pool =
+    (
+      mode === "custom" &&
+      gameData.customWords &&
+      gameData.customWords.length >= 25
+    )
+      ? gameData.customWords
+      : DEFAULT_WORDS;
+
   return shuffle(pool).slice(0, 25);
 }
 
+
+// ---------- START GAME ----------
+
 function startGame() {
-  const players = gameData.players || {};
-  const uids = Object.keys(players);
-  const redList = uids.filter(id => players[id].team === "red");
-  const blueList = uids.filter(id => players[id].team === "blue");
-  const redSpy = redList.filter(id => players[id].isSpymaster);
-  const blueSpy = blueList.filter(id => players[id].isSpymaster);
 
-  if (uids.length < 4) return alert("Need at least 4 players total.");
-  if (redList.length < 2 || blueList.length < 2) return alert("Each team needs at least 1 Spymaster and 1 Operative.");
-  if (redSpy.length !== 1 || blueSpy.length !== 1) return alert("Each team needs exactly 1 Spymaster.");
+  console.log("Start Game button clicked.");
 
-  const mode = gameData.wordListMode || "default";
-  if (mode === "custom" && (!gameData.customWords || gameData.customWords.length < 25)) {
-    return alert("Save a custom word list with at least 25 words first, or switch to the default list.");
+  if (!gameData) {
+    alert("Game data has not loaded yet. Please wait a moment.");
+    return;
   }
+
+  if (!isHost) {
+    alert("Only the host can start the game.");
+    return;
+  }
+
+
+  const players = gameData.players || {};
+
+  const uids = Object.keys(players);
+
+
+  const redList = uids.filter(
+    id => players[id].team === "red"
+  );
+
+  const blueList = uids.filter(
+    id => players[id].team === "blue"
+  );
+
+
+  const redSpy = redList.filter(
+    id => players[id].isSpymaster
+  );
+
+  const blueSpy = blueList.filter(
+    id => players[id].isSpymaster
+  );
+
+
+  // ---------- VALIDATION ----------
+
+  if (uids.length < 4) {
+    alert("Need at least 4 players total.");
+    return;
+  }
+
+
+  if (
+    redList.length < 2 ||
+    blueList.length < 2
+  ) {
+    alert(
+      "Each team needs at least 1 Spymaster and 1 Operative."
+    );
+    return;
+  }
+
+
+  if (
+    redSpy.length !== 1 ||
+    blueSpy.length !== 1
+  ) {
+    alert(
+      "Each team needs exactly 1 Spymaster."
+    );
+    return;
+  }
+
+
+  const mode =
+    gameData.wordListMode || "default";
+
+
+  if (
+    mode === "custom" &&
+    (
+      !gameData.customWords ||
+      gameData.customWords.length < 25
+    )
+  ) {
+
+    alert(
+      "Save a custom word list with at least 25 words first, or switch to the default list."
+    );
+
+    return;
+  }
+
+
+  // ---------- GENERATE GAME ----------
 
   const words = getWordsForGame();
-  const startingTeam = Math.random() < 0.5 ? "red" : "blue";
-  const counts = startingTeam === "red" ? { red: 9, blue: 8 } : { red: 8, blue: 9 };
-  const colors = [];
-  for (let i = 0; i < counts.red; i++) colors.push("red");
-  for (let i = 0; i < counts.blue; i++) colors.push("blue");
-  for (let i = 0; i < 7; i++) colors.push("yellow");
-  colors.push("black");
-  const shuffledColors = shuffle(colors);
 
-  const board = words.map(w => ({ word: w, revealed: false }));
+  const startingTeam =
+    Math.random() < 0.5
+      ? "red"
+      : "blue";
+
+
+  const counts =
+    startingTeam === "red"
+      ? { red: 9, blue: 8 }
+      : { red: 8, blue: 9 };
+
+
+  const colors = [];
+
+
+  for (let i = 0; i < counts.red; i++) {
+    colors.push("red");
+  }
+
+
+  for (let i = 0; i < counts.blue; i++) {
+    colors.push("blue");
+  }
+
+
+  for (let i = 0; i < 7; i++) {
+    colors.push("yellow");
+  }
+
+
+  colors.push("black");
+
+
+  const shuffledColors =
+    shuffle(colors);
+
+
+  const board =
+    words.map(w => ({
+      word: w,
+      revealed: false
+    }));
+
+
   const colorsUpdate = {};
-  shuffledColors.forEach((color, i) => { colorsUpdate[i] = color; });
+
+
+  shuffledColors.forEach(
+    (color, i) => {
+      colorsUpdate[i] = color;
+    }
+  );
+
+
+  // ---------- PREPARE GAME DATA ----------
 
   const updates = {};
-  updates["board"] = board;
-  updates["status"] = "playing";
-  updates["startingTeam"] = startingTeam;
-  updates["currentTurn"] = startingTeam;
-  updates["redRemaining"] = counts.red;
-  updates["blueRemaining"] = counts.blue;
-  updates["clue"] = null;
-  updates["winner"] = null;
-  pushCNLog(updates, `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`);
 
-  db.ref("cardColors/" + gameCode).set(colorsUpdate).then(() => gameRef.update(updates));
+
+  updates["board"] = board;
+
+  updates["status"] = "playing";
+
+  updates["startingTeam"] = startingTeam;
+
+  updates["currentTurn"] = startingTeam;
+
+  updates["redRemaining"] = counts.red;
+
+  updates["blueRemaining"] = counts.blue;
+
+  updates["clue"] = null;
+
+  updates["winner"] = null;
+
+
+  pushCNLog(
+    updates,
+    `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`
+  );
+
+
+  // ---------- WRITE CARD COLOURS ----------
+
+  console.log(
+    "Writing card colours for room:",
+    gameCode
+  );
+
+
+  /*
+   * IMPORTANT:
+   *
+   * Firebase rules are defined at:
+   *
+   * cardColors/$gameId/$idx
+   *
+   * Therefore we must write each individual colour
+   * instead of writing the entire cardColors/$gameId
+   * object at once.
+   */
+
+  const colorWrites =
+    Object.entries(colorsUpdate).map(
+      ([idx, color]) => {
+
+        return db
+          .ref(
+            "cardColors/" +
+            gameCode +
+            "/" +
+            idx
+          )
+          .set(color);
+      }
+    );
+
+
+  Promise.all(colorWrites)
+
+    .then(() => {
+
+      console.log(
+        "Card colours saved successfully."
+      );
+
+      return gameRef.update(updates);
+    })
+
+    .then(() => {
+
+      console.log(
+        "Game status updated successfully."
+      );
+
+      console.log(
+        "Game started successfully!"
+      );
+
+    })
+
+    .catch(e => {
+
+      console.error(
+        "START GAME ERROR:",
+        e
+      );
+
+      alert(
+        "Could not start game: " +
+        e.message
+      );
+
+    });
 }
 
+
 // ---------- GAME ----------
+
 function renderGame() {
+
   showScreen("screen-game");
-  const players = gameData.players || {};
-  const me = players[uid];
-  const currentTurn = gameData.currentTurn;
 
-  document.getElementById("turnPill").textContent = capitalize(currentTurn) + "'s turn";
-  document.getElementById("turnPill").className = "status-pill turn-" + currentTurn;
-  document.getElementById("redScore").textContent = "Red: " + (gameData.redRemaining ?? 9);
-  document.getElementById("blueScore").textContent = "Blue: " + (gameData.blueRemaining ?? 8);
+  const players =
+    gameData.players || {};
 
-  const roleBanner = document.getElementById("roleBanner");
+  const me =
+    players[uid];
+
+  const currentTurn =
+    gameData.currentTurn;
+
+
+  document.getElementById("turnPill").textContent =
+    capitalize(currentTurn) + "'s turn";
+
+
+  document.getElementById("turnPill").className =
+    "status-pill turn-" + currentTurn;
+
+
+  document.getElementById("redScore").textContent =
+    "Red: " +
+    (gameData.redRemaining ?? 9);
+
+
+  document.getElementById("blueScore").textContent =
+    "Blue: " +
+    (gameData.blueRemaining ?? 8);
+
+
+  const roleBanner =
+    document.getElementById("roleBanner");
+
+
   if (!me || !me.team) {
-    roleBanner.textContent = "You're spectating this game.";
+
+    roleBanner.textContent =
+      "You're spectating this game.";
+
   } else {
-    roleBanner.textContent = `You are on ${capitalize(me.team)} Team${me.isSpymaster ? " — Spymaster" : " — Operative"}.`;
+
+    roleBanner.textContent =
+      `You are on ${capitalize(me.team)} Team` +
+      (
+        me.isSpymaster
+          ? " — Spymaster"
+          : " — Operative"
+      );
   }
 
-  const clue = gameData.clue;
-  const isMyTurnTeam = me && me.team === currentTurn;
-  const iAmSpymasterGivingClue = me && me.isSpymaster && isMyTurnTeam && !clue;
 
-  document.getElementById("clueGiveBox").style.display = iAmSpymasterGivingClue ? "block" : "none";
+  const clue =
+    gameData.clue;
+
+
+  const isMyTurnTeam =
+    me &&
+    me.team === currentTurn;
+
+
+  const iAmSpymasterGivingClue =
+    me &&
+    me.isSpymaster &&
+    isMyTurnTeam &&
+    !clue;
+
+
+  document.getElementById("clueGiveBox").style.display =
+    iAmSpymasterGivingClue
+      ? "block"
+      : "none";
+
 
   if (clue) {
-    document.getElementById("clueDisplayBox").style.display = "block";
-    document.getElementById("clueWordDisplay").textContent = clue.word;
+
+    document.getElementById("clueDisplayBox").style.display =
+      "block";
+
+
+    document.getElementById("clueWordDisplay").textContent =
+      clue.word;
+
+
     document.getElementById("clueNumberDisplay").textContent =
       `${clue.number} card${clue.number === 1 ? "" : "s"} · ${clue.guessesMade || 0} guessed so far`;
+
   } else {
-    document.getElementById("clueDisplayBox").style.display = "none";
+
+    document.getElementById("clueDisplayBox").style.display =
+      "none";
   }
 
-  const canGuess = me && !me.isSpymaster && isMyTurnTeam && !!clue;
-  document.getElementById("endTurnBox").style.display = canGuess ? "block" : "none";
 
-  renderBoard(me, canGuess);
+  const canGuess =
+    me &&
+    !me.isSpymaster &&
+    isMyTurnTeam &&
+    !!clue;
+
+
+  document.getElementById("endTurnBox").style.display =
+    canGuess
+      ? "block"
+      : "none";
+
+
+  renderBoard(
+    me,
+    canGuess
+  );
+
   renderCNLog();
 }
 
+
+// ---------- BOARD ----------
+
 function renderBoard(me, canGuess) {
-  const board = gameData.board || [];
-  const boardEl = document.getElementById("board");
+
+  const board =
+    gameData.board || {};
+
+  const boardEl =
+    document.getElementById("board");
+
+
   boardEl.innerHTML = "";
+
+
   board.forEach((card, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "cn-card";
-    btn.textContent = card.word;
-    const color = cardColorsData[idx]; // only present for us if revealed, we're a spymaster, or game ended
+
+    const btn =
+      document.createElement("button");
+
+
+    btn.className =
+      "cn-card";
+
+
+    btn.textContent =
+      card.word;
+
+
+    const color =
+      cardColorsData[idx];
+
+
     if (card.revealed) {
-      if (color) btn.classList.add("color-" + color);
-      btn.classList.add("revealed");
+
+      if (color) {
+        btn.classList.add(
+          "color-" + color
+        );
+      }
+
+      btn.classList.add(
+        "revealed"
+      );
+
       btn.disabled = true;
+
     } else if (color) {
-      btn.classList.add("color-" + color);
+
+      btn.classList.add(
+        "color-" + color
+      );
     }
-    if (!card.revealed && canGuess) {
-      btn.onclick = () => selectCard(idx);
+
+
+    if (
+      !card.revealed &&
+      canGuess
+    ) {
+
+      btn.onclick =
+        () => selectCard(idx);
+
     } else {
+
       btn.disabled = true;
     }
+
+
     boardEl.appendChild(btn);
   });
 }
 
-function submitClue() {
-  const word = document.getElementById("clueWordInput").value.trim();
-  const number = parseInt(document.getElementById("clueNumberInput").value, 10);
-  if (!word) return alert("Enter a one-word clue.");
-  if (isNaN(number) || number < 0 || number > 9) return alert("Enter a valid number (0-9).");
-  const updates = {};
-  updates["clue"] = { word, number, team: gameData.currentTurn, guessesMade: 0, givenBy: uid };
-  pushCNLog(updates, `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`);
-  gameRef.update(updates);
-  document.getElementById("clueWordInput").value = "";
-  document.getElementById("clueNumberInput").value = "1";
-}
 
-function selectCard(idx) {
-  gameRef.child("board/" + idx + "/revealed").set(true)
-    .then(() => db.ref("cardColors/" + gameCode + "/" + idx).once("value"))
-    .then(snap => {
-      const color = snap.val();
-      const word = gameData.board[idx].word;
-      processGuessResult(idx, color, word);
+// ---------- CLUES ----------
+
+function submitClue() {
+
+  const word =
+    document.getElementById("clueWordInput")
+      .value
+      .trim();
+
+
+  const number =
+    parseInt(
+      document.getElementById("clueNumberInput").value,
+      10
+    );
+
+
+  if (!word) {
+    return alert(
+      "Enter a one-word clue."
+    );
+  }
+
+
+  if (
+    isNaN(number) ||
+    number < 0 ||
+    number > 9
+  ) {
+
+    return alert(
+      "Enter a valid number (0-9)."
+    );
+  }
+
+
+  const updates = {};
+
+
+  updates["clue"] = {
+    word: word,
+    number: number,
+    team: gameData.currentTurn,
+    guessesMade: 0,
+    givenBy: uid
+  };
+
+
+  pushCNLog(
+    updates,
+    `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
+  );
+
+
+  gameRef
+    .update(updates)
+    .then(() => {
+
+      document.getElementById(
+        "clueWordInput"
+      ).value = "";
+
+      document.getElementById(
+        "clueNumberInput"
+      ).value = "1";
+
+    })
+    .catch(e => {
+
+      console.error(
+        "Could not submit clue:",
+        e
+      );
+
+      alert(
+        "Could not submit clue: " +
+        e.message
+      );
     });
 }
 
-function processGuessResult(idx, color, word) {
-  const myTeam = gameData.currentTurn;
-  const updates = {};
-  let text = "";
 
-  if (color === "black") {
-    const winner = myTeam === "red" ? "blue" : "red";
-    updates["status"] = "ended";
-    updates["winner"] = winner;
-    text = `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
-    pushCNLog(updates, text);
-    gameRef.update(updates);
+// ---------- CARD SELECTION ----------
+
+function selectCard(idx) {
+
+  if (resolvingGuess) {
     return;
   }
 
+  resolvingGuess = true;
+
+
+  gameRef
+    .child("board/" + idx + "/revealed")
+    .set(true)
+
+    .then(() => {
+
+      return db
+        .ref(
+          "cardColors/" +
+          gameCode +
+          "/" +
+          idx
+        )
+        .once("value");
+
+    })
+
+    .then(snap => {
+
+      const color =
+        snap.val();
+
+
+      const word =
+        gameData.board[idx].word;
+
+
+      processGuessResult(
+        idx,
+        color,
+        word
+      );
+
+    })
+
+    .catch(e => {
+
+      console.error(
+        "Could not process guess:",
+        e
+      );
+
+      alert(
+        "Could not process guess: " +
+        e.message
+      );
+
+    })
+
+    .finally(() => {
+
+      resolvingGuess = false;
+
+    });
+}
+
+
+// ---------- GUESS RESULT ----------
+
+function processGuessResult(
+  idx,
+  color,
+  word
+) {
+
+  const myTeam =
+    gameData.currentTurn;
+
+
+  const updates = {};
+
+  let text = "";
+
+
+  // Assassin
+
+  if (color === "black") {
+
+    const winner =
+      myTeam === "red"
+        ? "blue"
+        : "red";
+
+
+    updates["status"] =
+      "ended";
+
+    updates["winner"] =
+      winner;
+
+
+    text =
+      `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
+
+
+    pushCNLog(
+      updates,
+      text
+    );
+
+
+    gameRef
+      .update(updates)
+      .catch(e => {
+
+        console.error(
+          "Could not end game:",
+          e
+        );
+
+        alert(
+          "Could not update game: " +
+          e.message
+        );
+      });
+
+
+    return;
+  }
+
+
+  // Correct colour
+
   if (color === myTeam) {
-    const remainingKey = myTeam + "Remaining";
-    const newRemaining = (gameData[remainingKey] || 0) - 1;
-    updates[remainingKey] = newRemaining;
+
+    const remainingKey =
+      myTeam + "Remaining";
+
+
+    const newRemaining =
+      (gameData[remainingKey] || 0) - 1;
+
+
+    updates[remainingKey] =
+      newRemaining;
+
+
+    // Team has found all words
 
     if (newRemaining <= 0) {
-      updates["status"] = "ended";
-      updates["winner"] = myTeam;
-      text = `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
-      pushCNLog(updates, text);
-      gameRef.update(updates);
+
+      updates["status"] =
+        "ended";
+
+      updates["winner"] =
+        myTeam;
+
+
+      text =
+        `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
+
+
+      pushCNLog(
+        updates,
+        text
+      );
+
+
+      gameRef
+        .update(updates)
+        .catch(e => {
+
+          console.error(
+            "Could not end game:",
+            e
+          );
+
+          alert(
+            "Could not update game: " +
+            e.message
+          );
+        });
+
+
       return;
     }
 
-    const guessesMade = (gameData.clue.guessesMade || 0) + 1;
-    updates["clue/guessesMade"] = guessesMade;
-    if (guessesMade >= gameData.clue.number + 1) {
-      updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
-      updates["clue"] = null;
-      text = `${word} was correct, but out of guesses for this clue. Turn passes.`;
+
+    const guessesMade =
+      (gameData.clue.guessesMade || 0) + 1;
+
+
+    updates["clue/guessesMade"] =
+      guessesMade;
+
+
+    if (
+      guessesMade >=
+      gameData.clue.number + 1
+    ) {
+
+      updates["currentTurn"] =
+        myTeam === "red"
+          ? "blue"
+          : "red";
+
+
+      updates["clue"] =
+        null;
+
+
+      text =
+        `${word} was correct, but out of guesses for this clue. Turn passes.`;
+
     } else {
-      text = `${word} was correct! Keep guessing.`;
+
+      text =
+        `${word} was correct! Keep guessing.`;
     }
+
+
+  // Innocent bystander
+
   } else if (color === "yellow") {
-    updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
-    updates["clue"] = null;
-    text = `${word} was an innocent bystander. Turn ends.`;
+
+    updates["currentTurn"] =
+      myTeam === "red"
+        ? "blue"
+        : "red";
+
+
+    updates["clue"] =
+      null;
+
+
+    text =
+      `${word} was an innocent bystander. Turn ends.`;
+
+
+  // Opponent's card
+
   } else {
-    const oppTeam = color;
-    const oppRemainingKey = oppTeam + "Remaining";
-    const newOppRemaining = (gameData[oppRemainingKey] || 0) - 1;
-    updates[oppRemainingKey] = newOppRemaining;
-    updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
-    updates["clue"] = null;
-    text = `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
+
+    const oppTeam =
+      color;
+
+
+    const oppRemainingKey =
+      oppTeam + "Remaining";
+
+
+    const newOppRemaining =
+      (gameData[oppRemainingKey] || 0) - 1;
+
+
+    updates[oppRemainingKey] =
+      newOppRemaining;
+
+
+    updates["currentTurn"] =
+      myTeam === "red"
+        ? "blue"
+        : "red";
+
+
+    updates["clue"] =
+      null;
+
+
+    text =
+      `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
+
+
     if (newOppRemaining <= 0) {
-      updates["status"] = "ended";
-      updates["winner"] = oppTeam;
-      text += ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
+
+      updates["status"] =
+        "ended";
+
+      updates["winner"] =
+        oppTeam;
+
+
+      text +=
+        ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
     }
   }
 
-  pushCNLog(updates, text);
-  gameRef.update(updates);
+
+  pushCNLog(
+    updates,
+    text
+  );
+
+
+  gameRef
+    .update(updates)
+    .catch(e => {
+
+      console.error(
+        "Could not update guess result:",
+        e
+      );
+
+      alert(
+        "Could not update game: " +
+        e.message
+      );
+    });
 }
+
+
+// ---------- END TURN ----------
 
 function endTurnManually() {
+
   const updates = {};
-  updates["currentTurn"] = gameData.currentTurn === "red" ? "blue" : "red";
-  updates["clue"] = null;
-  pushCNLog(updates, `${capitalize(gameData.currentTurn)} ended their turn.`);
-  gameRef.update(updates);
+
+
+  updates["currentTurn"] =
+    gameData.currentTurn === "red"
+      ? "blue"
+      : "red";
+
+
+  updates["clue"] =
+    null;
+
+
+  pushCNLog(
+    updates,
+    `${capitalize(gameData.currentTurn)} ended their turn.`
+  );
+
+
+  gameRef
+    .update(updates)
+    .catch(e => {
+
+      console.error(
+        "Could not end turn:",
+        e
+      );
+
+      alert(
+        "Could not end turn: " +
+        e.message
+      );
+    });
 }
 
-function pushCNLog(updates, text) {
-  const key = "log/entry_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-  updates[key] = { text, ts: firebase.database.ServerValue.TIMESTAMP };
+
+// ---------- GAME LOG ----------
+
+function pushCNLog(
+  updates,
+  text
+) {
+
+  const key =
+    "log/entry_" +
+    Date.now() +
+    "_" +
+    Math.floor(
+      Math.random() * 1000
+    );
+
+
+  updates[key] = {
+    text: text,
+    ts: firebase.database.ServerValue.TIMESTAMP
+  };
 }
+
 
 function renderCNLog() {
-  const log = gameData.log || {};
-  const entries = Object.values(log).sort((a, b) => (a.ts || 0) - (b.ts || 0));
-  document.getElementById("cnLogList").innerHTML = entries.map(e =>
-    `<div class="log-entry">${escapeHtml(e.text)}</div>`
-  ).join("") || `<p class="small">No events yet.</p>`;
+
+  const log =
+    gameData.log || {};
+
+
+  const entries =
+    Object.values(log)
+      .sort(
+        (a, b) =>
+          (a.ts || 0) -
+          (b.ts || 0)
+      );
+
+
+  document.getElementById(
+    "cnLogList"
+  ).innerHTML =
+
+    entries.map(e =>
+      `<div class="log-entry">
+        ${escapeHtml(e.text)}
+      </div>`
+    ).join("")
+
+    ||
+
+    `<p class="small">
+      No events yet.
+    </p>`;
 }
+
 
 // ---------- ENDED ----------
-function renderEnded() {
-  showScreen("screen-ended");
-  const winner = gameData.winner;
-  document.getElementById("cnWinnerTitle").textContent =
-    winner === "red" ? "🔴 Red Team Wins!" : "🔵 Blue Team Wins!";
-  document.getElementById("cnWinnerSub").textContent = "";
 
-  const board = gameData.board || [];
-  document.getElementById("finalBoardList").innerHTML = board.map((c, idx) => {
-    const color = cardColorsData[idx] || "?";
-    return `<div class="final-row"><span>${escapeHtml(c.word)}</span><span style="color:var(--${color === 'yellow' ? 'yellow' : color === 'black' ? 'muted' : color})">${color.toUpperCase()}</span></div>`;
-  }).join("");
+function renderEnded() {
+
+  showScreen(
+    "screen-ended"
+  );
+
+
+  const winner =
+    gameData.winner;
+
+
+  document.getElementById(
+    "cnWinnerTitle"
+  ).textContent =
+
+    winner === "red"
+      ? "🔴 Red Team Wins!"
+      : "🔵 Blue Team Wins!";
+
+
+  document.getElementById(
+    "cnWinnerSub"
+  ).textContent = "";
+
+
+  const board =
+    gameData.board || [];
+
+
+  document.getElementById(
+    "finalBoardList"
+  ).innerHTML =
+
+    board.map((c, idx) => {
+
+      const color =
+        cardColorsData[idx] || "?";
+
+
+      return `
+        <div class="final-row">
+          <span>${escapeHtml(c.word)}</span>
+          <span style="color:var(--${
+            color === "yellow"
+              ? "yellow"
+              : color === "black"
+                ? "muted"
+                : color
+          })">
+            ${color.toUpperCase()}
+          </span>
+        </div>
+      `;
+
+    }).join("");
 }
 
+
+// ---------- BACK TO START ----------
+
 function cnBackToStart() {
+
   const tasks = [];
-  if (gameRef) tasks.push(gameRef.remove().catch(e => console.warn("Could not delete game data:", e)));
-  if (gameCode) tasks.push(db.ref("cardColors/" + gameCode).remove().catch(e => console.warn("Could not delete card colors:", e)));
-  Promise.all(tasks).finally(() => location.reload());
+
+
+  if (gameRef) {
+
+    tasks.push(
+      gameRef
+        .remove()
+        .catch(e =>
+          console.warn(
+            "Could not delete game data:",
+            e
+          )
+        )
+    );
+  }
+
+
+  if (gameCode) {
+
+    tasks.push(
+      db
+        .ref(
+          "cardColors/" +
+          gameCode
+        )
+        .remove()
+        .catch(e =>
+          console.warn(
+            "Could not delete card colors:",
+            e
+          )
+        )
+    );
+  }
+
+
+  Promise.all(tasks)
+    .finally(() => {
+      location.reload();
+    });
 }
 </script>
 </body>
