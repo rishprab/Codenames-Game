@@ -6,367 +6,354 @@
 <title>Codenames</title>
 
 <style>
-  :root {
-    --bg: #14161a;
-    --panel: #1e2127;
-    --panel2: #23262c;
-    --line: #2c3037;
-    --text: #e9e7e2;
-    --muted: #8b8f98;
-    --gold: #c9a24b;
-    --red: #b5504f;
-    --blue: #4f7fb5;
-    --yellow: #c9a24b;
-    --black: #17181b;
-    --green: #4f9b6e;
-  }
+:root {
+  --bg: #14161a;
+  --panel: #1e2127;
+  --panel2: #23262c;
+  --line: #2c3037;
+  --text: #e9e7e2;
+  --muted: #8b8f98;
+  --gold: #c9a24b;
+  --red: #b5504f;
+  --blue: #4f7fb5;
+  --yellow: #c9a24b;
+  --black: #17181b;
+  --green: #4f9b6e;
+}
 
-  * {
-    box-sizing: border-box;
-  }
+* {
+  box-sizing: border-box;
+}
 
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: 16px;
-  }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 16px;
+}
 
-  h1 {
-    font-size: 1.4rem;
-    color: var(--gold);
-    margin: 0 0 4px 0;
-  }
+h1 {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin: 0 0 4px 0;
+}
 
-  h2 {
-    font-size: 1.05rem;
-    color: var(--gold);
-    margin: 16px 0 8px 0;
-  }
+h2 {
+  font-size: 1.05rem;
+  color: var(--gold);
+  margin: 16px 0 8px 0;
+}
 
-  p.sub {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin: 0 0 16px 0;
-  }
+p.sub {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 16px 0;
+}
 
-  .screen {
-    display: none;
-  }
+.screen {
+  display: none;
+}
 
-  .screen.active {
-    display: block;
-  }
+.screen.active {
+  display: block;
+}
 
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
-  }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
 
-  input[type=text],
-  textarea {
-    width: 100%;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 11px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    margin-bottom: 8px;
-    font-family: inherit;
-  }
+input[type=text],
+textarea {
+  width: 100%;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  font-family: inherit;
+}
 
-  textarea {
-    min-height: 90px;
-    resize: vertical;
-  }
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
-  input[type=number] {
-    width: 70px;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 1rem;
-    text-align: center;
-  }
+input[type=number] {
+  width: 70px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
 
-  button {
-    background: var(--gold);
-    border: none;
-    color: #14161a;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 7px;
-  }
+button {
+  background: var(--gold);
+  border: none;
+  color: #14161a;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 7px;
+}
 
-  button:hover {
-    filter: brightness(1.08);
-  }
+button.secondary {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+}
 
-  button:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
+button.red-btn {
+  background: var(--red);
+  color: white;
+}
 
-  button.secondary {
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    font-weight: 600;
-  }
+button.blue-btn {
+  background: var(--blue);
+  color: white;
+}
 
-  button.red-btn {
-    background: var(--red);
-    color: white;
-  }
+button.green {
+  background: var(--green);
+  color: white;
+}
 
-  button.blue-btn {
-    background: var(--blue);
-    color: white;
-  }
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 
-  button.green {
-    background: var(--green);
-    color: white;
-  }
+.roomcode {
+  font-size: 2rem;
+  letter-spacing: 6px;
+  text-align: center;
+  color: var(--gold);
+  font-weight: 700;
+  margin: 6px 0;
+}
 
-  .roomcode {
-    font-size: 2rem;
-    letter-spacing: 6px;
-    text-align: center;
-    color: var(--gold);
-    font-weight: 700;
-    margin: 6px 0;
-  }
+.small {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
 
-  .small {
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
+.center {
+  text-align: center;
+}
 
-  .center {
-    text-align: center;
-  }
+.team-col {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
-  .team-col {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
+.team-box {
+  flex: 1;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+}
 
-  .team-box {
-    flex: 1;
-    border-radius: 10px;
-    padding: 10px;
-    border: 1px solid var(--line);
-  }
+.team-box.red {
+  background: rgba(181,80,79,0.12);
+}
 
-  .team-box.red {
-    background: rgba(181,80,79,0.12);
-  }
+.team-box.blue {
+  background: rgba(79,127,181,0.12);
+}
 
-  .team-box.blue {
-    background: rgba(79,127,181,0.12);
-  }
+.team-box h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+}
 
-  .team-box h3 {
-    margin: 0 0 8px 0;
-    font-size: 0.9rem;
-  }
+.team-box.red h3 {
+  color: var(--red);
+}
 
-  .team-box.red h3 {
-    color: var(--red);
-  }
+.team-box.blue h3 {
+  color: var(--blue);
+}
 
-  .team-box.blue h3 {
-    color: var(--blue);
-  }
+.player-chip {
+  font-size: 0.82rem;
+  padding: 4px 0;
+}
 
-  .player-chip {
-    font-size: 0.82rem;
-    padding: 4px 0;
-  }
+.player-chip .tag {
+  font-size: 0.68rem;
+  color: var(--gold);
+}
 
-  .player-chip .tag {
-    font-size: 0.68rem;
-    color: var(--gold);
-  }
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
 
-  .toggle-row {
-    display: flex;
-    gap: 8px;
-  }
+.toggle-row button {
+  flex: 1;
+}
 
-  .toggle-row button {
-    flex: 1;
-  }
+.status-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--panel2);
+  color: var(--gold);
+  margin-bottom: 10px;
+}
 
-  .status-pill {
-    display: inline-block;
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--panel2);
-    color: var(--gold);
-    margin-bottom: 10px;
-  }
+.status-pill.turn-red {
+  color: var(--red);
+}
 
-  .status-pill.turn-red {
-    color: var(--red);
-  }
+.status-pill.turn-blue {
+  color: var(--blue);
+}
 
-  .status-pill.turn-blue {
-    color: var(--blue);
-  }
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
 
-  .scoreboard {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-  }
+.scoreboard .r {
+  color: var(--red);
+}
 
-  .scoreboard .r {
-    color: var(--red);
-  }
+.scoreboard .b {
+  color: var(--blue);
+}
 
-  .scoreboard .b {
-    color: var(--blue);
-  }
+.clue-display {
+  text-align: center;
+  padding: 10px;
+  background: var(--panel2);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
 
-  .clue-display {
-    text-align: center;
-    padding: 10px;
-    background: var(--panel2);
-    border-radius: 10px;
-    margin-bottom: 10px;
-  }
+.clue-display .word {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
 
-  .clue-display .word {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--gold);
-  }
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
 
-  .board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 12px;
-  }
+.cn-card {
+  aspect-ratio: 1.15 / 1;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: #f2f0ea;
+  color: #14161a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3px;
+  cursor: pointer;
+  line-height: 1.1;
+}
 
-  .cn-card {
-    aspect-ratio: 1.15 / 1;
-    border-radius: 8px;
-    border: 2px solid var(--line);
-    background: #f2f0ea;
-    color: #14161a;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 3px;
-    cursor: pointer;
-    line-height: 1.1;
-  }
+.cn-card:disabled {
+  cursor: default;
+}
 
-  .cn-card:disabled {
-    cursor: default;
-  }
+.cn-card.color-red {
+  background: var(--red);
+  border-color: var(--red);
+  color: #14161a;
+}
 
-  .cn-card.color-red {
-    background: var(--red);
-    border-color: var(--red);
-    color: #14161a;
-  }
+.cn-card.color-blue {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #14161a;
+}
 
-  .cn-card.color-blue {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #14161a;
-  }
+.cn-card.color-yellow {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #14161a;
+}
 
-  .cn-card.color-yellow {
-    background: var(--yellow);
-    border-color: var(--yellow);
-    color: #14161a;
-  }
+.cn-card.color-black {
+  background: var(--black);
+  border-color: #000;
+  color: #ffffff;
+}
 
-  .cn-card.color-black {
-    background: var(--black);
-    border-color: #000;
-    color: #ffffff;
-  }
+.cn-card.revealed {
+  opacity: 0.55;
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,0.35);
+}
 
-  .cn-card.revealed {
-    opacity: 0.55;
-    box-shadow: inset 0 0 0 3px rgba(0,0,0,0.35);
-  }
+.log-entry {
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
 
-  .log-entry {
-    font-size: 0.8rem;
-    color: var(--muted);
-    padding: 5px 0;
-    border-bottom: 1px solid var(--line);
-  }
+.log-entry:last-child {
+  border-bottom: none;
+}
 
-  .log-entry:last-child {
-    border-bottom: none;
-  }
+.role-banner {
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  background: var(--panel2);
+}
 
-  .role-banner {
-    text-align: center;
-    padding: 8px;
-    margin-bottom: 10px;
-    font-size: 0.85rem;
-    border-radius: 8px;
-    background: var(--panel2);
-  }
+.final-list {
+  font-size: 0.82rem;
+}
 
-  .final-list {
-    font-size: 0.82rem;
-  }
+.final-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
 
-  .final-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .error-box {
-    color: var(--red);
-    margin-top: 8px;
-  }
-
-  @media (max-width: 600px) {
-    .team-col {
-      flex-direction: column;
-    }
-
-    .board {
-      gap: 4px;
-    }
-
-    .cn-card {
-      font-size: 0.58rem;
-    }
-  }
+.debug {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #111;
+  color: #777;
+  font-size: 0.7rem;
+  word-break: break-word;
+}
 </style>
 </head>
 
@@ -375,13 +362,12 @@
 <h1>🕵️ Codenames</h1>
 <p class="sub" id="topSub">Play a live game with friends.</p>
 
-<!-- ========================================================= -->
 <!-- LANDING -->
-<!-- ========================================================= -->
 
 <div id="screen-landing" class="screen active">
 
   <div class="card">
+
     <h2 style="margin-top:0">Your name</h2>
 
     <input
@@ -390,13 +376,17 @@
       placeholder="Enter your name"
       maxlength="16"
     >
+
   </div>
 
   <div class="card">
+
     <button onclick="createGame()">Create Game</button>
+
   </div>
 
   <div class="card">
+
     <input
       type="text"
       id="joinCodeInput"
@@ -405,7 +395,10 @@
       style="text-transform:uppercase"
     >
 
-    <button class="secondary" onclick="joinGame()">Join Game</button>
+    <button class="secondary" onclick="joinGame()">
+      Join Game
+    </button>
+
   </div>
 
   <p class="small center" id="landingError"></p>
@@ -413,15 +406,20 @@
 </div>
 
 
-<!-- ========================================================= -->
 <!-- LOBBY -->
-<!-- ========================================================= -->
 
 <div id="screen-lobby" class="screen">
 
   <div class="card center">
-    <p class="small">Room code — share this with your friends</p>
-    <div class="roomcode" id="lobbyCode">----</div>
+
+    <p class="small">
+      Room code — share this with your friends
+    </p>
+
+    <div class="roomcode" id="lobbyCode">
+      ----
+    </div>
+
   </div>
 
 
@@ -480,15 +478,15 @@
   </div>
 
 
-  <!-- HOST CONTROLS -->
-
   <div
     class="card"
     id="hostControlsBox"
     style="display:none"
   >
 
-    <h2 style="margin-top:0">Word list</h2>
+    <h2 style="margin-top:0">
+      Word list
+    </h2>
 
     <div
       class="toggle-row"
@@ -552,8 +550,6 @@
   </div>
 
 
-  <!-- NON-HOST WAITING MESSAGE -->
-
   <div
     class="card center"
     id="lobbyWaitBox"
@@ -569,9 +565,7 @@
 </div>
 
 
-<!-- ========================================================= -->
 <!-- GAME -->
-<!-- ========================================================= -->
 
 <div id="screen-game" class="screen">
 
@@ -607,8 +601,6 @@
     id="roleBanner"
   ></div>
 
-
-  <!-- GIVE CLUE -->
 
   <div
     id="clueGiveBox"
@@ -649,8 +641,6 @@
   </div>
 
 
-  <!-- CURRENT CLUE -->
-
   <div
     id="clueDisplayBox"
     class="clue-display"
@@ -680,15 +670,11 @@
   </div>
 
 
-  <!-- BOARD -->
-
   <div
     class="board"
     id="board"
   ></div>
 
-
-  <!-- END TURN -->
 
   <div
     id="endTurnBox"
@@ -705,8 +691,6 @@
   </div>
 
 
-  <!-- LOG -->
-
   <div class="card">
 
     <h2 style="margin-top:0">
@@ -720,9 +704,7 @@
 </div>
 
 
-<!-- ========================================================= -->
 <!-- ENDED -->
-<!-- ========================================================= -->
 
 <div id="screen-ended" class="screen">
 
@@ -767,144 +749,290 @@
 </div>
 
 
-<!-- ========================================================= -->
 <!-- FIREBASE -->
-<!-- ========================================================= -->
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 
 
 <script>
 
-/* ============================================================
+/* =========================================================
    FIREBASE CONFIG
-   ============================================================ */
+   ========================================================= */
 
 const firebaseConfig = {
+
   apiKey: "AIzaSyDRgXgUbQB36hVUPi7t4z3EH44ZztaKfZQ",
-  authDomain: "codenames-game-93ab1.firebaseapp.com",
-  databaseURL: "https://codenames-game-93ab1-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "codenames-game-93ab1",
-  storageBucket: "codenames-game-93ab1.firebasestorage.app",
-  messagingSenderId: "795557982712",
-  appId: "1:795557982712:web:8b2148bee0ffcb1249260d"
+
+  authDomain:
+    "codenames-game-93ab1.firebaseapp.com",
+
+  databaseURL:
+    "https://codenames-game-93ab1-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId:
+    "codenames-game-93ab1",
+
+  storageBucket:
+    "codenames-game-93ab1.firebasestorage.app",
+
+  messagingSenderId:
+    "795557982712",
+
+  appId:
+    "1:795557982712:web:8b2148bee0ffcb1249260d"
 };
 
 
-/* ============================================================
-   INITIALISE FIREBASE
-   ============================================================ */
+/* =========================================================
+   FIREBASE INITIALISATION
+   ========================================================= */
 
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
+
 const db = firebase.database();
 
 
-/* ============================================================
+/* =========================================================
    GLOBAL STATE
-   ============================================================ */
+   ========================================================= */
 
 let uid = null;
+
 let gameCode = null;
+
 let isHost = false;
+
 let playerName = "";
+
 let gameData = null;
+
 let gameRef = null;
 
-let cardColorsData = {};
+let secretColorsData = {};
 
 let resolvingGuess = false;
 
 
-/* ============================================================
-   DEFAULT WORD LIST
-   ============================================================ */
+/* =========================================================
+   WORD LIST
+   ========================================================= */
 
 const DEFAULT_WORDS = [
 
-  "APPLE","RIVER","GUITAR","ROCKET","TIGER",
-  "CASTLE","ANCHOR","PLANET","DESERT","HAMMER",
+  "APPLE",
+  "RIVER",
+  "GUITAR",
+  "ROCKET",
+  "TIGER",
+  "CASTLE",
+  "ANCHOR",
+  "PLANET",
+  "DESERT",
+  "HAMMER",
 
-  "ISLAND","JUNGLE","KETTLE","LANTERN","MIRROR",
-  "NEEDLE","OCEAN","PENCIL","QUARRY","RIBBON",
+  "ISLAND",
+  "JUNGLE",
+  "KETTLE",
+  "LANTERN",
+  "MIRROR",
+  "NEEDLE",
+  "OCEAN",
+  "PENCIL",
+  "QUARRY",
+  "RIBBON",
 
-  "SATELLITE","TRUMPET","UMBRELLA","VOLCANO","WHISTLE",
-  "ZEBRA","ARROW","BRIDGE","CANDLE","DIAMOND",
+  "SATELLITE",
+  "TRUMPET",
+  "UMBRELLA",
+  "VOLCANO",
+  "WHISTLE",
+  "ZEBRA",
+  "ARROW",
+  "BRIDGE",
+  "CANDLE",
+  "DIAMOND",
 
-  "ENGINE","FEATHER","GARDEN","HELMET","IGLOO",
-  "JACKET","KITE","LADDER","MAGNET","NOTEBOOK",
+  "ENGINE",
+  "FEATHER",
+  "GARDEN",
+  "HELMET",
+  "IGLOO",
+  "JACKET",
+  "KITE",
+  "LADDER",
+  "MAGNET",
+  "NOTEBOOK",
 
-  "ORCHARD","PYRAMID","QUILT","SADDLE","TELESCOPE",
-  "UNICORN","VELVET","WINDMILL","YACHT","ANTLER",
+  "ORCHARD",
+  "PYRAMID",
+  "QUILT",
+  "SADDLE",
+  "TELESCOPE",
+  "UNICORN",
+  "VELVET",
+  "WINDMILL",
+  "YACHT",
+  "ANTLER",
 
-  "BALLOON","CACTUS","DOLPHIN","EAGLE","FOUNTAIN",
-  "GLACIER","HARBOR","IVORY","JIGSAW","KOALA",
+  "BALLOON",
+  "CACTUS",
+  "DOLPHIN",
+  "EAGLE",
+  "FOUNTAIN",
+  "GLACIER",
+  "HARBOR",
+  "IVORY",
+  "JIGSAW",
+  "KOALA",
 
-  "LIGHTHOUSE","MERMAID","NEBULA","OYSTER","PARROT",
-  "QUASAR","RAINBOW","SCORPION","THUNDER","URCHIN",
+  "LIGHTHOUSE",
+  "MERMAID",
+  "NEBULA",
+  "OYSTER",
+  "PARROT",
+  "QUASAR",
+  "RAINBOW",
+  "SCORPION",
+  "THUNDER",
+  "URCHIN",
 
-  "VULTURE","WALRUS","XYLOPHONE","YOGURT","ZEPPELIN",
-  "BEACON","COMPASS","DRAGON","EMBER","FALCON",
+  "VULTURE",
+  "WALRUS",
+  "XYLOPHONE",
+  "YOGURT",
+  "ZEPPELIN",
+  "BEACON",
+  "COMPASS",
+  "DRAGON",
+  "EMBER",
+  "FALCON",
 
-  "GONDOLA","HAWK","IMPULSE","JASMINE","KIMONO",
-  "LOTUS","MAPLE","NECTAR","OASIS","PEBBLE",
+  "GONDOLA",
+  "HAWK",
+  "IMPULSE",
+  "JASMINE",
+  "KIMONO",
+  "LOTUS",
+  "MAPLE",
+  "NECTAR",
+  "OASIS",
+  "PEBBLE",
 
-  "QUIVER","RAVEN","SPARROW","TORNADO","UTOPIA",
-  "VORTEX","WHISKER","XENON","YARDSTICK","ZODIAC",
+  "QUIVER",
+  "RAVEN",
+  "SPARROW",
+  "TORNADO",
+  "UTOPIA",
+  "VORTEX",
+  "WHISKER",
+  "XENON",
+  "YARDSTICK",
+  "ZODIAC",
 
-  "ALMOND","BARREL","CANYON","DAGGER","ECLIPSE",
-  "FROST","GRANITE","HORIZON","ICICLE","JUNIPER",
+  "ALMOND",
+  "BARREL",
+  "CANYON",
+  "DAGGER",
+  "ECLIPSE",
+  "FROST",
+  "GRANITE",
+  "HORIZON",
+  "ICICLE",
+  "JUNIPER",
 
-  "KRAKEN","LAGOON","MARBLE","NIGHTFALL","OBSIDIAN",
-  "PRISM","QUARTZ","REEF","SIERRA","TIDE",
+  "KRAKEN",
+  "LAGOON",
+  "MARBLE",
+  "NIGHTFALL",
+  "OBSIDIAN",
+  "PRISM",
+  "QUARTZ",
+  "REEF",
+  "SIERRA",
+  "TIDE",
 
-  "UNDERTOW","VELOCITY","WISTERIA","YEARLING","ZENITH",
-  "AMBER","BOULDER","CINDER","DUNE","ESTUARY",
+  "UNDERTOW",
+  "VELOCITY",
+  "WISTERIA",
+  "YEARLING",
+  "ZENITH",
+  "AMBER",
+  "BOULDER",
+  "CINDER",
+  "DUNE",
+  "ESTUARY",
 
-  "FJORD","GEYSER","HOLLOW","INLET","JUNCTION",
-  "KELP","LEDGE","MESA","NOOK","OUTPOST",
+  "FJORD",
+  "GEYSER",
+  "HOLLOW",
+  "INLET",
+  "JUNCTION",
+  "KELP",
+  "LEDGE",
+  "MESA",
+  "NOOK",
+  "OUTPOST",
 
-  "PLATEAU","QUAY","RIDGE","SUMMIT","THICKET",
-  "UPLAND","VALLEY","WHARF","YIELD","ZEPHYR",
+  "PLATEAU",
+  "QUAY",
+  "RIDGE",
+  "SUMMIT",
+  "THICKET",
+  "UPLAND",
+  "VALLEY",
+  "WHARF",
+  "YIELD",
+  "ZEPHYR",
 
-  "ATLAS","BUGLE","CRATER","DOMINO","EMBASSY",
-  "TALON","GALAXY","HORNET","IMPACT","JOCKEY"
+  "ATLAS",
+  "BUGLE",
+  "CRATER",
+  "DOMINO",
+  "EMBASSY",
+  "TALON",
+  "GALAXY",
+  "HORNET",
+  "IMPACT",
+  "JOCKEY"
 
 ];
 
 
-/* ============================================================
+/* =========================================================
    UTILITY FUNCTIONS
-   ============================================================ */
+   ========================================================= */
 
 function showScreen(id) {
 
   document
     .querySelectorAll(".screen")
-    .forEach(screen => {
-      screen.classList.remove("active");
-    });
+    .forEach(s => s.classList.remove("active"));
 
-  const target = document.getElementById(id);
+  const screen = document.getElementById(id);
 
-  if (target) {
-    target.classList.add("active");
+  if (screen) {
+    screen.classList.add("active");
   }
 }
 
 
-function showError(message) {
+function showError(msg) {
 
-  const error = document.getElementById("landingError");
+  const el =
+    document.getElementById("landingError");
 
-  if (error) {
-    error.textContent = message;
+  if (el) {
+    el.textContent = msg;
   }
 
-  console.error(message);
+  console.error(msg);
 }
 
 
@@ -936,20 +1064,26 @@ function shuffle(arr) {
     i--
   ) {
 
-    const j = Math.floor(
-      Math.random() * (i + 1)
-    );
+    const j =
+      Math.floor(Math.random() * (i + 1));
 
-    [a[i], a[j]] = [a[j], a[i]];
+    [
+      a[i],
+      a[j]
+    ] =
+    [
+      a[j],
+      a[i]
+    ];
   }
 
   return a;
 }
 
 
-/* ============================================================
-   AUTHENTICATION
-   ============================================================ */
+/* =========================================================
+   AUTH
+   ========================================================= */
 
 auth.onAuthStateChanged(user => {
 
@@ -958,7 +1092,7 @@ auth.onAuthStateChanged(user => {
     uid = user.uid;
 
     console.log(
-      "Firebase authenticated. UID:",
+      "Firebase authentication ready. UID:",
       uid
     );
 
@@ -966,21 +1100,13 @@ auth.onAuthStateChanged(user => {
 
     uid = null;
 
-    console.warn(
-      "Firebase user is not authenticated."
-    );
   }
+
 });
 
 
-auth.signInAnonymously()
-  .then(() => {
-
-    console.log(
-      "Anonymous authentication successful."
-    );
-
-  })
+auth
+  .signInAnonymously()
   .catch(error => {
 
     console.error(
@@ -989,14 +1115,16 @@ auth.signInAnonymously()
     );
 
     showError(
-      "Connection error: " + error.message
+      "Connection error: " +
+      error.message
     );
+
   });
 
 
-/* ============================================================
+/* =========================================================
    ROOM CODE
-   ============================================================ */
+   ========================================================= */
 
 function genRoomCode() {
 
@@ -1008,17 +1136,20 @@ function genRoomCode() {
   for (let i = 0; i < 4; i++) {
 
     code += chars[
-      Math.floor(Math.random() * chars.length)
+      Math.floor(
+        Math.random() * chars.length
+      )
     ];
+
   }
 
   return code;
 }
 
 
-/* ============================================================
+/* =========================================================
    CREATE GAME
-   ============================================================ */
+   ========================================================= */
 
 function createGame() {
 
@@ -1033,13 +1164,15 @@ function createGame() {
     return showError(
       "Enter your name first."
     );
+
   }
 
   if (!uid) {
 
     return showError(
-      "Still connecting, try again in a second."
+      "Still connecting to Firebase. Try again in a second."
     );
+
   }
 
   gameCode = genRoomCode();
@@ -1047,14 +1180,11 @@ function createGame() {
   isHost = true;
 
   gameRef =
-    db.ref("games/" + gameCode);
+    db.ref(
+      "games/" + gameCode
+    );
 
-  console.log(
-    "Creating game:",
-    gameCode
-  );
-
-  const gameObject = {
+  const initialGame = {
 
     hostUid: uid,
 
@@ -1096,13 +1226,20 @@ function createGame() {
   };
 
 
+  console.log(
+    "Creating game:",
+    gameCode
+  );
+
+
   gameRef
-    .set(gameObject)
+    .set(initialGame)
 
     .then(() => {
 
       console.log(
-        "Game successfully created."
+        "Game created successfully:",
+        gameCode
       );
 
       attachGameListener();
@@ -1122,12 +1259,13 @@ function createGame() {
       );
 
     });
+
 }
 
 
-/* ============================================================
+/* =========================================================
    JOIN GAME
-   ============================================================ */
+   ========================================================= */
 
 function joinGame() {
 
@@ -1150,6 +1288,7 @@ function joinGame() {
     return showError(
       "Enter your name first."
     );
+
   }
 
   if (!code) {
@@ -1157,18 +1296,22 @@ function joinGame() {
     return showError(
       "Enter a room code."
     );
+
   }
 
   if (!uid) {
 
     return showError(
-      "Still connecting, try again in a second."
+      "Still connecting to Firebase. Try again in a second."
     );
+
   }
 
 
   gameRef =
-    db.ref("games/" + code);
+    db.ref(
+      "games/" + code
+    );
 
 
   gameRef
@@ -1183,6 +1326,7 @@ function joinGame() {
         throw new Error(
           "No game found with that code."
         );
+
       }
 
       if (data.status !== "lobby") {
@@ -1190,6 +1334,7 @@ function joinGame() {
         throw new Error(
           "That game has already started."
         );
+
       }
 
       gameCode = code;
@@ -1219,7 +1364,7 @@ function joinGame() {
     .catch(error => {
 
       console.error(
-        "Could not join:",
+        "Could not join game:",
         error
       );
 
@@ -1229,281 +1374,199 @@ function joinGame() {
       );
 
     });
+
 }
 
 
-/* ============================================================
-   LIVE GAME LISTENER
-   ============================================================ */
+/* =========================================================
+   GAME LISTENER
+   ========================================================= */
 
 function attachGameListener() {
 
   if (!gameRef) {
 
     console.error(
-      "Cannot attach listener: gameRef is missing."
+      "Cannot attach listener: gameRef missing."
     );
 
     return;
+
   }
-
-
-  gameRef.on("value", snapshot => {
-
-    gameData = snapshot.val();
-
-    if (!gameData) {
-
-      console.warn(
-        "Game data no longer exists."
-      );
-
-      return;
-    }
-
-
-    /*
-     * Always derive host status from Firebase.
-     * This prevents the client from relying only
-     * on its original isHost value.
-     */
-
-    if (gameData.hostUid === uid) {
-
-      isHost = true;
-
-    } else {
-
-      isHost = false;
-
-    }
-
-
-    render();
-
-
-    /*
-     * IMPORTANT:
-     *
-     * We DO NOT automatically read
-     *
-     * /cardColors/ROOM
-     *
-     * for every player.
-     *
-     * Spymasters are allowed to read the
-     * complete key.
-     *
-     * Ordinary players can only read individual
-     * colours after cards are revealed.
-     */
-
-    loadSpymasterColors();
-
-    loadEndedColors();
-
-    loadRevealedColors();
-
-  });
 
 
   console.log(
-    "Game listener attached for room:",
-    gameCode
+    "Attaching game listener:",
+    gameRef.toString()
   );
-}
 
 
-/* ============================================================
-   LOAD COMPLETE KEY FOR SPYMASTER
-   ============================================================ */
+  gameRef.on(
 
-function loadSpymasterColors() {
+    "value",
 
-  if (!gameData) return;
+    snapshot => {
 
-  if (!gameData.players) return;
-
-  if (!uid) return;
+      gameData =
+        snapshot.val();
 
 
-  const me =
-    gameData.players[uid];
+      if (!gameData) {
+
+        console.warn(
+          "Game no longer exists."
+        );
+
+        return;
+
+      }
 
 
-  /*
-   * Only spymasters should request the
-   * complete colour key.
-   */
+      if (gameData.hostUid === uid) {
 
-  if (!me || !me.isSpymaster) {
+        isHost = true;
 
-    return;
-  }
-
-
-  db.ref(
-    "cardColors/" + gameCode
-  )
-    .once("value")
-
-    .then(snapshot => {
-
-      cardColorsData =
-        snapshot.val() || {};
+      }
 
 
       console.log(
-        "Spymaster colour key loaded:",
-        cardColorsData
+        "Game state updated:",
+        gameData.status
       );
 
 
       render();
 
-    })
+    },
 
-    .catch(error => {
+    error => {
 
       console.error(
-        "Spymaster colour read blocked:",
+        "Game listener error:",
         error
       );
 
-    });
-}
-
-
-/* ============================================================
-   LOAD COLOURS OF REVEALED CARDS
-   ============================================================ */
-
-function loadRevealedColors() {
-
-  if (!gameData) return;
-
-  if (!gameData.board) return;
-
-
-  gameData.board.forEach(
-    (card, idx) => {
-
-      if (!card || !card.revealed) {
-
-        return;
-      }
-
-
-      /*
-       * Don't request a colour that we
-       * already have.
-       */
-
-      if (cardColorsData[idx]) {
-
-        return;
-      }
-
-
-      db.ref(
-        "cardColors/" +
-        gameCode +
-        "/" +
-        idx
-      )
-
-      .once("value")
-
-      .then(snapshot => {
-
-        const color =
-          snapshot.val();
-
-
-        if (color) {
-
-          cardColorsData[idx] =
-            color;
-
-          render();
-
-        }
-
-      })
-
-      .catch(error => {
-
-        console.error(
-          "Could not read revealed card colour:",
-          idx,
-          error
-        );
-
-      });
-
     }
+
   );
-}
-
-
-/* ============================================================
-   LOAD COMPLETE KEY WHEN GAME HAS ENDED
-   ============================================================ */
-
-function loadEndedColors() {
-
-  if (!gameData) return;
-
-  if (gameData.status !== "ended") {
-
-    return;
-  }
 
 
   /*
-   * When the game has ended the Firebase rules
-   * allow everyone to read the complete key.
+   * IMPORTANT:
+   *
+   * We read the ENTIRE secretColors node.
+   *
+   * The Firebase rule therefore needs to be
+   * placed on /secretColors/$gameId itself.
+   *
+   * Only a player who is currently a Spymaster
+   * is allowed to read this node.
    */
 
-  db.ref(
-    "cardColors/" + gameCode
-  )
+  attachSecretColorsListener();
 
-  .once("value")
-
-  .then(snapshot => {
-
-    cardColorsData =
-      snapshot.val() || {};
-
-
-    render();
-
-  })
-
-  .catch(error => {
-
-    console.error(
-      "Could not load final colour key:",
-      error
-    );
-
-  });
 }
 
 
-/* ============================================================
+/* =========================================================
+   SECRET COLOURS LISTENER
+   ========================================================= */
+
+function attachSecretColorsListener() {
+
+  if (!gameCode) {
+
+    console.warn(
+      "Cannot attach secret colour listener without gameCode."
+    );
+
+    return;
+
+  }
+
+
+  const secretRef =
+    db.ref(
+      "secretColors/" + gameCode
+    );
+
+
+  console.log(
+    "Attaching secret colour listener:",
+    "secretColors/" + gameCode
+  );
+
+
+  secretRef.on(
+
+    "value",
+
+    snapshot => {
+
+      secretColorsData =
+        snapshot.val() || {};
+
+
+      console.log(
+        "Secret colours updated.",
+        secretColorsData
+      );
+
+
+      if (gameData) {
+
+        render();
+
+      }
+
+    },
+
+    error => {
+
+      /*
+       * This is expected for ordinary players.
+       *
+       * They are deliberately not allowed to read
+       * the secret answer key.
+       */
+
+      console.log(
+        "Secret colours unavailable to this player:",
+        error.code
+      );
+
+
+      secretColorsData = {};
+
+      if (gameData) {
+
+        render();
+
+      }
+
+    }
+
+  );
+
+}
+
+
+/* =========================================================
    MAIN ROUTER
-   ============================================================ */
+   ========================================================= */
 
 function render() {
 
-  if (!gameData) return;
+  if (!gameData) {
+
+    return;
+
+  }
 
 
-  document.getElementById(
-    "topSub"
-  ).textContent =
+  document
+    .getElementById("topSub")
+    .textContent =
     "Room " + gameCode;
 
 
@@ -1511,13 +1574,17 @@ function render() {
 
     renderLobby();
 
-  } else if (
+  }
+
+  else if (
     gameData.status === "playing"
   ) {
 
     renderGame();
 
-  } else if (
+  }
+
+  else if (
     gameData.status === "ended"
   ) {
 
@@ -1528,9 +1595,9 @@ function render() {
 }
 
 
-/* ============================================================
+/* =========================================================
    LOBBY
-   ============================================================ */
+   ========================================================= */
 
 function renderLobby() {
 
@@ -1539,9 +1606,9 @@ function renderLobby() {
   );
 
 
-  document.getElementById(
-    "lobbyCode"
-  ).textContent =
+  document
+    .getElementById("lobbyCode")
+    .textContent =
     gameCode;
 
 
@@ -1554,26 +1621,24 @@ function renderLobby() {
 
 
   const redList =
-    Object.values(players)
+    Object
+      .values(players)
       .filter(
         p => p.team === "red"
       );
 
 
   const blueList =
-    Object.values(players)
+    Object
+      .values(players)
       .filter(
         p => p.team === "blue"
       );
 
 
-  /*
-   * RED TEAM
-   */
-
-  document.getElementById(
-    "redPlayerList"
-  ).innerHTML =
+  document
+    .getElementById("redPlayerList")
+    .innerHTML =
 
     redList
       .map(p =>
@@ -1597,13 +1662,9 @@ function renderLobby() {
       </p>`;
 
 
-  /*
-   * BLUE TEAM
-   */
-
-  document.getElementById(
-    "bluePlayerList"
-  ).innerHTML =
+  document
+    .getElementById("bluePlayerList")
+    .innerHTML =
 
     blueList
       .map(p =>
@@ -1627,13 +1688,9 @@ function renderLobby() {
       </p>`;
 
 
-  /*
-   * SPYMASTER BUTTON
-   */
-
-  document.getElementById(
-    "spymasterToggleBox"
-  ).style.display =
+  document
+    .getElementById("spymasterToggleBox")
+    .style.display =
     me && me.team
       ? "block"
       : "none";
@@ -1641,9 +1698,11 @@ function renderLobby() {
 
   if (me && me.team) {
 
-    document.getElementById(
-      "spymasterToggleBtn"
-    ).textContent =
+    document
+      .getElementById(
+        "spymasterToggleBtn"
+      )
+      .textContent =
 
       me.isSpymaster
         ? "Give up Spymaster"
@@ -1652,162 +1711,147 @@ function renderLobby() {
   }
 
 
-  /*
-   * HOST CONTROLS
-   */
-
-  document.getElementById(
-    "hostControlsBox"
-  ).style.display =
+  document
+    .getElementById("hostControlsBox")
+    .style.display =
     isHost
       ? "block"
       : "none";
 
 
-  document.getElementById(
-    "lobbyWaitBox"
-  ).style.display =
+  document
+    .getElementById("lobbyWaitBox")
+    .style.display =
     isHost
       ? "none"
       : "block";
 
 
-  /*
-   * WORD LIST SETTINGS
-   */
+  if (!isHost) {
 
-  if (isHost) {
-
-    const mode =
-      gameData.wordListMode ||
-      "default";
-
-
-    document.getElementById(
-      "customWordsBox"
-    ).style.display =
-      mode === "custom"
-        ? "block"
-        : "none";
-
-
-    document.getElementById(
-      "defaultListBtn"
-    ).style.opacity =
-      mode === "default"
-        ? "1"
-        : "0.5";
-
-
-    document.getElementById(
-      "customListBtn"
-    ).style.opacity =
-      mode === "custom"
-        ? "1"
-        : "0.5";
-
-
-    /*
-     * LOBBY VALIDATION
-     */
-
-    const total =
-      Object.keys(players).length;
-
-
-    const redSpy =
-      redList.filter(
-        p => p.isSpymaster
-      ).length;
-
-
-    const blueSpy =
-      blueList.filter(
-        p => p.isSpymaster
-      ).length;
-
-
-    let warning =
-      `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
-
-
-    if (total < 4) {
-
-      warning +=
-        " Need at least 4 total.";
-
-    }
-
-
-    if (
-      redList.length < 2 ||
-      blueList.length < 2
-    ) {
-
-      warning +=
-        " Each team needs 1 Spymaster + 1 Operative.";
-
-    }
-
-
-    if (
-      redSpy !== 1 ||
-      blueSpy !== 1
-    ) {
-
-      warning +=
-        " Each team needs exactly 1 Spymaster.";
-
-    }
-
-
-    if (
-      mode === "custom" &&
-      (
-        !gameData.customWords ||
-        gameData.customWords.length < 25
-      )
-    ) {
-
-      warning +=
-        " Custom word list needs at least 25 words saved.";
-
-    }
-
-
-    document.getElementById(
-      "lobbyWarning"
-    ).textContent =
-      warning;
+    return;
 
   }
+
+
+  const mode =
+    gameData.wordListMode ||
+    "default";
+
+
+  document
+    .getElementById("customWordsBox")
+    .style.display =
+    mode === "custom"
+      ? "block"
+      : "none";
+
+
+  document
+    .getElementById("defaultListBtn")
+    .style.opacity =
+    mode === "default"
+      ? "1"
+      : "0.5";
+
+
+  document
+    .getElementById("customListBtn")
+    .style.opacity =
+    mode === "custom"
+      ? "1"
+      : "0.5";
+
+
+  const total =
+    Object.keys(players).length;
+
+
+  const redSpy =
+    redList.filter(
+      p => p.isSpymaster
+    ).length;
+
+
+  const blueSpy =
+    blueList.filter(
+      p => p.isSpymaster
+    ).length;
+
+
+  let warning =
+    `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
+
+
+  if (total < 4) {
+
+    warning +=
+      " Need at least 4 total.";
+
+  }
+
+
+  if (
+    redList.length < 2 ||
+    blueList.length < 2
+  ) {
+
+    warning +=
+      " Each team needs 1 Spymaster + 1 Operative.";
+
+  }
+
+
+  if (
+    redSpy !== 1 ||
+    blueSpy !== 1
+  ) {
+
+    warning +=
+      " Each team needs exactly 1 Spymaster.";
+
+  }
+
+
+  if (
+    mode === "custom" &&
+    (
+      !gameData.customWords ||
+      gameData.customWords.length < 25
+    )
+  ) {
+
+    warning +=
+      " Custom word list needs at least 25 words saved.";
+
+  }
+
+
+  document
+    .getElementById("lobbyWarning")
+    .textContent =
+    warning;
 
 }
 
 
-/* ============================================================
+/* =========================================================
    JOIN TEAM
-   ============================================================ */
+   ========================================================= */
 
 function joinTeam(team) {
 
   if (!gameRef || !uid) {
 
     return;
-  }
 
-
-  if (
-    team !== "red" &&
-    team !== "blue"
-  ) {
-
-    return;
   }
 
 
   gameRef
-    .child("players/" + uid)
+    .child(
+      "players/" + uid
+    )
     .update({
 
       team: team,
@@ -1829,12 +1873,13 @@ function joinTeam(team) {
       );
 
     });
+
 }
 
 
-/* ============================================================
-   TOGGLE SPYMASTER
-   ============================================================ */
+/* =========================================================
+   SPYMASTER
+   ========================================================= */
 
 function toggleSpymaster() {
 
@@ -1849,17 +1894,19 @@ function toggleSpymaster() {
   if (!me || !me.team) {
 
     return;
+
   }
 
 
   if (!me.isSpymaster) {
 
     const existing =
-      Object.entries(players)
+      Object
+        .entries(players)
         .find(
           ([id, p]) =>
             p.team === me.team &&
-            p.isSpymaster
+            p.isSpymaster === true
         );
 
 
@@ -1870,6 +1917,7 @@ function toggleSpymaster() {
       );
 
       return;
+
     }
 
   }
@@ -1881,7 +1929,6 @@ function toggleSpymaster() {
       uid +
       "/isSpymaster"
     )
-
     .set(!me.isSpymaster)
 
     .catch(error => {
@@ -1897,18 +1944,20 @@ function toggleSpymaster() {
       );
 
     });
+
 }
 
 
-/* ============================================================
-   WORD LIST MODE
-   ============================================================ */
+/* =========================================================
+   WORD LIST
+   ========================================================= */
 
 function setWordMode(mode) {
 
   if (!isHost) {
 
     return;
+
   }
 
 
@@ -1924,34 +1973,30 @@ function setWordMode(mode) {
         error
       );
 
-      alert(
-        "Could not change word mode: " +
-        error.message
-      );
-
     });
+
 }
 
-
-/* ============================================================
-   SAVE CUSTOM WORDS
-   ============================================================ */
 
 function saveCustomWords() {
 
   if (!isHost) {
 
     return;
+
   }
 
 
   const raw =
-    document.getElementById(
-      "customWordsInput"
-    ).value;
+    document
+      .getElementById(
+        "customWordsInput"
+      )
+      .value;
 
 
   const words = [
+
     ...new Set(
 
       raw
@@ -1962,18 +2007,22 @@ function saveCustomWords() {
         .filter(Boolean)
 
     )
+
   ];
 
 
   if (words.length < 25) {
 
-    document.getElementById(
-      "customWordsStatus"
-    ).textContent =
+    document
+      .getElementById(
+        "customWordsStatus"
+      )
+      .textContent =
 
       `Only ${words.length} unique words — need at least 25.`;
 
     return;
+
   }
 
 
@@ -1988,9 +2037,11 @@ function saveCustomWords() {
 
     .then(() => {
 
-      document.getElementById(
-        "customWordsStatus"
-      ).textContent =
+      document
+        .getElementById(
+          "customWordsStatus"
+        )
+        .textContent =
 
         `Saved ${words.length} words.`;
 
@@ -2003,18 +2054,19 @@ function saveCustomWords() {
         error
       );
 
-      alert(
+      document
+        .getElementById(
+          "customWordsStatus"
+        )
+        .textContent =
+
         "Could not save word list: " +
-        error.message
-      );
+        error.message;
 
     });
+
 }
 
-
-/* ============================================================
-   GET WORDS
-   ============================================================ */
 
 function getWordsForGame() {
 
@@ -2031,368 +2083,385 @@ function getWordsForGame() {
       gameData.customWords.length >= 25
     )
 
-      ? gameData.customWords
+      ?
 
-      : DEFAULT_WORDS;
+    gameData.customWords
+
+      :
+
+    DEFAULT_WORDS;
 
 
-  return shuffle(pool).slice(0, 25);
+  return shuffle(pool)
+    .slice(0, 25);
+
 }
 
 
-/* ============================================================
+/* =========================================================
    START GAME
-   ============================================================ */
+   ========================================================= */
 
-function startGame() {
+async function startGame() {
 
   console.log(
-    "Start Game clicked."
+    "START GAME clicked."
   );
 
 
-  /*
-   * Extra safety check.
-   */
+  try {
 
-  if (!isHost) {
-
-    alert(
-      "Only the host can start the game."
-    );
-
-    return;
-  }
-
-
-  if (!gameData) {
-
-    alert(
-      "Game data has not loaded yet."
-    );
-
-    return;
-  }
-
-
-  const players =
-    gameData.players || {};
-
-
-  const uids =
-    Object.keys(players);
-
-
-  const redList =
-    uids.filter(
-      id => players[id].team === "red"
-    );
-
-
-  const blueList =
-    uids.filter(
-      id => players[id].team === "blue"
-    );
-
-
-  const redSpy =
-    redList.filter(
-      id => players[id].isSpymaster
-    );
-
-
-  const blueSpy =
-    blueList.filter(
-      id => players[id].isSpymaster
-    );
-
-
-  /*
-   * VALIDATE PLAYER COUNT
-   */
-
-  if (uids.length < 4) {
-
-    alert(
-      "Need at least 4 players total."
-    );
-
-    return;
-  }
-
-
-  /*
-   * VALIDATE TEAMS
-   */
-
-  if (
-    redList.length < 2 ||
-    blueList.length < 2
-  ) {
-
-    alert(
-      "Each team needs at least 1 Spymaster and 1 Operative."
-    );
-
-    return;
-  }
-
-
-  /*
-   * VALIDATE SPYMASTERS
-   */
-
-  if (
-    redSpy.length !== 1 ||
-    blueSpy.length !== 1
-  ) {
-
-    alert(
-      "Each team needs exactly 1 Spymaster."
-    );
-
-    return;
-  }
-
-
-  /*
-   * VALIDATE WORD LIST
-   */
-
-  const mode =
-    gameData.wordListMode ||
-    "default";
-
-
-  if (
-    mode === "custom" &&
-    (
-      !gameData.customWords ||
-      gameData.customWords.length < 25
-    )
-  ) {
-
-    alert(
-      "Save a custom word list with at least 25 words first, or switch to the default list."
-    );
-
-    return;
-  }
-
-
-  /*
-   * GENERATE BOARD
-   */
-
-  const words =
-    getWordsForGame();
-
-
-  const startingTeam =
-    Math.random() < 0.5
-      ? "red"
-      : "blue";
-
-
-  const counts =
-    startingTeam === "red"
-
-      ? {
-          red: 9,
-          blue: 8
-        }
-
-      : {
-          red: 8,
-          blue: 9
-        };
-
-
-  const colors = [];
-
-
-  for (
-    let i = 0;
-    i < counts.red;
-    i++
-  ) {
-
-    colors.push("red");
-
-  }
-
-
-  for (
-    let i = 0;
-    i < counts.blue;
-    i++
-  ) {
-
-    colors.push("blue");
-
-  }
-
-
-  for (
-    let i = 0;
-    i < 7;
-    i++
-  ) {
-
-    colors.push("yellow");
-
-  }
-
-
-  colors.push("black");
-
-
-  const shuffledColors =
-    shuffle(colors);
-
-
-  const board =
-    words.map(word => ({
-
-      word: word,
-
-      revealed: false
-
-    }));
-
-
-  const colorsUpdate = {};
-
-
-  shuffledColors.forEach(
-    (color, index) => {
-
-      colorsUpdate[index] =
-        color;
-
-    }
-  );
-
-
-  /*
-   * BUILD GAME UPDATE
-   */
-
-  const updates = {};
-
-
-  updates["board"] =
-    board;
-
-
-  updates["status"] =
-    "playing";
-
-
-  updates["startingTeam"] =
-    startingTeam;
-
-
-  updates["currentTurn"] =
-    startingTeam;
-
-
-  updates["redRemaining"] =
-    counts.red;
-
-
-  updates["blueRemaining"] =
-    counts.blue;
-
-
-  updates["clue"] =
-    null;
-
-
-  updates["winner"] =
-    null;
-
-
-  pushCNLog(
-    updates,
-    `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`
-  );
-
-
-  console.log(
-    "Starting game.",
-    {
-      gameCode,
-      startingTeam,
-      board,
-      colorsUpdate
-    }
-  );
-
-
-  /*
-   * IMPORTANT:
-   *
-   * Write the secret colour key first.
-   *
-   * Only the host can write this.
-   */
-
-  const colorRef =
-    db.ref(
-      "cardColors/" +
-      gameCode
-    );
-
-
-  colorRef
-    .set(colorsUpdate)
-
-    .then(() => {
-
-      console.log(
-        "Secret colour key successfully written."
-      );
-
-
-      /*
-       * Now change the game status to
-       * "playing".
-       */
-
-      return gameRef.update(
-        updates
-      );
-
-    })
-
-    .then(() => {
-
-      console.log(
-        "Game successfully started."
-      );
-
-    })
-
-    .catch(error => {
+    if (!isHost) {
 
       console.error(
-        "Could not start game:",
-        error
+        "Start Game blocked: current user is not host."
       );
 
       alert(
-        "Could not start game: " +
-        error.message
+        "Only the host can start the game."
       );
 
-    });
+      return;
+
+    }
+
+
+    if (!gameData) {
+
+      alert(
+        "Game data has not loaded yet."
+      );
+
+      return;
+
+    }
+
+
+    const players =
+      gameData.players || {};
+
+
+    const uids =
+      Object.keys(players);
+
+
+    const redList =
+      uids.filter(
+        id => players[id].team === "red"
+      );
+
+
+    const blueList =
+      uids.filter(
+        id => players[id].team === "blue"
+      );
+
+
+    const redSpy =
+      redList.filter(
+        id => players[id].isSpymaster === true
+      );
+
+
+    const blueSpy =
+      blueList.filter(
+        id => players[id].isSpymaster === true
+      );
+
+
+    console.log(
+      "Start validation:",
+      {
+        players: uids.length,
+        red: redList.length,
+        blue: blueList.length,
+        redSpy: redSpy.length,
+        blueSpy: blueSpy.length
+      }
+    );
+
+
+    if (uids.length < 4) {
+
+      alert(
+        "Need at least 4 players total."
+      );
+
+      return;
+
+    }
+
+
+    if (
+      redList.length < 2 ||
+      blueList.length < 2
+    ) {
+
+      alert(
+        "Each team needs at least 1 Spymaster and 1 Operative."
+      );
+
+      return;
+
+    }
+
+
+    if (
+      redSpy.length !== 1 ||
+      blueSpy.length !== 1
+    ) {
+
+      alert(
+        "Each team needs exactly 1 Spymaster."
+      );
+
+      return;
+
+    }
+
+
+    const mode =
+      gameData.wordListMode ||
+      "default";
+
+
+    if (
+      mode === "custom" &&
+      (
+        !gameData.customWords ||
+        gameData.customWords.length < 25
+      )
+    ) {
+
+      alert(
+        "Save a custom word list with at least 25 words first, or switch to the default list."
+      );
+
+      return;
+
+    }
+
+
+    const words =
+      getWordsForGame();
+
+
+    if (words.length !== 25) {
+
+      alert(
+        "Could not generate the 25-card board."
+      );
+
+      return;
+
+    }
+
+
+    const startingTeam =
+      Math.random() < 0.5
+        ? "red"
+        : "blue";
+
+
+    const counts =
+      startingTeam === "red"
+
+        ?
+
+      {
+        red: 9,
+        blue: 8
+      }
+
+        :
+
+      {
+        red: 8,
+        blue: 9
+      };
+
+
+    /*
+     * Create the answer key.
+     *
+     * IMPORTANT:
+     * This is NOT stored in /games.
+     * It is stored in /secretColors.
+     */
+
+    const colors = [];
+
+
+    for (
+      let i = 0;
+      i < counts.red;
+      i++
+    ) {
+
+      colors.push("red");
+
+    }
+
+
+    for (
+      let i = 0;
+      i < counts.blue;
+      i++
+    ) {
+
+      colors.push("blue");
+
+    }
+
+
+    for (
+      let i = 0;
+      i < 7;
+      i++
+    ) {
+
+      colors.push("yellow");
+
+    }
+
+
+    colors.push("black");
+
+
+    const shuffledColors =
+      shuffle(colors);
+
+
+    const secretColors = {};
+
+
+    shuffledColors.forEach(
+      (color, index) => {
+
+        secretColors[index] =
+          color;
+
+      }
+    );
+
+
+    const board =
+      words.map(word => ({
+
+        word: word,
+
+        revealed: false
+
+      }));
+
+
+    const updates = {
+
+      board: board,
+
+      status: "playing",
+
+      startingTeam: startingTeam,
+
+      currentTurn: startingTeam,
+
+      redRemaining: counts.red,
+
+      blueRemaining: counts.blue,
+
+      clue: null,
+
+      winner: null
+
+    };
+
+
+    /*
+     * First write the secret answer key.
+     *
+     * This must succeed before we allow the game
+     * to transition from lobby -> playing.
+     */
+
+    console.log(
+      "Writing secret colours..."
+    );
+
+
+    await db
+      .ref(
+        "secretColors/" +
+        gameCode
+      )
+      .set(secretColors);
+
+
+    console.log(
+      "Secret colours written successfully."
+    );
+
+
+    /*
+     * Now update the public game state.
+     */
+
+    const logKey =
+      "log/entry_" +
+      Date.now() +
+      "_" +
+      Math.floor(
+        Math.random() * 1000
+      );
+
+
+    updates[logKey] = {
+
+      text:
+        `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`,
+
+      ts:
+        firebase.database.ServerValue.TIMESTAMP
+
+    };
+
+
+    console.log(
+      "Updating game status to playing..."
+    );
+
+
+    await gameRef.update(
+      updates
+    );
+
+
+    console.log(
+      "GAME STARTED SUCCESSFULLY."
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "START GAME FAILED:",
+      error
+    );
+
+
+    alert(
+      "Could not start game:\n\n" +
+      error.message
+    );
+
+  }
+
 }
 
 
-/* ============================================================
-   GAME SCREEN
-   ============================================================ */
+/* =========================================================
+   GAME
+   ========================================================= */
 
 function renderGame() {
 
@@ -2413,49 +2482,39 @@ function renderGame() {
     gameData.currentTurn;
 
 
-  /*
-   * TURN
-   */
-
-  document.getElementById(
-    "turnPill"
-  ).textContent =
+  document
+    .getElementById("turnPill")
+    .textContent =
     capitalize(currentTurn) +
     "'s turn";
 
 
-  document.getElementById(
-    "turnPill"
-  ).className =
+  document
+    .getElementById("turnPill")
+    .className =
     "status-pill turn-" +
     currentTurn;
 
 
-  /*
-   * SCORE
-   */
-
-  document.getElementById(
-    "redScore"
-  ).textContent =
+  document
+    .getElementById("redScore")
+    .textContent =
     "Red: " +
     (
-      gameData.redRemaining ?? 9
+      gameData.redRemaining ??
+      9
     );
 
 
-  document.getElementById(
-    "blueScore"
-  ).textContent =
+  document
+    .getElementById("blueScore")
+    .textContent =
     "Blue: " +
     (
-      gameData.blueRemaining ?? 8
+      gameData.blueRemaining ??
+      8
     );
 
-
-  /*
-   * ROLE
-   */
 
   const roleBanner =
     document.getElementById(
@@ -2468,21 +2527,22 @@ function renderGame() {
     roleBanner.textContent =
       "You're spectating this game.";
 
-  } else {
+  }
+
+  else {
 
     roleBanner.textContent =
-      `You are on ${capitalize(me.team)} Team${
+
+      `You are on ${capitalize(me.team)} Team` +
+
+      (
         me.isSpymaster
           ? " — Spymaster"
           : " — Operative"
-      }.`;
+      );
 
   }
 
-
-  /*
-   * CLUE
-   */
 
   const clue =
     gameData.clue;
@@ -2494,15 +2554,17 @@ function renderGame() {
 
 
   const iAmSpymasterGivingClue =
+
     me &&
     me.isSpymaster &&
     isMyTurnTeam &&
     !clue;
 
 
-  document.getElementById(
-    "clueGiveBox"
-  ).style.display =
+  document
+    .getElementById("clueGiveBox")
+    .style.display =
+
     iAmSpymasterGivingClue
       ? "block"
       : "none";
@@ -2510,21 +2572,27 @@ function renderGame() {
 
   if (clue) {
 
-    document.getElementById(
-      "clueDisplayBox"
-    ).style.display =
+    document
+      .getElementById(
+        "clueDisplayBox"
+      )
+      .style.display =
       "block";
 
 
-    document.getElementById(
-      "clueWordDisplay"
-    ).textContent =
+    document
+      .getElementById(
+        "clueWordDisplay"
+      )
+      .textContent =
       clue.word;
 
 
-    document.getElementById(
-      "clueNumberDisplay"
-    ).textContent =
+    document
+      .getElementById(
+        "clueNumberDisplay"
+      )
+      .textContent =
 
       `${clue.number} card${
         clue.number === 1
@@ -2534,38 +2602,35 @@ function renderGame() {
         clue.guessesMade || 0
       } guessed so far`;
 
-  } else {
+  }
 
-    document.getElementById(
-      "clueDisplayBox"
-    ).style.display =
+  else {
+
+    document
+      .getElementById(
+        "clueDisplayBox"
+      )
+      .style.display =
       "none";
 
   }
 
 
-  /*
-   * GUESSING
-   */
-
   const canGuess =
+
     me &&
     !me.isSpymaster &&
     isMyTurnTeam &&
     !!clue;
 
 
-  document.getElementById(
-    "endTurnBox"
-  ).style.display =
+  document
+    .getElementById("endTurnBox")
+    .style.display =
     canGuess
       ? "block"
       : "none";
 
-
-  /*
-   * BOARD
-   */
 
   renderBoard(
     me,
@@ -2573,17 +2638,14 @@ function renderGame() {
   );
 
 
-  /*
-   * LOG
-   */
-
   renderCNLog();
+
 }
 
 
-/* ============================================================
-   RENDER BOARD
-   ============================================================ */
+/* =========================================================
+   BOARD
+   ========================================================= */
 
 function renderBoard(
   me,
@@ -2601,6 +2663,11 @@ function renderBoard(
 
 
   boardEl.innerHTML = "";
+
+
+  const isSpymaster =
+    me &&
+    me.isSpymaster === true;
 
 
   board.forEach(
@@ -2621,42 +2688,38 @@ function renderBoard(
 
 
       /*
-       * Colour visibility:
+       * Spymasters are allowed to see the entire
+       * secret answer key.
        *
-       * - Spymasters can see all colours.
-       * - Revealed cards can be seen by everyone.
+       * Normal players only see colours for cards
+       * that have already been revealed.
        */
 
-      const color =
-        cardColorsData[idx];
+      let color = null;
 
 
-      if (card.revealed) {
+      if (isSpymaster) {
 
-        if (color) {
+        color =
+          secretColorsData[idx];
 
-          btn.classList.add(
-            "color-" + color
-          );
+      }
 
-        }
-
-        btn.classList.add(
-          "revealed"
-        );
-
-        btn.disabled = true;
-
-      } else if (
-        color &&
-        me &&
-        me.isSpymaster
-      ) {
+      else if (card.revealed) {
 
         /*
-         * Unrevealed colours should only
-         * be visible to spymasters.
+         * The revealed colour is stored publicly
+         * on the board once a card has been selected.
          */
+
+        color =
+          card.revealedColor ||
+          null;
+
+      }
+
+
+      if (color) {
 
         btn.classList.add(
           "color-" + color
@@ -2665,43 +2728,50 @@ function renderBoard(
       }
 
 
-      /*
-       * CLICKABILITY
-       */
+      if (card.revealed) {
 
-      if (
-        !card.revealed &&
-        canGuess
-      ) {
-
-        btn.onclick = () => {
-
-          selectCard(idx);
-
-        };
-
-      } else {
+        btn.classList.add(
+          "revealed"
+        );
 
         btn.disabled = true;
 
       }
 
 
-      boardEl.appendChild(btn);
+      if (
+        !card.revealed &&
+        canGuess
+      ) {
+
+        btn.onclick =
+          () => selectCard(idx);
+
+      }
+
+      else {
+
+        btn.disabled = true;
+
+      }
+
+
+      boardEl.appendChild(
+        btn
+      );
 
     }
+
   );
+
 }
 
 
-/* ============================================================
-   SUBMIT CLUE
-   ============================================================ */
+/* =========================================================
+   CLUE
+   ========================================================= */
 
 function submitClue() {
-
-  if (!gameData) return;
-
 
   const word =
     document
@@ -2714,9 +2784,11 @@ function submitClue() {
 
   const number =
     parseInt(
-      document.getElementById(
-        "clueNumberInput"
-      ).value,
+      document
+        .getElementById(
+          "clueNumberInput"
+        )
+        .value,
       10
     );
 
@@ -2728,6 +2800,7 @@ function submitClue() {
     );
 
     return;
+
   }
 
 
@@ -2742,6 +2815,7 @@ function submitClue() {
     );
 
     return;
+
   }
 
 
@@ -2765,26 +2839,16 @@ function submitClue() {
 
 
   pushCNLog(
+
     updates,
+
     `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
+
   );
 
 
   gameRef
     .update(updates)
-
-    .then(() => {
-
-      document.getElementById(
-        "clueWordInput"
-      ).value = "";
-
-
-      document.getElementById(
-        "clueNumberInput"
-      ).value = "1";
-
-    })
 
     .catch(error => {
 
@@ -2799,124 +2863,211 @@ function submitClue() {
       );
 
     });
+
+
+  document
+    .getElementById(
+      "clueWordInput"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "clueNumberInput"
+    )
+    .value = "1";
+
 }
 
 
-/* ============================================================
+/* =========================================================
    SELECT CARD
-   ============================================================ */
+   ========================================================= */
 
-function selectCard(idx) {
-
-  /*
-   * Prevent double-clicks while Firebase
-   * is processing the previous guess.
-   */
+async function selectCard(idx) {
 
   if (resolvingGuess) {
 
     return;
+
   }
 
 
   resolvingGuess = true;
 
 
-  const cardRef =
-    gameRef.child(
-      "board/" + idx
-    );
+  try {
+
+    const currentBoard =
+      gameData.board || [];
 
 
-  const colorRef =
-    db.ref(
-      "cardColors/" +
-      gameCode +
-      "/" +
-      idx
-    );
+    if (
+      !currentBoard[idx] ||
+      currentBoard[idx].revealed
+    ) {
+
+      return;
+
+    }
 
 
-  /*
-   * First reveal the card.
-   *
-   * Once revealed, Firebase rules allow
-   * ordinary players to read its colour.
-   */
+    /*
+     * Only use the secret answer key if it is available.
+     *
+     * For a normal operative this will not be readable.
+     * Therefore we cannot process the answer using
+     * secretColors from their client.
+     *
+     * Instead we read the colour through a transaction
+     * against the hidden node.
+     *
+     * NOTE:
+     * The rules below allow revealed colours to become
+     * public after the guess.
+     */
 
-  cardRef
-    .child("revealed")
-    .set(true)
-
-    .then(() => {
-
-      return colorRef.once(
-        "value"
-      );
-
-    })
-
-    .then(snapshot => {
-
-      const color =
-        snapshot.val();
+    let color =
+      secretColorsData[idx];
 
 
-      if (!color) {
+    /*
+     * If the player is not a Spymaster, they won't have
+     * secretColorsData.
+     *
+     * We therefore need the guess to be resolved by a
+     * trusted backend for a truly secure implementation.
+     *
+     * For this Firebase-only version, the host resolves
+     * guesses.
+     */
 
-        throw new Error(
-          "No colour found for card " +
-          idx
-        );
-
-      }
-
+    if (!color) {
 
       /*
-       * Cache the colour locally.
+       * Ask the host to resolve this guess.
        */
 
-      cardColorsData[idx] =
-        color;
+      await gameRef
+        .child(
+          "pendingGuess"
+        )
+        .set({
+
+          index: idx,
+
+          requestedBy: uid,
+
+          ts:
+            firebase.database.ServerValue.TIMESTAMP
+
+        });
 
 
-      const word =
-        gameData.board[idx].word;
+      return;
+
+    }
 
 
-      processGuessResult(
-        idx,
-        color,
-        word
-      );
+    /*
+     * Spymaster testing / host resolving.
+     */
 
-    })
+    await revealAndProcessGuess(
+      idx,
+      color
+    );
 
-    .catch(error => {
+  }
 
-      console.error(
-        "Could not process guess:",
-        error
-      );
+  catch (error) {
 
-      alert(
-        "Could not process the guess: " +
-        error.message
-      );
+    console.error(
+      "Could not select card:",
+      error
+    );
 
-    })
+    alert(
+      "Could not select card: " +
+      error.message
+    );
 
-    .finally(() => {
+  }
 
-      resolvingGuess = false;
+  finally {
 
-    });
+    resolvingGuess = false;
+
+  }
+
 }
 
 
-/* ============================================================
-   PROCESS GUESS
-   ============================================================ */
+/* =========================================================
+   REVEAL / PROCESS GUESS
+   ========================================================= */
+
+async function revealAndProcessGuess(
+  idx,
+  color
+) {
+
+  const board =
+    gameData.board || [];
+
+
+  if (
+    !board[idx] ||
+    board[idx].revealed
+  ) {
+
+    return;
+
+  }
+
+
+  const word =
+    board[idx].word;
+
+
+  /*
+   * First publish the revealed colour.
+   *
+   * Normal players are only able to see colours
+   * after the card has been revealed.
+   */
+
+  await gameRef
+    .child(
+      "board/" +
+      idx +
+      "/revealedColor"
+    )
+    .set(color);
+
+
+  await gameRef
+    .child(
+      "board/" +
+      idx +
+      "/revealed"
+    )
+    .set(true);
+
+
+  processGuessResult(
+    idx,
+    color,
+    word
+  );
+
+}
+
+
+/* =========================================================
+   GUESS RESULT
+   ========================================================= */
 
 function processGuessResult(
   idx,
@@ -2930,13 +3081,8 @@ function processGuessResult(
 
   const updates = {};
 
-
   let text = "";
 
-
-  /*
-   * ASSASSIN
-   */
 
   if (color === "black") {
 
@@ -2969,12 +3115,9 @@ function processGuessResult(
 
 
     return;
+
   }
 
-
-  /*
-   * CORRECT TEAM
-   */
 
   if (color === myTeam) {
 
@@ -2983,20 +3126,23 @@ function processGuessResult(
 
 
     const newRemaining =
+
       (
-        gameData[remainingKey] || 0
+        gameData[
+          remainingKey
+        ] || 0
       ) - 1;
 
 
-    updates[remainingKey] =
+    updates[
+      remainingKey
+    ] =
       newRemaining;
 
 
-    /*
-     * TEAM HAS WON
-     */
-
-    if (newRemaining <= 0) {
+    if (
+      newRemaining <= 0
+    ) {
 
       updates["status"] =
         "ended";
@@ -3021,26 +3167,25 @@ function processGuessResult(
 
 
       return;
+
     }
 
 
-    /*
-     * CORRECT GUESS
-     */
-
     const guessesMade =
+
       (
-        gameData.clue.guessesMade || 0
+        gameData.clue &&
+        gameData.clue.guessesMade
+          ? gameData.clue.guessesMade
+          : 0
       ) + 1;
 
 
-    updates["clue/guessesMade"] =
+    updates[
+      "clue/guessesMade"
+    ] =
       guessesMade;
 
-
-    /*
-     * MAXIMUM GUESSES
-     */
 
     if (
       guessesMade >=
@@ -3048,6 +3193,7 @@ function processGuessResult(
     ) {
 
       updates["currentTurn"] =
+
         myTeam === "red"
           ? "blue"
           : "red";
@@ -3060,7 +3206,9 @@ function processGuessResult(
       text =
         `${word} was correct, but out of guesses for this clue. Turn passes.`;
 
-    } else {
+    }
+
+    else {
 
       text =
         `${word} was correct! Keep guessing.`;
@@ -3069,16 +3217,12 @@ function processGuessResult(
 
   }
 
-
-  /*
-   * INNOCENT BYSTANDER
-   */
-
   else if (
     color === "yellow"
   ) {
 
     updates["currentTurn"] =
+
       myTeam === "red"
         ? "blue"
         : "red";
@@ -3093,11 +3237,6 @@ function processGuessResult(
 
   }
 
-
-  /*
-   * OPPOSING TEAM
-   */
-
   else {
 
     const oppTeam =
@@ -3109,16 +3248,22 @@ function processGuessResult(
 
 
     const newOppRemaining =
+
       (
-        gameData[oppRemainingKey] || 0
+        gameData[
+          oppRemainingKey
+        ] || 0
       ) - 1;
 
 
-    updates[oppRemainingKey] =
+    updates[
+      oppRemainingKey
+    ] =
       newOppRemaining;
 
 
     updates["currentTurn"] =
+
       myTeam === "red"
         ? "blue"
         : "red";
@@ -3145,6 +3290,7 @@ function processGuessResult(
 
 
       text +=
+
         ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
 
     }
@@ -3164,27 +3310,26 @@ function processGuessResult(
     .catch(error => {
 
       console.error(
-        "Could not update guess result:",
+        "Could not process guess:",
         error
       );
 
     });
+
 }
 
 
-/* ============================================================
-   END TURN MANUALLY
-   ============================================================ */
+/* =========================================================
+   END TURN
+   ========================================================= */
 
 function endTurnManually() {
-
-  if (!gameData) return;
-
 
   const updates = {};
 
 
   updates["currentTurn"] =
+
     gameData.currentTurn === "red"
       ? "blue"
       : "red";
@@ -3195,8 +3340,11 @@ function endTurnManually() {
 
 
   pushCNLog(
+
     updates,
+
     `${capitalize(gameData.currentTurn)} ended their turn.`
+
   );
 
 
@@ -3210,18 +3358,14 @@ function endTurnManually() {
         error
       );
 
-      alert(
-        "Could not end turn: " +
-        error.message
-      );
-
     });
+
 }
 
 
-/* ============================================================
+/* =========================================================
    GAME LOG
-   ============================================================ */
+   ========================================================= */
 
 function pushCNLog(
   updates,
@@ -3229,6 +3373,7 @@ function pushCNLog(
 ) {
 
   const key =
+
     "log/entry_" +
     Date.now() +
     "_" +
@@ -3245,6 +3390,7 @@ function pushCNLog(
       firebase.database.ServerValue.TIMESTAMP
 
   };
+
 }
 
 
@@ -3255,7 +3401,9 @@ function renderCNLog() {
 
 
   const entries =
-    Object.values(log)
+
+    Object
+      .values(log)
       .sort(
         (a, b) =>
           (a.ts || 0) -
@@ -3263,20 +3411,20 @@ function renderCNLog() {
       );
 
 
-  document.getElementById(
-    "cnLogList"
-  ).innerHTML =
+  document
+    .getElementById(
+      "cnLogList"
+    )
+    .innerHTML =
 
     entries
+      .map(
+        e =>
 
-      .map(e =>
-
-        `<div class="log-entry">
-          ${escapeHtml(e.text)}
-        </div>`
-
+          `<div class="log-entry">
+            ${escapeHtml(e.text)}
+          </div>`
       )
-
       .join("")
 
       ||
@@ -3284,12 +3432,13 @@ function renderCNLog() {
       `<p class="small">
         No events yet.
       </p>`;
+
 }
 
 
-/* ============================================================
-   ENDED GAME
-   ============================================================ */
+/* =========================================================
+   ENDED
+   ========================================================= */
 
 function renderEnded() {
 
@@ -3302,61 +3451,43 @@ function renderEnded() {
     gameData.winner;
 
 
-  document.getElementById(
-    "cnWinnerTitle"
-  ).textContent =
+  document
+    .getElementById(
+      "cnWinnerTitle"
+    )
+    .textContent =
 
     winner === "red"
-
       ? "🔴 Red Team Wins!"
-
       : "🔵 Blue Team Wins!";
 
 
-  document.getElementById(
-    "cnWinnerSub"
-  ).textContent =
+  document
+    .getElementById(
+      "cnWinnerSub"
+    )
+    .textContent =
     "";
 
 
   const board =
-    gameData.board || [];
+    gameData.board || {};
 
 
-  document.getElementById(
-    "finalBoardList"
-  ).innerHTML =
+  document
+    .getElementById(
+      "finalBoardList"
+    )
+    .innerHTML =
 
     board
-
-      .map((card, idx) => {
+      .map((c, idx) => {
 
         const color =
-          cardColorsData[idx] || "?";
 
-
-        let cssColor =
-          "muted";
-
-
-        if (
-          color === "red" ||
-          color === "blue" ||
-          color === "yellow"
-        ) {
-
-          cssColor =
-            color;
-
-        }
-
-
-        if (color === "black") {
-
-          cssColor =
-            "muted";
-
-        }
+          secretColorsData[idx] ||
+          c.revealedColor ||
+          "?";
 
 
         return `
@@ -3364,12 +3495,10 @@ function renderEnded() {
           <div class="final-row">
 
             <span>
-              ${escapeHtml(card.word)}
+              ${escapeHtml(c.word)}
             </span>
 
-            <span
-              style="color:var(--${cssColor})"
-            >
+            <span>
               ${color.toUpperCase()}
             </span>
 
@@ -3378,14 +3507,14 @@ function renderEnded() {
         `;
 
       })
-
       .join("");
+
 }
 
 
-/* ============================================================
+/* =========================================================
    BACK TO START
-   ============================================================ */
+   ========================================================= */
 
 function cnBackToStart() {
 
@@ -3398,14 +3527,13 @@ function cnBackToStart() {
 
       gameRef
         .remove()
-        .catch(error => {
-
-          console.warn(
-            "Could not delete game data:",
-            error
-          );
-
-        })
+        .catch(
+          error =>
+            console.warn(
+              "Could not delete game data:",
+              error
+            )
+        )
 
     );
 
@@ -3416,19 +3544,19 @@ function cnBackToStart() {
 
     tasks.push(
 
-      db.ref(
-        "cardColors/" +
-        gameCode
-      )
-      .remove()
-      .catch(error => {
-
-        console.warn(
-          "Could not delete card colours:",
-          error
-        );
-
-      })
+      db
+        .ref(
+          "secretColors/" +
+          gameCode
+        )
+        .remove()
+        .catch(
+          error =>
+            console.warn(
+              "Could not delete secret colours:",
+              error
+            )
+        )
 
     );
 
@@ -3437,21 +3565,11 @@ function cnBackToStart() {
 
   Promise
     .all(tasks)
-    .finally(() => {
+    .finally(
+      () => location.reload()
+    );
 
-      location.reload();
-
-    });
 }
-
-
-/* ============================================================
-   DEBUGGING HELPERS
-   ============================================================ */
-
-console.log(
-  "Codenames application loaded."
-);
 
 </script>
 
