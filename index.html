@@ -4,139 +4,349 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Codenames</title>
+
 <style>
-  :root {
-    --bg: #14161a;
-    --panel: #1e2127;
-    --panel2: #23262c;
-    --line: #2c3037;
-    --text: #e9e7e2;
-    --muted: #8b8f98;
-    --gold: #c9a24b;
-    --red: #b5504f;
-    --blue: #4f7fb5;
-    --yellow: #c9a24b;
-    --black: #17181b;
-    --green: #4f9b6e;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: 16px;
-  }
-  h1 { font-size: 1.4rem; color: var(--gold); margin: 0 0 4px 0; }
-  h2 { font-size: 1.05rem; color: var(--gold); margin: 16px 0 8px 0; }
-  p.sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 16px 0; }
-  .screen { display: none; }
-  .screen.active { display: block; }
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
-  }
-  input[type=text], textarea {
-    width: 100%;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 11px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    margin-bottom: 8px;
-    font-family: inherit;
-  }
-  textarea { min-height: 90px; resize: vertical; }
-  input[type=number] {
-    width: 70px;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 1rem;
-    text-align: center;
-  }
-  button {
-    background: var(--gold);
-    border: none;
-    color: #14161a;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 7px;
-  }
-  button.secondary { background: var(--panel2); border: 1px solid var(--line); color: var(--text); font-weight: 600; }
-  button.red-btn { background: var(--red); color: white; }
-  button.blue-btn { background: var(--blue); color: white; }
-  button.green { background: var(--green); color: white; }
-  button:disabled { opacity: 0.35; }
-  .roomcode { font-size: 2rem; letter-spacing: 6px; text-align: center; color: var(--gold); font-weight: 700; margin: 6px 0; }
-  .small { font-size: 0.78rem; color: var(--muted); }
-  .center { text-align: center; }
-  .team-col { display: flex; gap: 10px; margin-bottom: 10px; }
-  .team-box { flex: 1; border-radius: 10px; padding: 10px; border: 1px solid var(--line); }
-  .team-box.red { background: rgba(181,80,79,0.12); }
-  .team-box.blue { background: rgba(79,127,181,0.12); }
-  .team-box h3 { margin: 0 0 8px 0; font-size: 0.9rem; }
-  .team-box.red h3 { color: var(--red); }
-  .team-box.blue h3 { color: var(--blue); }
-  .player-chip { font-size: 0.82rem; padding: 4px 0; }
-  .player-chip .tag { font-size: 0.68rem; color: var(--gold); }
-  .toggle-row { display: flex; gap: 8px; }
-  .toggle-row button { flex: 1; }
-  .status-pill { display: inline-block; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--panel2); color: var(--gold); margin-bottom: 10px; }
-  .status-pill.turn-red { color: var(--red); }
-  .status-pill.turn-blue { color: var(--blue); }
-  .scoreboard { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; font-weight: 700; }
-  .scoreboard .r { color: var(--red); }
-  .scoreboard .b { color: var(--blue); }
-  .clue-display { text-align: center; padding: 10px; background: var(--panel2); border-radius: 10px; margin-bottom: 10px; }
-  .clue-display .word { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .cn-card {
-    aspect-ratio: 1.15 / 1;
-    border-radius: 8px;
-    border: 2px solid var(--line);
-    background: #f2f0ea;
-    color: #14161a;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 3px;
-    cursor: pointer;
-    line-height: 1.1;
-  }
-  .cn-card:disabled { cursor: default; }
-  .cn-card.color-red { background: var(--red); border-color: var(--red); color: #14161a; }
-  .cn-card.color-blue { background: var(--blue); border-color: var(--blue); color: #14161a; }
-  .cn-card.color-yellow { background: var(--yellow); border-color: var(--yellow); color: #14161a; }
-  .cn-card.color-black { background: var(--black); border-color: #000; color: #ffffff; }
-  .cn-card.revealed { opacity: 0.55; box-shadow: inset 0 0 0 3px rgba(0,0,0,0.35); }
-  .log-entry { font-size: 0.8rem; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--line); }
-  .log-entry:last-child { border-bottom: none; }
-  .role-banner { text-align: center; padding: 8px; margin-bottom: 10px; font-size: 0.85rem; border-radius: 8px; background: var(--panel2); }
-  .final-list { font-size: 0.82rem; }
-  .final-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--line); }
+:root {
+  --bg: #14161a;
+  --panel: #1e2127;
+  --panel2: #23262c;
+  --line: #2c3037;
+  --text: #e9e7e2;
+  --muted: #8b8f98;
+  --gold: #c9a24b;
+  --red: #b5504f;
+  --blue: #4f7fb5;
+  --yellow: #c9a24b;
+  --black: #17181b;
+  --green: #4f9b6e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 16px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin: 0 0 4px 0;
+}
+
+h2 {
+  font-size: 1.05rem;
+  color: var(--gold);
+  margin: 16px 0 8px 0;
+}
+
+p.sub {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 16px 0;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+input[type=text],
+textarea {
+  width: 100%;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  font-family: inherit;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+input[type=number] {
+  width: 70px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+button {
+  background: var(--gold);
+  border: none;
+  color: #14161a;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 7px;
+}
+
+button.secondary {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+}
+
+button.red-btn {
+  background: var(--red);
+  color: white;
+}
+
+button.blue-btn {
+  background: var(--blue);
+  color: white;
+}
+
+button.green {
+  background: var(--green);
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.roomcode {
+  font-size: 2rem;
+  letter-spacing: 6px;
+  text-align: center;
+  color: var(--gold);
+  font-weight: 700;
+  margin: 6px 0;
+}
+
+.small {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.center {
+  text-align: center;
+}
+
+.team-col {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.team-box {
+  flex: 1;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+}
+
+.team-box.red {
+  background: rgba(181,80,79,0.12);
+}
+
+.team-box.blue {
+  background: rgba(79,127,181,0.12);
+}
+
+.team-box h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+}
+
+.team-box.red h3 {
+  color: var(--red);
+}
+
+.team-box.blue h3 {
+  color: var(--blue);
+}
+
+.player-chip {
+  font-size: 0.82rem;
+  padding: 4px 0;
+}
+
+.player-chip .tag {
+  font-size: 0.68rem;
+  color: var(--gold);
+}
+
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-row button {
+  flex: 1;
+}
+
+.status-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--panel2);
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.status-pill.turn-red {
+  color: var(--red);
+}
+
+.status-pill.turn-blue {
+  color: var(--blue);
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.scoreboard .r {
+  color: var(--red);
+}
+
+.scoreboard .b {
+  color: var(--blue);
+}
+
+.clue-display {
+  text-align: center;
+  padding: 10px;
+  background: var(--panel2);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.clue-display .word {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cn-card {
+  aspect-ratio: 1.15 / 1;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  background: #f2f0ea;
+  color: #14161a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3px;
+  cursor: pointer;
+  line-height: 1.1;
+}
+
+.cn-card:disabled {
+  cursor: default;
+}
+
+.cn-card.color-red {
+  background: var(--red);
+  border-color: var(--red);
+  color: #14161a;
+}
+
+.cn-card.color-blue {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #14161a;
+}
+
+.cn-card.color-yellow {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #14161a;
+}
+
+.cn-card.color-black {
+  background: var(--black);
+  border-color: #000;
+  color: #ffffff;
+}
+
+.cn-card.revealed {
+  opacity: 0.55;
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,0.35);
+}
+
+.log-entry {
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.role-banner {
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  background: var(--panel2);
+}
+
+.final-list {
+  font-size: 0.82rem;
+}
+
+.final-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
 </style>
 </head>
+
 <body>
 
 <h1>🕵️ Codenames</h1>
@@ -144,116 +354,267 @@
 
 <!-- LANDING -->
 <div id="screen-landing" class="screen active">
+
   <div class="card">
     <h2 style="margin-top:0">Your name</h2>
-    <input type="text" id="nameInput" placeholder="Enter your name" maxlength="16">
+    <input
+      type="text"
+      id="nameInput"
+      placeholder="Enter your name"
+      maxlength="16"
+    >
   </div>
+
   <div class="card">
     <button onclick="createGame()">Create Game</button>
   </div>
+
   <div class="card">
-    <input type="text" id="joinCodeInput" placeholder="Room code" maxlength="4" style="text-transform:uppercase">
+    <input
+      type="text"
+      id="joinCodeInput"
+      placeholder="Room code"
+      maxlength="4"
+      style="text-transform:uppercase"
+    >
     <button class="secondary" onclick="joinGame()">Join Game</button>
   </div>
+
   <p class="small center" id="landingError"></p>
 </div>
 
 <!-- LOBBY -->
 <div id="screen-lobby" class="screen">
+
   <div class="card center">
     <p class="small">Room code — share this with your friends</p>
     <div class="roomcode" id="lobbyCode">----</div>
   </div>
 
   <div class="team-col">
+
     <div class="team-box red">
       <h3>Red Team</h3>
       <div id="redPlayerList"></div>
-      <button class="red-btn" style="margin-top:6px" onclick="joinTeam('red')">Join Red</button>
+      <button
+        class="red-btn"
+        style="margin-top:6px"
+        onclick="joinTeam('red')"
+      >
+        Join Red
+      </button>
     </div>
+
     <div class="team-box blue">
       <h3>Blue Team</h3>
       <div id="bluePlayerList"></div>
-      <button class="blue-btn" style="margin-top:6px" onclick="joinTeam('blue')">Join Blue</button>
+      <button
+        class="blue-btn"
+        style="margin-top:6px"
+        onclick="joinTeam('blue')"
+      >
+        Join Blue
+      </button>
     </div>
+
   </div>
 
   <div class="card" id="spymasterToggleBox" style="display:none">
-    <button class="secondary" id="spymasterToggleBtn" onclick="toggleSpymaster()">Become Spymaster</button>
+    <button
+      class="secondary"
+      id="spymasterToggleBtn"
+      onclick="toggleSpymaster()"
+    >
+      Become Spymaster
+    </button>
   </div>
 
   <div class="card" id="hostControlsBox" style="display:none">
+
     <h2 style="margin-top:0">Word list</h2>
+
     <div class="toggle-row" style="margin-bottom:8px">
-      <button class="secondary" id="defaultListBtn" onclick="setWordMode('default')">Default list</button>
-      <button class="secondary" id="customListBtn" onclick="setWordMode('custom')">Custom list</button>
+      <button
+        class="secondary"
+        id="defaultListBtn"
+        onclick="setWordMode('default')"
+      >
+        Default list
+      </button>
+
+      <button
+        class="secondary"
+        id="customListBtn"
+        onclick="setWordMode('custom')"
+      >
+        Custom list
+      </button>
     </div>
+
     <div id="customWordsBox" style="display:none">
-      <textarea id="customWordsInput" placeholder="Enter at least 25 words, separated by commas or new lines"></textarea>
-      <button class="secondary" onclick="saveCustomWords()">Save Word List</button>
+
+      <textarea
+        id="customWordsInput"
+        placeholder="Enter at least 25 words, separated by commas or new lines"
+      ></textarea>
+
+      <button
+        class="secondary"
+        onclick="saveCustomWords()"
+      >
+        Save Word List
+      </button>
+
       <p class="small" id="customWordsStatus"></p>
+
     </div>
+
     <p class="small" id="lobbyWarning"></p>
+
     <button onclick="startGame()">Start Game</button>
+
   </div>
+
   <div class="card center" id="lobbyWaitBox" style="display:none">
-    <p class="small">Waiting for the host to configure and start the game...</p>
+    <p class="small">
+      Waiting for the host to configure and start the game...
+    </p>
   </div>
+
 </div>
 
 <!-- GAME -->
 <div id="screen-game" class="screen">
+
   <div class="status-pill" id="turnPill">-</div>
+
   <div class="scoreboard">
     <span class="r" id="redScore">Red: 0</span>
     <span class="b" id="blueScore">Blue: 0</span>
   </div>
+
   <div class="role-banner" id="roleBanner"></div>
 
   <div id="clueGiveBox" class="card" style="display:none">
+
     <h2 style="margin-top:0">Give your team a clue</h2>
-    <input type="text" id="clueWordInput" placeholder="One word clue" maxlength="24">
+
+    <input
+      type="text"
+      id="clueWordInput"
+      placeholder="One word clue"
+      maxlength="24"
+    >
+
     <label class="small">Number of related cards</label>
-    <input type="number" id="clueNumberInput" min="0" max="9" value="1">
-    <button style="margin-top:8px" onclick="submitClue()">Give Clue</button>
+
+    <input
+      type="number"
+      id="clueNumberInput"
+      min="0"
+      max="9"
+      value="1"
+    >
+
+    <button
+      style="margin-top:8px"
+      onclick="submitClue()"
+    >
+      Give Clue
+    </button>
+
   </div>
 
-  <div id="clueDisplayBox" class="clue-display" style="display:none">
+  <div
+    id="clueDisplayBox"
+    class="clue-display"
+    style="display:none"
+  >
     <p class="small" style="margin:0">Clue</p>
     <div class="word" id="clueWordDisplay">-</div>
-    <p class="small" id="clueNumberDisplay" style="margin:4px 0 0 0"></p>
+    <p
+      class="small"
+      id="clueNumberDisplay"
+      style="margin:4px 0 0 0"
+    ></p>
   </div>
 
   <div class="board" id="board"></div>
 
   <div id="endTurnBox" style="display:none">
-    <button class="secondary" onclick="endTurnManually()">End Turn</button>
+    <button
+      class="secondary"
+      onclick="endTurnManually()"
+    >
+      End Turn
+    </button>
   </div>
 
   <div class="card">
+
     <h2 style="margin-top:0">Game log</h2>
+
     <div id="cnLogList"></div>
+
   </div>
+
 </div>
 
 <!-- ENDED -->
 <div id="screen-ended" class="screen">
+
   <div class="card center">
-    <h2 style="margin-top:0" id="cnWinnerTitle">Game Over</h2>
-    <p class="small" id="cnWinnerSub"></p>
+
+    <h2
+      style="margin-top:0"
+      id="cnWinnerTitle"
+    >
+      Game Over
+    </h2>
+
+    <p
+      class="small"
+      id="cnWinnerSub"
+    ></p>
+
   </div>
+
   <div class="card">
-    <h2 style="margin-top:0">Final board</h2>
-    <div class="final-list" id="finalBoardList"></div>
+
+    <h2 style="margin-top:0">
+      Final board
+    </h2>
+
+    <div
+      class="final-list"
+      id="finalBoardList"
+    ></div>
+
   </div>
-  <button class="secondary" onclick="cnBackToStart()">Back to start</button>
+
+  <button
+    class="secondary"
+    onclick="cnBackToStart()"
+  >
+    Back to start
+  </button>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+
 <script>
-// ====== PASTE YOUR FIREBASE CONFIG HERE ======
+
+// ============================================================
+// CODENAMES - FIREBASE GAME LOGIC
+// ============================================================
+
+// ------------------------------------------------------------
+// FIREBASE CONFIG
+// ------------------------------------------------------------
+
 const firebaseConfig = {
   apiKey: "AIzaSyDRgXgUbQB36hVUPi7t4z3EH44ZztaKfZQ",
   authDomain: "codenames-game-93ab1.firebaseapp.com",
@@ -263,23 +624,33 @@ const firebaseConfig = {
   messagingSenderId: "795557982712",
   appId: "1:795557982712:web:8b2148bee0ffcb1249260d"
 };
-// ==============================================
 
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.database();
 
+
+// ------------------------------------------------------------
+// GLOBAL STATE
+// ------------------------------------------------------------
+
 let uid = null;
+let authReady = false;
+
 let gameCode = null;
 let isHost = false;
 let playerName = "";
+
 let gameData = null;
 let gameRef = null;
+
 let cardColorsData = {};
-let secretColorsData = null;
-let secretColorsAttached = false;
-let resolvingGuess = false;
+
+
+// ------------------------------------------------------------
+// DEFAULT WORD LIST
+// ------------------------------------------------------------
 
 const DEFAULT_WORDS = [
   "APPLE","RIVER","GUITAR","ROCKET","TIGER","CASTLE","ANCHOR","PLANET","DESERT","HAMMER",
@@ -301,529 +672,622 @@ const DEFAULT_WORDS = [
 ];
 
 
-// ---------- UTILITY FUNCTIONS ----------
+// ------------------------------------------------------------
+// UTILITY FUNCTIONS
+// ------------------------------------------------------------
 
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
+
+  const target = document.getElementById(id);
+
+  if (target) {
+    target.classList.add("active");
+  }
 }
 
-function showError(msg) {
-  document.getElementById("landingError").textContent = msg;
+
+function showError(message) {
+  const el = document.getElementById("landingError");
+
+  if (el) {
+    el.textContent = message;
+  }
+
+  console.error(message);
 }
+
 
 function escapeHtml(str) {
-  const d = document.createElement("div");
-  d.textContent = str;
-  return d.innerHTML;
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 }
 
-function capitalize(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+function capitalize(str) {
+  if (!str) return str;
+
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function shuffle(arr) {
-  const a = [...arr];
 
-  for (let i = a.length - 1; i > 0; i--) {
+function shuffle(array) {
+  const result = [...array];
+
+  for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+
+    [result[i], result[j]] = [result[j], result[i]];
   }
 
-  return a;
+  return result;
 }
 
 
-// ---------- AUTHENTICATION ----------
+function requireAuth() {
+  if (!authReady || !uid) {
+    showError("Still connecting to Firebase. Please try again in a moment.");
+    return false;
+  }
+
+  return true;
+}
+
+
+// ------------------------------------------------------------
+// AUTHENTICATION
+// ------------------------------------------------------------
 
 auth.onAuthStateChanged(user => {
+
   if (user) {
     uid = user.uid;
-    console.log("Authenticated anonymously:", uid);
+    authReady = true;
+
+    console.log("Firebase authentication ready.");
+    console.log("Authenticated UID:", uid);
+
+  } else {
+
+    uid = null;
+    authReady = false;
+
+    console.log("No authenticated Firebase user.");
+
   }
-});
 
-auth.signInAnonymously().catch(e => {
-  console.error("Authentication error:", e);
-  showError("Connection error: " + e.message);
 });
 
 
-// ---------- ROOM CODE ----------
+auth.signInAnonymously()
+  .then(result => {
+
+    uid = result.user.uid;
+    authReady = true;
+
+    console.log("Anonymous Firebase authentication successful.");
+    console.log("UID:", uid);
+
+  })
+  .catch(error => {
+
+    console.error("Firebase authentication failed:", error);
+
+    authReady = false;
+
+    showError(
+      "Firebase authentication failed: " + error.message
+    );
+
+  });
+
+
+// ------------------------------------------------------------
+// ROOM CODE
+// ------------------------------------------------------------
 
 function genRoomCode() {
+
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
   let code = "";
 
   for (let i = 0; i < 4; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += chars[
+      Math.floor(Math.random() * chars.length)
+    ];
   }
 
   return code;
 }
 
 
-// ---------- CREATE / JOIN ----------
+// ------------------------------------------------------------
+// CREATE GAME
+// ------------------------------------------------------------
 
-function createGame() {
-  playerName = document.getElementById("nameInput").value.trim();
+async function createGame() {
 
-  if (!playerName) {
-    return showError("Enter your name first.");
-  }
+  try {
 
-  if (!uid) {
-    return showError("Still connecting, try again in a second.");
-  }
+    playerName =
+      document.getElementById("nameInput").value.trim();
 
-  gameCode = genRoomCode();
-  isHost = true;
-  gameRef = db.ref("games/" + gameCode);
-
-  gameRef.set({
-    hostUid: uid,
-    status: "lobby",
-    wordListMode: "default",
-    createdAt: firebase.database.ServerValue.TIMESTAMP,
-
-    players: {
-      [uid]: {
-        name: playerName,
-        team: null,
-        isSpymaster: false
-      }
-    },
-
-    log: {
-      init: {
-        text: "Game created. Waiting for players to join.",
-        ts: firebase.database.ServerValue.TIMESTAMP
-      }
-    }
-
-  }).then(() => {
-    attachGameListener();
-
-  }).catch(e => {
-    console.error("Could not create game:", e);
-    showError("Could not create game: " + e.message);
-  });
-}
-
-
-function joinGame() {
-  playerName = document.getElementById("nameInput").value.trim();
-
-  const code = document
-    .getElementById("joinCodeInput")
-    .value
-    .trim()
-    .toUpperCase();
-
-  if (!playerName) {
-    return showError("Enter your name first.");
-  }
-
-  if (!code) {
-    return showError("Enter a room code.");
-  }
-
-  if (!uid) {
-    return showError("Still connecting, try again in a second.");
-  }
-
-  gameRef = db.ref("games/" + code);
-
-  gameRef.once("value")
-    .then(snap => {
-      const data = snap.val();
-
-      if (!data) {
-        showError("No game found with that code.");
-        return null;
-      }
-
-      if (data.status !== "lobby") {
-        showError("That game has already started.");
-        return null;
-      }
-
-      gameCode = code;
-      isHost = false;
-
-      return gameRef.child("players/" + uid).set({
-        name: playerName,
-        team: null,
-        isSpymaster: false
-      });
-    })
-    .then(() => {
-      if (gameCode) {
-        attachGameListener();
-      }
-    })
-    .catch(e => {
-      console.error("Could not join:", e);
-      showError("Could not join: " + e.message);
-    });
-}
-
-
-// ---------- LIVE LISTENER ----------
-
-function attachGameListener() {
-
-  gameRef.on("value", snap => {
-    gameData = snap.val();
-
-    if (!gameData) {
+    if (!playerName) {
+      showError("Enter your name first.");
       return;
     }
 
-    // Always determine host status from Firebase.
-    if (gameData.hostUid === uid) {
-      isHost = true;
+    if (!requireAuth()) {
+      return;
     }
 
-    render();
-  });
+    gameCode = genRoomCode();
+
+    isHost = true;
+
+    gameRef = db.ref("games/" + gameCode);
+
+    console.log("Creating game:", gameCode);
+    console.log("Host UID:", uid);
+
+    const gameDataToCreate = {
+
+      hostUid: uid,
+
+      status: "lobby",
+
+      wordListMode: "default",
+
+      createdAt:
+        firebase.database.ServerValue.TIMESTAMP,
+
+      players: {
+
+        [uid]: {
+          name: playerName,
+          team: null,
+          isSpymaster: false
+        }
+
+      },
+
+      log: {
+
+        init: {
+          text: "Game created. Waiting for players to join.",
+          ts: firebase.database.ServerValue.TIMESTAMP
+        }
+
+      }
+
+    };
 
 
-  db.ref("cardColors/" + gameCode).on("value", snap => {
-    cardColorsData = snap.val() || {};
+    await gameRef.set(gameDataToCreate);
 
-    if (gameData) {
-      render();
-    }
-  });
+    console.log(
+      "Game successfully created at /games/" + gameCode
+    );
+
+    attachGameListener();
+
+  }
+
+  catch (error) {
+
+    console.error("CREATE GAME ERROR:", error);
+
+    showError(
+      "Could not create game: " +
+      error.message
+    );
+
+  }
+
 }
 
 
-// ---------- MAIN ROUTER ----------
+// ------------------------------------------------------------
+// JOIN GAME
+// ------------------------------------------------------------
+
+async function joinGame() {
+
+  try {
+
+    playerName =
+      document.getElementById("nameInput").value.trim();
+
+    const code =
+      document.getElementById("joinCodeInput").value
+        .trim()
+        .toUpperCase();
+
+
+    if (!playerName) {
+      showError("Enter your name first.");
+      return;
+    }
+
+    if (!code) {
+      showError("Enter a room code.");
+      return;
+    }
+
+    if (!requireAuth()) {
+      return;
+    }
+
+
+    console.log("Looking for game:", code);
+
+    const ref = db.ref("games/" + code);
+
+    const snapshot = await ref.once("value");
+
+    const data = snapshot.val();
+
+
+    if (!data) {
+
+      showError(
+        "No game found with that code."
+      );
+
+      return;
+    }
+
+
+    if (data.status !== "lobby") {
+
+      showError(
+        "That game has already started."
+      );
+
+      return;
+    }
+
+
+    gameCode = code;
+
+    isHost = false;
+
+    gameRef = ref;
+
+
+    console.log("Joining game:", gameCode);
+
+    console.log("Player UID:", uid);
+
+
+    await gameRef
+      .child("players")
+      .child(uid)
+      .set({
+
+        name: playerName,
+
+        team: null,
+
+        isSpymaster: false
+
+      });
+
+
+    console.log("Successfully joined game.");
+
+    attachGameListener();
+
+  }
+
+  catch (error) {
+
+    console.error("JOIN GAME ERROR:", error);
+
+    showError(
+      "Could not join: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+// ------------------------------------------------------------
+// LIVE GAME LISTENER
+// ------------------------------------------------------------
+
+function attachGameListener() {
+
+  if (!gameRef) {
+    console.error("Cannot attach game listener: gameRef is missing.");
+    return;
+  }
+
+
+  console.log(
+    "Listening to /games/" + gameCode
+  );
+
+
+  gameRef.on("value", snapshot => {
+
+    gameData = snapshot.val();
+
+
+    if (!gameData) {
+
+      console.warn("Game no longer exists.");
+
+      return;
+    }
+
+
+    // Always derive host status from Firebase data.
+    isHost = gameData.hostUid === uid;
+
+
+    console.log(
+      "Game updated:",
+      gameData.status,
+      "Host:",
+      isHost
+    );
+
+
+    render();
+
+  }, error => {
+
+    console.error(
+      "GAME LISTENER ERROR:",
+      error
+    );
+
+  });
+
+
+  // Listen to secret card colours.
+  //
+  // Firebase security rules determine which colours
+  // the current user is actually allowed to receive.
+
+  db.ref("cardColors/" + gameCode).on(
+    "value",
+    snapshot => {
+
+      cardColorsData =
+        snapshot.val() || {};
+
+      if (gameData) {
+        render();
+      }
+
+    },
+    error => {
+
+      console.warn(
+        "Card colour read blocked:",
+        error
+      );
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// MAIN ROUTER
+// ------------------------------------------------------------
 
 function render() {
+
   if (!gameData) {
     return;
   }
 
+
   document.getElementById("topSub").textContent =
     "Room " + gameCode;
 
+
   if (gameData.status === "lobby") {
+
     renderLobby();
 
-  } else if (gameData.status === "playing") {
+  }
+
+  else if (gameData.status === "playing") {
+
     renderGame();
 
-  } else if (gameData.status === "ended") {
-    renderEnded();
   }
+
+  else if (gameData.status === "ended") {
+
+    renderEnded();
+
+  }
+
 }
 
 
-// ---------- LOBBY ----------
+// ------------------------------------------------------------
+// LOBBY
+// ------------------------------------------------------------
 
 function renderLobby() {
 
   showScreen("screen-lobby");
 
-  document.getElementById("lobbyCode").textContent = gameCode;
 
-  const players = gameData.players || {};
-  const me = players[uid];
+  document.getElementById("lobbyCode").textContent =
+    gameCode;
 
-  const redList = Object.values(players)
-    .filter(p => p.team === "red");
 
-  const blueList = Object.values(players)
-    .filter(p => p.team === "blue");
+  const players =
+    gameData.players || {};
+
+
+  const me =
+    players[uid];
+
+
+  const redList =
+    Object.values(players)
+      .filter(player => player.team === "red");
+
+
+  const blueList =
+    Object.values(players)
+      .filter(player => player.team === "blue");
 
 
   document.getElementById("redPlayerList").innerHTML =
-    redList.map(p =>
+
+    redList.map(player =>
+
       `<div class="player-chip">
-        ${escapeHtml(p.name)}
-        ${p.isSpymaster
-          ? '<span class="tag">Spymaster</span>'
-          : ""}
+        ${escapeHtml(player.name)}
+        ${
+          player.isSpymaster
+            ? '<span class="tag">Spymaster</span>'
+            : ""
+        }
       </div>`
+
     ).join("")
+
     ||
+
     `<p class="small">No one yet.</p>`;
 
 
   document.getElementById("bluePlayerList").innerHTML =
-    blueList.map(p =>
+
+    blueList.map(player =>
+
       `<div class="player-chip">
-        ${escapeHtml(p.name)}
-        ${p.isSpymaster
-          ? '<span class="tag">Spymaster</span>'
-          : ""}
+        ${escapeHtml(player.name)}
+        ${
+          player.isSpymaster
+            ? '<span class="tag">Spymaster</span>'
+            : ""
+        }
       </div>`
+
     ).join("")
+
     ||
+
     `<p class="small">No one yet.</p>`;
 
 
   // Spymaster controls
 
-  document.getElementById("spymasterToggleBox").style.display =
-    me && me.team ? "block" : "none";
+  document.getElementById(
+    "spymasterToggleBox"
+  ).style.display =
+    me && me.team
+      ? "block"
+      : "none";
 
 
   if (me && me.team) {
-    document.getElementById("spymasterToggleBtn").textContent =
+
+    document.getElementById(
+      "spymasterToggleBtn"
+    ).textContent =
+
       me.isSpymaster
         ? "Give up Spymaster"
         : "Become Spymaster";
+
   }
 
 
   // Host controls
 
-  document.getElementById("hostControlsBox").style.display =
-    isHost ? "block" : "none";
+  document.getElementById(
+    "hostControlsBox"
+  ).style.display =
+    isHost
+      ? "block"
+      : "none";
+
+
+  document.getElementById(
+    "lobbyWaitBox"
+  ).style.display =
+    isHost
+      ? "none"
+      : "block";
 
-  document.getElementById("lobbyWaitBox").style.display =
-    isHost ? "none" : "block";
-
-
-  if (isHost) {
-
-    const mode = gameData.wordListMode || "default";
-
-    document.getElementById("customWordsBox").style.display =
-      mode === "custom" ? "block" : "none";
-
-    document.getElementById("defaultListBtn").style.opacity =
-      mode === "default" ? "1" : "0.5";
-
-    document.getElementById("customListBtn").style.opacity =
-      mode === "custom" ? "1" : "0.5";
-
-
-    const total = Object.keys(players).length;
-
-    const redSpy = redList.filter(
-      p => p.isSpymaster
-    ).length;
-
-    const blueSpy = blueList.filter(
-      p => p.isSpymaster
-    ).length;
-
-
-    let warning =
-      `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
-
-
-    if (total < 4) {
-      warning += " Need at least 4 total.";
-    }
-
-
-    if (redList.length < 2 || blueList.length < 2) {
-      warning +=
-        " Each team needs 1 Spymaster + 1 Operative.";
-    }
-
-
-    if (redSpy !== 1 || blueSpy !== 1) {
-      warning +=
-        " Each team needs exactly 1 Spymaster.";
-    }
-
-
-    if (
-      mode === "custom" &&
-      (!gameData.customWords ||
-       gameData.customWords.length < 25)
-    ) {
-      warning +=
-        " Custom word list needs at least 25 words saved.";
-    }
-
-
-    document.getElementById("lobbyWarning").textContent =
-      warning;
-  }
-}
-
-
-// ---------- TEAM MANAGEMENT ----------
-
-function joinTeam(team) {
-
-  gameRef
-    .child("players/" + uid)
-    .update({
-      team: team,
-      isSpymaster: false
-    })
-    .catch(e => {
-      console.error("Could not join team:", e);
-      alert("Could not join team: " + e.message);
-    });
-}
-
-
-function toggleSpymaster() {
-
-  const players = gameData.players || {};
-  const me = players[uid];
-
-  if (!me || !me.team) {
-    return;
-  }
-
-
-  if (!me.isSpymaster) {
-
-    const existing = Object.entries(players).find(
-      ([id, p]) =>
-        p.team === me.team &&
-        p.isSpymaster
-    );
-
-    if (existing) {
-      alert("This team already has a Spymaster.");
-      return;
-    }
-  }
-
-
-  gameRef
-    .child("players/" + uid + "/isSpymaster")
-    .set(!me.isSpymaster)
-    .catch(e => {
-      console.error("Could not change Spymaster status:", e);
-      alert("Could not change Spymaster status: " + e.message);
-    });
-}
-
-
-// ---------- WORD LIST ----------
-
-function setWordMode(mode) {
-
-  gameRef
-    .update({
-      wordListMode: mode
-    })
-    .catch(e => {
-      console.error("Could not change word mode:", e);
-      alert("Could not change word mode: " + e.message);
-    });
-}
-
-
-function saveCustomWords() {
-
-  const raw =
-    document.getElementById("customWordsInput").value;
-
-  const words = [
-    ...new Set(
-      raw
-        .split(/[\n,]/)
-        .map(w => w.trim().toUpperCase())
-        .filter(Boolean)
-    )
-  ];
-
-
-  if (words.length < 25) {
-
-    document.getElementById("customWordsStatus").textContent =
-      `Only ${words.length} unique words — need at least 25.`;
-
-    return;
-  }
-
-
-  gameRef
-    .update({
-      customWords: words,
-      wordListMode: "custom"
-    })
-    .then(() => {
-
-      document.getElementById("customWordsStatus").textContent =
-        `Saved ${words.length} words.`;
-
-    })
-    .catch(e => {
-
-      console.error("Could not save custom words:", e);
-
-      document.getElementById("customWordsStatus").textContent =
-        "Could not save word list: " + e.message;
-    });
-}
-
-
-function getWordsForGame() {
-
-  const mode = gameData.wordListMode || "default";
-
-  const pool =
-    (
-      mode === "custom" &&
-      gameData.customWords &&
-      gameData.customWords.length >= 25
-    )
-      ? gameData.customWords
-      : DEFAULT_WORDS;
-
-  return shuffle(pool).slice(0, 25);
-}
-
-
-// ---------- START GAME ----------
-
-function startGame() {
-
-  console.log("Start Game button clicked.");
-
-  if (!gameData) {
-    alert("Game data has not loaded yet. Please wait a moment.");
-    return;
-  }
 
   if (!isHost) {
-    alert("Only the host can start the game.");
     return;
   }
 
 
-  const players = gameData.players || {};
-
-  const uids = Object.keys(players);
-
-
-  const redList = uids.filter(
-    id => players[id].team === "red"
-  );
-
-  const blueList = uids.filter(
-    id => players[id].team === "blue"
-  );
+  const mode =
+    gameData.wordListMode || "default";
 
 
-  const redSpy = redList.filter(
-    id => players[id].isSpymaster
-  );
+  document.getElementById(
+    "customWordsBox"
+  ).style.display =
+    mode === "custom"
+      ? "block"
+      : "none";
 
-  const blueSpy = blueList.filter(
-    id => players[id].isSpymaster
-  );
+
+  document.getElementById(
+    "defaultListBtn"
+  ).style.opacity =
+    mode === "default"
+      ? "1"
+      : "0.5";
 
 
-  // ---------- VALIDATION ----------
+  document.getElementById(
+    "customListBtn"
+  ).style.opacity =
+    mode === "custom"
+      ? "1"
+      : "0.5";
 
-  if (uids.length < 4) {
-    alert("Need at least 4 players total.");
-    return;
+
+  const total =
+    Object.keys(players).length;
+
+
+  const redSpy =
+    redList.filter(
+      player => player.isSpymaster
+    ).length;
+
+
+  const blueSpy =
+    blueList.filter(
+      player => player.isSpymaster
+    ).length;
+
+
+  let warning =
+    `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
+
+
+  if (total < 4) {
+
+    warning +=
+      " Need at least 4 total.";
+
   }
 
 
@@ -831,26 +1295,22 @@ function startGame() {
     redList.length < 2 ||
     blueList.length < 2
   ) {
-    alert(
-      "Each team needs at least 1 Spymaster and 1 Operative."
-    );
-    return;
+
+    warning +=
+      " Each team needs 1 Spymaster + 1 Operative.";
+
   }
 
 
   if (
-    redSpy.length !== 1 ||
-    blueSpy.length !== 1
+    redSpy !== 1 ||
+    blueSpy !== 1
   ) {
-    alert(
-      "Each team needs exactly 1 Spymaster."
-    );
-    return;
+
+    warning +=
+      " Each team needs exactly 1 Spymaster.";
+
   }
-
-
-  const mode =
-    gameData.wordListMode || "default";
 
 
   if (
@@ -861,211 +1321,716 @@ function startGame() {
     )
   ) {
 
-    alert(
-      "Save a custom word list with at least 25 words first, or switch to the default list."
+    warning +=
+      " Custom word list needs at least 25 words saved.";
+
+  }
+
+
+  document.getElementById(
+    "lobbyWarning"
+  ).textContent = warning;
+
+}
+
+
+// ------------------------------------------------------------
+// JOIN TEAM
+// ------------------------------------------------------------
+
+async function joinTeam(team) {
+
+  try {
+
+    if (!requireAuth()) {
+      return;
+    }
+
+
+    if (!gameRef) {
+      return;
+    }
+
+
+    if (
+      team !== "red" &&
+      team !== "blue"
+    ) {
+      return;
+    }
+
+
+    await gameRef
+      .child("players")
+      .child(uid)
+      .update({
+
+        team: team,
+
+        isSpymaster: false
+
+      });
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "JOIN TEAM ERROR:",
+      error
     );
 
-    return;
+    alert(
+      "Could not join team: " +
+      error.message
+    );
+
   }
 
-
-  // ---------- GENERATE GAME ----------
-
-  const words = getWordsForGame();
-
-  const startingTeam =
-    Math.random() < 0.5
-      ? "red"
-      : "blue";
+}
 
 
-  const counts =
-    startingTeam === "red"
-      ? { red: 9, blue: 8 }
-      : { red: 8, blue: 9 };
+// ------------------------------------------------------------
+// SPYMASTER
+// ------------------------------------------------------------
+
+async function toggleSpymaster() {
+
+  try {
+
+    const players =
+      gameData.players || {};
 
 
-  const colors = [];
+    const me =
+      players[uid];
 
 
-  for (let i = 0; i < counts.red; i++) {
-    colors.push("red");
-  }
-
-
-  for (let i = 0; i < counts.blue; i++) {
-    colors.push("blue");
-  }
-
-
-  for (let i = 0; i < 7; i++) {
-    colors.push("yellow");
-  }
-
-
-  colors.push("black");
-
-
-  const shuffledColors =
-    shuffle(colors);
-
-
-  const board =
-    words.map(w => ({
-      word: w,
-      revealed: false
-    }));
-
-
-  const colorsUpdate = {};
-
-
-  shuffledColors.forEach(
-    (color, i) => {
-      colorsUpdate[i] = color;
+    if (!me || !me.team) {
+      return;
     }
-  );
 
 
-  // ---------- PREPARE GAME DATA ----------
+    if (!me.isSpymaster) {
 
-  const updates = {};
-
-
-  updates["board"] = board;
-
-  updates["status"] = "playing";
-
-  updates["startingTeam"] = startingTeam;
-
-  updates["currentTurn"] = startingTeam;
-
-  updates["redRemaining"] = counts.red;
-
-  updates["blueRemaining"] = counts.blue;
-
-  updates["clue"] = null;
-
-  updates["winner"] = null;
+      const existing =
+        Object.entries(players)
+          .find(([id, player]) =>
+            player.team === me.team &&
+            player.isSpymaster
+          );
 
 
-  pushCNLog(
-    updates,
-    `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`
-  );
+      if (existing) {
+
+        alert(
+          "This team already has a Spymaster."
+        );
+
+        return;
+      }
+
+    }
 
 
-  // ---------- WRITE CARD COLOURS ----------
+    await gameRef
+      .child("players")
+      .child(uid)
+      .child("isSpymaster")
+      .set(!me.isSpymaster);
 
-  console.log(
-    "Writing card colours for room:",
-    gameCode
-  );
+  }
+
+  catch (error) {
+
+    console.error(
+      "SPYMASTER ERROR:",
+      error
+    );
+
+    alert(
+      "Could not change Spymaster status: " +
+      error.message
+    );
+
+  }
+
+}
 
 
-  /*
-   * IMPORTANT:
-   *
-   * Firebase rules are defined at:
-   *
-   * cardColors/$gameId/$idx
-   *
-   * Therefore we must write each individual colour
-   * instead of writing the entire cardColors/$gameId
-   * object at once.
-   */
+// ------------------------------------------------------------
+// WORD LIST
+// ------------------------------------------------------------
 
-  const colorWrites =
-    Object.entries(colorsUpdate).map(
-      ([idx, color]) => {
+async function setWordMode(mode) {
 
-        return db
-          .ref(
-            "cardColors/" +
-            gameCode +
-            "/" +
-            idx
+  try {
+
+    if (!isHost) {
+      alert("Only the host can change the word list.");
+      return;
+    }
+
+
+    await gameRef.update({
+      wordListMode: mode
+    });
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "WORD MODE ERROR:",
+      error
+    );
+
+    alert(
+      "Could not change word list: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+async function saveCustomWords() {
+
+  try {
+
+    if (!isHost) {
+      alert("Only the host can change the word list.");
+      return;
+    }
+
+
+    const raw =
+      document.getElementById(
+        "customWordsInput"
+      ).value;
+
+
+    const words = [
+      ...new Set(
+        raw
+          .split(/[\n,]/)
+          .map(word =>
+            word.trim().toUpperCase()
           )
-          .set(color);
+          .filter(Boolean)
+      )
+    ];
+
+
+    if (words.length < 25) {
+
+      document.getElementById(
+        "customWordsStatus"
+      ).textContent =
+        `Only ${words.length} unique words — need at least 25.`;
+
+      return;
+    }
+
+
+    await gameRef.update({
+
+      customWords: words,
+
+      wordListMode: "custom"
+
+    });
+
+
+    document.getElementById(
+      "customWordsStatus"
+    ).textContent =
+      `Saved ${words.length} words.`;
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "CUSTOM WORD ERROR:",
+      error
+    );
+
+    alert(
+      "Could not save word list: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+// ------------------------------------------------------------
+// GET GAME WORDS
+// ------------------------------------------------------------
+
+function getWordsForGame() {
+
+  const mode =
+    gameData.wordListMode || "default";
+
+
+  const pool =
+
+    (
+      mode === "custom" &&
+      gameData.customWords &&
+      gameData.customWords.length >= 25
+    )
+
+      ? gameData.customWords
+
+      : DEFAULT_WORDS;
+
+
+  return shuffle(pool).slice(0, 25);
+
+}
+
+
+// ------------------------------------------------------------
+// START GAME
+// ------------------------------------------------------------
+
+async function startGame() {
+
+  console.log("================================");
+  console.log("START GAME CLICKED");
+  console.log("================================");
+
+
+  try {
+
+    // --------------------------------------------------------
+    // BASIC CHECKS
+    // --------------------------------------------------------
+
+    if (!requireAuth()) {
+      return;
+    }
+
+
+    if (!gameRef) {
+
+      console.error(
+        "startGame(): gameRef does not exist."
+      );
+
+      alert(
+        "Game connection is not ready. Please refresh and try again."
+      );
+
+      return;
+    }
+
+
+    if (!gameData) {
+
+      console.error(
+        "startGame(): gameData does not exist."
+      );
+
+      alert(
+        "Game data has not loaded yet. Please wait a moment."
+      );
+
+      return;
+    }
+
+
+    if (!isHost) {
+
+      console.error(
+        "startGame(): current user is not host."
+      );
+
+      alert(
+        "Only the host can start the game."
+      );
+
+      return;
+    }
+
+
+    console.log("Authenticated UID:", uid);
+    console.log("Game:", gameCode);
+    console.log("Host UID:", gameData.hostUid);
+
+
+    // --------------------------------------------------------
+    // PLAYER VALIDATION
+    // --------------------------------------------------------
+
+    const players =
+      gameData.players || {};
+
+
+    const uids =
+      Object.keys(players);
+
+
+    const redList =
+      uids.filter(
+        id => players[id].team === "red"
+      );
+
+
+    const blueList =
+      uids.filter(
+        id => players[id].team === "blue"
+      );
+
+
+    const redSpy =
+      redList.filter(
+        id => players[id].isSpymaster
+      );
+
+
+    const blueSpy =
+      blueList.filter(
+        id => players[id].isSpymaster
+      );
+
+
+    console.log("Players:", uids.length);
+    console.log("Red:", redList.length);
+    console.log("Blue:", blueList.length);
+    console.log("Red Spymasters:", redSpy.length);
+    console.log("Blue Spymasters:", blueSpy.length);
+
+
+    if (uids.length < 4) {
+
+      alert(
+        "Need at least 4 players total."
+      );
+
+      return;
+    }
+
+
+    if (
+      redList.length < 2 ||
+      blueList.length < 2
+    ) {
+
+      alert(
+        "Each team needs at least 1 Spymaster and 1 Operative."
+      );
+
+      return;
+    }
+
+
+    if (
+      redSpy.length !== 1 ||
+      blueSpy.length !== 1
+    ) {
+
+      alert(
+        "Each team needs exactly 1 Spymaster."
+      );
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // WORD LIST VALIDATION
+    // --------------------------------------------------------
+
+    const mode =
+      gameData.wordListMode || "default";
+
+
+    if (
+      mode === "custom" &&
+      (
+        !gameData.customWords ||
+        gameData.customWords.length < 25
+      )
+    ) {
+
+      alert(
+        "Save a custom word list with at least 25 words first, or switch to the default list."
+      );
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // CREATE BOARD
+    // --------------------------------------------------------
+
+    const words =
+      getWordsForGame();
+
+
+    if (words.length !== 25) {
+
+      alert(
+        "Could not generate the 25-word board."
+      );
+
+      return;
+    }
+
+
+    const startingTeam =
+      Math.random() < 0.5
+        ? "red"
+        : "blue";
+
+
+    const counts =
+      startingTeam === "red"
+
+        ? {
+            red: 9,
+            blue: 8
+          }
+
+        : {
+            red: 8,
+            blue: 9
+          };
+
+
+    const colors = [];
+
+
+    for (
+      let i = 0;
+      i < counts.red;
+      i++
+    ) {
+
+      colors.push("red");
+
+    }
+
+
+    for (
+      let i = 0;
+      i < counts.blue;
+      i++
+    ) {
+
+      colors.push("blue");
+
+    }
+
+
+    for (
+      let i = 0;
+      i < 7;
+      i++
+    ) {
+
+      colors.push("yellow");
+
+    }
+
+
+    colors.push("black");
+
+
+    const shuffledColors =
+      shuffle(colors);
+
+
+    const board =
+      words.map(word => ({
+
+        word: word,
+
+        revealed: false
+
+      }));
+
+
+    const colorsUpdate = {};
+
+
+    shuffledColors.forEach(
+      (color, index) => {
+
+        colorsUpdate[index] =
+          color;
+
       }
     );
 
 
-  Promise.all(colorWrites)
+    // --------------------------------------------------------
+    // GAME DATA
+    // --------------------------------------------------------
 
-    .then(() => {
+    const updates = {
 
-      console.log(
-        "Card colours saved successfully."
-      );
+      board: board,
 
-      return gameRef.update(updates);
-    })
+      status: "playing",
 
-    .then(() => {
+      startingTeam: startingTeam,
 
-      console.log(
-        "Game status updated successfully."
-      );
+      currentTurn: startingTeam,
 
-      console.log(
-        "Game started successfully!"
-      );
+      redRemaining: counts.red,
 
-    })
+      blueRemaining: counts.blue,
 
-    .catch(e => {
+      clue: null,
 
-      console.error(
-        "START GAME ERROR:",
-        e
-      );
+      winner: null
 
-      alert(
-        "Could not start game: " +
-        e.message
-      );
+    };
 
-    });
+
+    pushCNLog(
+      updates,
+      `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`
+    );
+
+
+    console.log(
+      "Writing secret card colours..."
+    );
+
+
+    // --------------------------------------------------------
+    // IMPORTANT:
+    //
+    // Write card colours first.
+    //
+    // Our Firebase rules only allow the host to write here.
+    // --------------------------------------------------------
+
+    await db
+      .ref("cardColors/" + gameCode)
+      .set(colorsUpdate);
+
+
+    console.log(
+      "Card colours written successfully."
+    );
+
+
+    // --------------------------------------------------------
+    // NOW START THE GAME
+    // --------------------------------------------------------
+
+    console.log(
+      "Updating /games/" + gameCode
+    );
+
+
+    await gameRef.update(updates);
+
+
+    console.log(
+      "================================"
+    );
+
+    console.log(
+      "GAME STARTED SUCCESSFULLY"
+    );
+
+    console.log(
+      "================================"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "================================"
+    );
+
+    console.error(
+      "START GAME FAILED"
+    );
+
+    console.error(
+      error
+    );
+
+    console.error(
+      "================================"
+    );
+
+
+    alert(
+      "Could not start game:\n\n" +
+      error.message
+    );
+
+  }
+
 }
 
 
-// ---------- GAME ----------
+// ------------------------------------------------------------
+// GAME SCREEN
+// ------------------------------------------------------------
 
 function renderGame() {
 
   showScreen("screen-game");
 
+
   const players =
     gameData.players || {};
 
+
   const me =
     players[uid];
+
 
   const currentTurn =
     gameData.currentTurn;
 
 
-  document.getElementById("turnPill").textContent =
+  document.getElementById(
+    "turnPill"
+  ).textContent =
     capitalize(currentTurn) + "'s turn";
 
 
-  document.getElementById("turnPill").className =
+  document.getElementById(
+    "turnPill"
+  ).className =
     "status-pill turn-" + currentTurn;
 
 
-  document.getElementById("redScore").textContent =
+  document.getElementById(
+    "redScore"
+  ).textContent =
     "Red: " +
     (gameData.redRemaining ?? 9);
 
 
-  document.getElementById("blueScore").textContent =
+  document.getElementById(
+    "blueScore"
+  ).textContent =
     "Blue: " +
     (gameData.blueRemaining ?? 8);
 
 
   const roleBanner =
-    document.getElementById("roleBanner");
+    document.getElementById(
+      "roleBanner"
+    );
 
 
   if (!me || !me.team) {
@@ -1073,15 +2038,20 @@ function renderGame() {
     roleBanner.textContent =
       "You're spectating this game.";
 
-  } else {
+  }
+
+  else {
 
     roleBanner.textContent =
+
       `You are on ${capitalize(me.team)} Team` +
+
       (
         me.isSpymaster
           ? " — Spymaster"
           : " — Operative"
       );
+
   }
 
 
@@ -1095,13 +2065,17 @@ function renderGame() {
 
 
   const iAmSpymasterGivingClue =
+
     me &&
     me.isSpymaster &&
     isMyTurnTeam &&
     !clue;
 
 
-  document.getElementById("clueGiveBox").style.display =
+  document.getElementById(
+    "clueGiveBox"
+  ).style.display =
+
     iAmSpymasterGivingClue
       ? "block"
       : "none";
@@ -1109,32 +2083,52 @@ function renderGame() {
 
   if (clue) {
 
-    document.getElementById("clueDisplayBox").style.display =
+    document.getElementById(
+      "clueDisplayBox"
+    ).style.display =
       "block";
 
 
-    document.getElementById("clueWordDisplay").textContent =
+    document.getElementById(
+      "clueWordDisplay"
+    ).textContent =
       clue.word;
 
 
-    document.getElementById("clueNumberDisplay").textContent =
-      `${clue.number} card${clue.number === 1 ? "" : "s"} · ${clue.guessesMade || 0} guessed so far`;
+    document.getElementById(
+      "clueNumberDisplay"
+    ).textContent =
 
-  } else {
+      `${clue.number} card${
+        clue.number === 1 ? "" : "s"
+      } · ${
+        clue.guessesMade || 0
+      } guessed so far`;
 
-    document.getElementById("clueDisplayBox").style.display =
+  }
+
+  else {
+
+    document.getElementById(
+      "clueDisplayBox"
+    ).style.display =
       "none";
+
   }
 
 
   const canGuess =
+
     me &&
     !me.isSpymaster &&
     isMyTurnTeam &&
     !!clue;
 
 
-  document.getElementById("endTurnBox").style.display =
+  document.getElementById(
+    "endTurnBox"
+  ).style.display =
+
     canGuess
       ? "block"
       : "none";
@@ -1145,183 +2139,254 @@ function renderGame() {
     canGuess
   );
 
+
   renderCNLog();
+
 }
 
 
-// ---------- BOARD ----------
+// ------------------------------------------------------------
+// BOARD
+// ------------------------------------------------------------
 
-function renderBoard(me, canGuess) {
+function renderBoard(
+  me,
+  canGuess
+) {
 
   const board =
     gameData.board || {};
 
+
   const boardEl =
-    document.getElementById("board");
+    document.getElementById(
+      "board"
+    );
 
 
   boardEl.innerHTML = "";
 
 
-  board.forEach((card, idx) => {
+  Object.entries(board).forEach(
+    ([idx, card]) => {
 
-    const btn =
-      document.createElement("button");
-
-
-    btn.className =
-      "cn-card";
-
-
-    btn.textContent =
-      card.word;
+      const btn =
+        document.createElement(
+          "button"
+        );
 
 
-    const color =
-      cardColorsData[idx];
+      btn.className =
+        "cn-card";
 
 
-    if (card.revealed) {
+      btn.textContent =
+        card.word;
 
-      if (color) {
+
+      const color =
+        cardColorsData[idx];
+
+
+      if (card.revealed) {
+
+        if (color) {
+
+          btn.classList.add(
+            "color-" + color
+          );
+
+        }
+
+        btn.classList.add(
+          "revealed"
+        );
+
+        btn.disabled = true;
+
+      }
+
+      else if (color) {
+
+        // This will normally only happen
+        // for a Spymaster.
+
         btn.classList.add(
           "color-" + color
         );
+
       }
 
-      btn.classList.add(
-        "revealed"
+
+      if (
+        !card.revealed &&
+        canGuess
+      ) {
+
+        btn.onclick =
+          () => selectCard(idx);
+
+      }
+
+      else {
+
+        btn.disabled = true;
+
+      }
+
+
+      boardEl.appendChild(btn);
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// SUBMIT CLUE
+// ------------------------------------------------------------
+
+async function submitClue() {
+
+  try {
+
+    const word =
+      document.getElementById(
+        "clueWordInput"
+      ).value.trim();
+
+
+    const number =
+      parseInt(
+        document.getElementById(
+          "clueNumberInput"
+        ).value,
+        10
       );
 
-      btn.disabled = true;
 
-    } else if (color) {
+    if (!word) {
 
-      btn.classList.add(
-        "color-" + color
+      alert(
+        "Enter a one-word clue."
       );
+
+      return;
     }
 
 
     if (
-      !card.revealed &&
-      canGuess
+      isNaN(number) ||
+      number < 0 ||
+      number > 9
     ) {
 
-      btn.onclick =
-        () => selectCard(idx);
+      alert(
+        "Enter a valid number (0-9)."
+      );
 
-    } else {
-
-      btn.disabled = true;
+      return;
     }
 
 
-    boardEl.appendChild(btn);
-  });
+    const updates = {};
+
+
+    updates["clue"] = {
+
+      word: word,
+
+      number: number,
+
+      team: gameData.currentTurn,
+
+      guessesMade: 0,
+
+      givenBy: uid
+
+    };
+
+
+    pushCNLog(
+      updates,
+      `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
+    );
+
+
+    await gameRef.update(
+      updates
+    );
+
+
+    document.getElementById(
+      "clueWordInput"
+    ).value = "";
+
+
+    document.getElementById(
+      "clueNumberInput"
+    ).value = "1";
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "SUBMIT CLUE ERROR:",
+      error
+    );
+
+    alert(
+      "Could not submit clue: " +
+      error.message
+    );
+
+  }
+
 }
 
 
-// ---------- CLUES ----------
+// ------------------------------------------------------------
+// SELECT CARD
+// ------------------------------------------------------------
 
-function submitClue() {
+async function selectCard(idx) {
 
-  const word =
-    document.getElementById("clueWordInput")
-      .value
-      .trim();
+  try {
 
+    if (
+      !gameData ||
+      !gameData.board ||
+      !gameData.board[idx]
+    ) {
 
-  const number =
-    parseInt(
-      document.getElementById("clueNumberInput").value,
-      10
-    );
-
-
-  if (!word) {
-    return alert(
-      "Enter a one-word clue."
-    );
-  }
+      return;
+    }
 
 
-  if (
-    isNaN(number) ||
-    number < 0 ||
-    number > 9
-  ) {
-
-    return alert(
-      "Enter a valid number (0-9)."
-    );
-  }
+    const card =
+      gameData.board[idx];
 
 
-  const updates = {};
+    if (card.revealed) {
+      return;
+    }
 
 
-  updates["clue"] = {
-    word: word,
-    number: number,
-    team: gameData.currentTurn,
-    guessesMade: 0,
-    givenBy: uid
-  };
+    // Reveal card.
+
+    await gameRef
+      .child("board")
+      .child(idx)
+      .child("revealed")
+      .set(true);
 
 
-  pushCNLog(
-    updates,
-    `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
-  );
+    // Get the secret colour.
 
-
-  gameRef
-    .update(updates)
-    .then(() => {
-
-      document.getElementById(
-        "clueWordInput"
-      ).value = "";
-
-      document.getElementById(
-        "clueNumberInput"
-      ).value = "1";
-
-    })
-    .catch(e => {
-
-      console.error(
-        "Could not submit clue:",
-        e
-      );
-
-      alert(
-        "Could not submit clue: " +
-        e.message
-      );
-    });
-}
-
-
-// ---------- CARD SELECTION ----------
-
-function selectCard(idx) {
-
-  if (resolvingGuess) {
-    return;
-  }
-
-  resolvingGuess = true;
-
-
-  gameRef
-    .child("board/" + idx + "/revealed")
-    .set(true)
-
-    .then(() => {
-
-      return db
+    const snap =
+      await db
         .ref(
           "cardColors/" +
           gameCode +
@@ -1330,141 +2395,88 @@ function selectCard(idx) {
         )
         .once("value");
 
-    })
 
-    .then(snap => {
-
-      const color =
-        snap.val();
+    const color =
+      snap.val();
 
 
-      const word =
-        gameData.board[idx].word;
-
-
-      processGuessResult(
-        idx,
-        color,
-        word
-      );
-
-    })
-
-    .catch(e => {
+    if (!color) {
 
       console.error(
-        "Could not process guess:",
-        e
+        "No colour found for card:",
+        idx
       );
 
-      alert(
-        "Could not process guess: " +
-        e.message
-      );
+      return;
+    }
 
-    })
 
-    .finally(() => {
+    processGuessResult(
+      idx,
+      color,
+      card.word
+    );
 
-      resolvingGuess = false;
+  }
 
-    });
+  catch (error) {
+
+    console.error(
+      "SELECT CARD ERROR:",
+      error
+    );
+
+    alert(
+      "Could not reveal card: " +
+      error.message
+    );
+
+  }
+
 }
 
 
-// ---------- GUESS RESULT ----------
+// ------------------------------------------------------------
+// PROCESS GUESS
+// ------------------------------------------------------------
 
-function processGuessResult(
+async function processGuessResult(
   idx,
   color,
   word
 ) {
 
-  const myTeam =
-    gameData.currentTurn;
+  try {
+
+    const myTeam =
+      gameData.currentTurn;
 
 
-  const updates = {};
+    const updates = {};
 
-  let text = "";
-
-
-  // Assassin
-
-  if (color === "black") {
-
-    const winner =
-      myTeam === "red"
-        ? "blue"
-        : "red";
+    let text = "";
 
 
-    updates["status"] =
-      "ended";
+    // ASSASSIN
 
-    updates["winner"] =
-      winner;
+    if (color === "black") {
 
+      const winner =
+        myTeam === "red"
+          ? "blue"
+          : "red";
 
-    text =
-      `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
-
-
-    pushCNLog(
-      updates,
-      text
-    );
-
-
-    gameRef
-      .update(updates)
-      .catch(e => {
-
-        console.error(
-          "Could not end game:",
-          e
-        );
-
-        alert(
-          "Could not update game: " +
-          e.message
-        );
-      });
-
-
-    return;
-  }
-
-
-  // Correct colour
-
-  if (color === myTeam) {
-
-    const remainingKey =
-      myTeam + "Remaining";
-
-
-    const newRemaining =
-      (gameData[remainingKey] || 0) - 1;
-
-
-    updates[remainingKey] =
-      newRemaining;
-
-
-    // Team has found all words
-
-    if (newRemaining <= 0) {
 
       updates["status"] =
         "ended";
 
+
       updates["winner"] =
-        myTeam;
+        winner;
 
 
       text =
-        `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
+        `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
 
 
       pushCNLog(
@@ -1473,38 +2485,106 @@ function processGuessResult(
       );
 
 
-      gameRef
-        .update(updates)
-        .catch(e => {
-
-          console.error(
-            "Could not end game:",
-            e
-          );
-
-          alert(
-            "Could not update game: " +
-            e.message
-          );
-        });
+      await gameRef.update(
+        updates
+      );
 
 
       return;
+
     }
 
 
-    const guessesMade =
-      (gameData.clue.guessesMade || 0) + 1;
+    // CORRECT TEAM
+
+    if (color === myTeam) {
+
+      const remainingKey =
+        myTeam + "Remaining";
 
 
-    updates["clue/guessesMade"] =
-      guessesMade;
+      const newRemaining =
+        (gameData[remainingKey] || 0) - 1;
 
 
-    if (
-      guessesMade >=
-      gameData.clue.number + 1
-    ) {
+      updates[remainingKey] =
+        newRemaining;
+
+
+      if (newRemaining <= 0) {
+
+        updates["status"] =
+          "ended";
+
+
+        updates["winner"] =
+          myTeam;
+
+
+        text =
+          `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
+
+
+        pushCNLog(
+          updates,
+          text
+        );
+
+
+        await gameRef.update(
+          updates
+        );
+
+
+        return;
+
+      }
+
+
+      const guessesMade =
+        (
+          gameData.clue.guessesMade ||
+          0
+        ) + 1;
+
+
+      updates["clue/guessesMade"] =
+        guessesMade;
+
+
+      if (
+        guessesMade >=
+        gameData.clue.number + 1
+      ) {
+
+        updates["currentTurn"] =
+          myTeam === "red"
+            ? "blue"
+            : "red";
+
+
+        updates["clue"] =
+          null;
+
+
+        text =
+          `${word} was correct, but out of guesses for this clue. Turn passes.`;
+
+      }
+
+      else {
+
+        text =
+          `${word} was correct! Keep guessing.`;
+
+      }
+
+    }
+
+
+    // BYSTANDER
+
+    else if (color === "yellow") {
 
       updates["currentTurn"] =
         myTeam === "red"
@@ -1517,146 +2597,145 @@ function processGuessResult(
 
 
       text =
-        `${word} was correct, but out of guesses for this clue. Turn passes.`;
+        `${word} was an innocent bystander. Turn ends.`;
 
-    } else {
+    }
+
+
+    // OPPOSING TEAM
+
+    else {
+
+      const oppTeam =
+        color;
+
+
+      const oppRemainingKey =
+        oppTeam + "Remaining";
+
+
+      const newOppRemaining =
+        (
+          gameData[oppRemainingKey] ||
+          0
+        ) - 1;
+
+
+      updates[oppRemainingKey] =
+        newOppRemaining;
+
+
+      updates["currentTurn"] =
+        myTeam === "red"
+          ? "blue"
+          : "red";
+
+
+      updates["clue"] =
+        null;
+
 
       text =
-        `${word} was correct! Keep guessing.`;
+        `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
+
+
+      if (
+        newOppRemaining <= 0
+      ) {
+
+        updates["status"] =
+          "ended";
+
+
+        updates["winner"] =
+          oppTeam;
+
+
+        text +=
+          ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
+
+      }
+
     }
 
 
-  // Innocent bystander
-
-  } else if (color === "yellow") {
-
-    updates["currentTurn"] =
-      myTeam === "red"
-        ? "blue"
-        : "red";
+    pushCNLog(
+      updates,
+      text
+    );
 
 
-    updates["clue"] =
-      null;
+    await gameRef.update(
+      updates
+    );
 
-
-    text =
-      `${word} was an innocent bystander. Turn ends.`;
-
-
-  // Opponent's card
-
-  } else {
-
-    const oppTeam =
-      color;
-
-
-    const oppRemainingKey =
-      oppTeam + "Remaining";
-
-
-    const newOppRemaining =
-      (gameData[oppRemainingKey] || 0) - 1;
-
-
-    updates[oppRemainingKey] =
-      newOppRemaining;
-
-
-    updates["currentTurn"] =
-      myTeam === "red"
-        ? "blue"
-        : "red";
-
-
-    updates["clue"] =
-      null;
-
-
-    text =
-      `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
-
-
-    if (newOppRemaining <= 0) {
-
-      updates["status"] =
-        "ended";
-
-      updates["winner"] =
-        oppTeam;
-
-
-      text +=
-        ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
-    }
   }
 
+  catch (error) {
 
-  pushCNLog(
-    updates,
-    text
-  );
+    console.error(
+      "PROCESS GUESS ERROR:",
+      error
+    );
 
+  }
 
-  gameRef
-    .update(updates)
-    .catch(e => {
-
-      console.error(
-        "Could not update guess result:",
-        e
-      );
-
-      alert(
-        "Could not update game: " +
-        e.message
-      );
-    });
 }
 
 
-// ---------- END TURN ----------
+// ------------------------------------------------------------
+// END TURN
+// ------------------------------------------------------------
 
-function endTurnManually() {
+async function endTurnManually() {
 
-  const updates = {};
+  try {
 
-
-  updates["currentTurn"] =
-    gameData.currentTurn === "red"
-      ? "blue"
-      : "red";
+    const updates = {};
 
 
-  updates["clue"] =
-    null;
+    updates["currentTurn"] =
+      gameData.currentTurn === "red"
+        ? "blue"
+        : "red";
 
 
-  pushCNLog(
-    updates,
-    `${capitalize(gameData.currentTurn)} ended their turn.`
-  );
+    updates["clue"] =
+      null;
 
 
-  gameRef
-    .update(updates)
-    .catch(e => {
+    pushCNLog(
+      updates,
+      `${capitalize(gameData.currentTurn)} ended their turn.`
+    );
 
-      console.error(
-        "Could not end turn:",
-        e
-      );
 
-      alert(
-        "Could not end turn: " +
-        e.message
-      );
-    });
+    await gameRef.update(
+      updates
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "END TURN ERROR:",
+      error
+    );
+
+    alert(
+      "Could not end turn: " +
+      error.message
+    );
+
+  }
+
 }
 
 
-// ---------- GAME LOG ----------
+// ------------------------------------------------------------
+// GAME LOG
+// ------------------------------------------------------------
 
 function pushCNLog(
   updates,
@@ -1673,9 +2752,14 @@ function pushCNLog(
 
 
   updates[key] = {
+
     text: text,
-    ts: firebase.database.ServerValue.TIMESTAMP
+
+    ts:
+      firebase.database.ServerValue.TIMESTAMP
+
   };
+
 }
 
 
@@ -1698,10 +2782,12 @@ function renderCNLog() {
     "cnLogList"
   ).innerHTML =
 
-    entries.map(e =>
+    entries.map(entry =>
+
       `<div class="log-entry">
-        ${escapeHtml(e.text)}
+        ${escapeHtml(entry.text)}
       </div>`
+
     ).join("")
 
     ||
@@ -1709,10 +2795,13 @@ function renderCNLog() {
     `<p class="small">
       No events yet.
     </p>`;
+
 }
 
 
-// ---------- ENDED ----------
+// ------------------------------------------------------------
+// ENDED GAME
+// ------------------------------------------------------------
 
 function renderEnded() {
 
@@ -1730,7 +2819,9 @@ function renderEnded() {
   ).textContent =
 
     winner === "red"
+
       ? "🔴 Red Team Wins!"
+
       : "🔵 Blue Team Wins!";
 
 
@@ -1740,84 +2831,114 @@ function renderEnded() {
 
 
   const board =
-    gameData.board || [];
+    gameData.board || {};
 
 
   document.getElementById(
     "finalBoardList"
   ).innerHTML =
 
-    board.map((c, idx) => {
+    Object.entries(board)
+      .map(([idx, card]) => {
 
-      const color =
-        cardColorsData[idx] || "?";
+        const color =
+          cardColorsData[idx] || "?";
 
 
-      return `
-        <div class="final-row">
-          <span>${escapeHtml(c.word)}</span>
-          <span style="color:var(--${
-            color === "yellow"
-              ? "yellow"
-              : color === "black"
-                ? "muted"
-                : color
-          })">
-            ${color.toUpperCase()}
-          </span>
-        </div>
-      `;
+        const cssColor =
 
-    }).join("");
+          color === "yellow"
+            ? "yellow"
+
+          : color === "black"
+            ? "muted"
+
+          : color;
+
+
+        return `
+
+          <div class="final-row">
+
+            <span>
+              ${escapeHtml(card.word)}
+            </span>
+
+            <span
+              style="color:var(--${cssColor})"
+            >
+              ${color.toUpperCase()}
+            </span>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
 }
 
 
-// ---------- BACK TO START ----------
+// ------------------------------------------------------------
+// BACK TO START
+// ------------------------------------------------------------
 
-function cnBackToStart() {
+async function cnBackToStart() {
 
-  const tasks = [];
+  try {
+
+    const tasks = [];
 
 
-  if (gameRef) {
+    if (gameRef) {
 
-    tasks.push(
-      gameRef
-        .remove()
-        .catch(e =>
-          console.warn(
-            "Could not delete game data:",
-            e
+      tasks.push(
+        gameRef
+          .remove()
+          .catch(error =>
+            console.warn(
+              "Could not delete game data:",
+              error
+            )
           )
-        )
-    );
+      );
+
+    }
+
+
+    if (gameCode) {
+
+      tasks.push(
+        db
+          .ref(
+            "cardColors/" +
+            gameCode
+          )
+          .remove()
+          .catch(error =>
+            console.warn(
+              "Could not delete card colours:",
+              error
+            )
+          )
+      );
+
+    }
+
+
+    await Promise.all(tasks);
+
   }
 
+  finally {
 
-  if (gameCode) {
+    location.reload();
 
-    tasks.push(
-      db
-        .ref(
-          "cardColors/" +
-          gameCode
-        )
-        .remove()
-        .catch(e =>
-          console.warn(
-            "Could not delete card colors:",
-            e
-          )
-        )
-    );
   }
 
-
-  Promise.all(tasks)
-    .finally(() => {
-      location.reload();
-    });
 }
 </script>
+
 </body>
 </html>
