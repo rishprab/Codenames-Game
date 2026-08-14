@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codenames</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1e2127;
+    --panel2: #23262c;
+    --line: #2c3037;
+    --text: #e9e7e2;
+    --muted: #8b8f98;
+    --gold: #c9a24b;
+    --red: #b5504f;
+    --blue: #4f7fb5;
+    --yellow: #c9a24b;
+    --black: #17181b;
+    --green: #4f9b6e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 16px;
+  }
+  h1 { font-size: 1.4rem; color: var(--gold); margin: 0 0 4px 0; }
+  h2 { font-size: 1.05rem; color: var(--gold); margin: 16px 0 8px 0; }
+  p.sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 16px 0; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  input[type=text], textarea {
+    width: 100%;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-family: inherit;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  input[type=number] {
+    width: 70px;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+  }
+  button {
+    background: var(--gold);
+    border: none;
+    color: #14161a;
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 7px;
+  }
+  button.secondary { background: var(--panel2); border: 1px solid var(--line); color: var(--text); font-weight: 600; }
+  button.red-btn { background: var(--red); color: white; }
+  button.blue-btn { background: var(--blue); color: white; }
+  button.green { background: var(--green); color: white; }
+  button:disabled { opacity: 0.35; }
+  .roomcode { font-size: 2rem; letter-spacing: 6px; text-align: center; color: var(--gold); font-weight: 700; margin: 6px 0; }
+  .small { font-size: 0.78rem; color: var(--muted); }
+  .center { text-align: center; }
+  .team-col { display: flex; gap: 10px; margin-bottom: 10px; }
+  .team-box { flex: 1; border-radius: 10px; padding: 10px; border: 1px solid var(--line); }
+  .team-box.red { background: rgba(181,80,79,0.12); }
+  .team-box.blue { background: rgba(79,127,181,0.12); }
+  .team-box h3 { margin: 0 0 8px 0; font-size: 0.9rem; }
+  .team-box.red h3 { color: var(--red); }
+  .team-box.blue h3 { color: var(--blue); }
+  .player-chip { font-size: 0.82rem; padding: 4px 0; }
+  .player-chip .tag { font-size: 0.68rem; color: var(--gold); }
+  .toggle-row { display: flex; gap: 8px; }
+  .toggle-row button { flex: 1; }
+  .status-pill { display: inline-block; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--panel2); color: var(--gold); margin-bottom: 10px; }
+  .status-pill.turn-red { color: var(--red); }
+  .status-pill.turn-blue { color: var(--blue); }
+  .scoreboard { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; font-weight: 700; }
+  .scoreboard .r { color: var(--red); }
+  .scoreboard .b { color: var(--blue); }
+  .clue-display { text-align: center; padding: 10px; background: var(--panel2); border-radius: 10px; margin-bottom: 10px; }
+  .clue-display .word { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .cn-card {
+    aspect-ratio: 1.15 / 1;
+    border-radius: 8px;
+    border: 2px solid var(--line);
+    background: var(--panel2);
+    color: var(--text);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3px;
+    cursor: pointer;
+    line-height: 1.1;
+  }
+  .cn-card:disabled { cursor: default; }
+  .cn-card.spy-red { border-color: var(--red); }
+  .cn-card.spy-blue { border-color: var(--blue); }
+  .cn-card.spy-yellow { border-color: var(--yellow); }
+  .cn-card.spy-black { border-color: #666; }
+  .cn-card.revealed-red { background: var(--red); border-color: var(--red); color: white; opacity: 0.55; }
+  .cn-card.revealed-blue { background: var(--blue); border-color: var(--blue); color: white; opacity: 0.55; }
+  .cn-card.revealed-yellow { background: var(--yellow); border-color: var(--yellow); color: #14161a; opacity: 0.55; }
+  .cn-card.revealed-black { background: var(--black); border-color: #444; color: #999; opacity: 0.75; }
+  .log-entry { font-size: 0.8rem; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .log-entry:last-child { border-bottom: none; }
+  .role-banner { text-align: center; padding: 8px; margin-bottom: 10px; font-size: 0.85rem; border-radius: 8px; background: var(--panel2); }
+  .final-list { font-size: 0.82rem; }
+  .final-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<h1>🕵️ Codenames</h1>
+<p class="sub" id="topSub">Play a live game with friends.</p>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="card">
+    <h2 style="margin-top:0">Your name</h2>
+    <input type="text" id="nameInput" placeholder="Enter your name" maxlength="16">
+  </div>
+  <div class="card">
+    <button onclick="createGame()">Create Game</button>
+  </div>
+  <div class="card">
+    <input type="text" id="joinCodeInput" placeholder="Room code" maxlength="4" style="text-transform:uppercase">
+    <button class="secondary" onclick="joinGame()">Join Game</button>
+  </div>
+  <p class="small center" id="landingError"></p>
+</div>
+
+<!-- LOBBY -->
+<div id="screen-lobby" class="screen">
+  <div class="card center">
+    <p class="small">Room code — share this with your friends</p>
+    <div class="roomcode" id="lobbyCode">----</div>
+  </div>
+
+  <div class="team-col">
+    <div class="team-box red">
+      <h3>Red Team</h3>
+      <div id="redPlayerList"></div>
+      <button class="red-btn" style="margin-top:6px" onclick="joinTeam('red')">Join Red</button>
+    </div>
+    <div class="team-box blue">
+      <h3>Blue Team</h3>
+      <div id="bluePlayerList"></div>
+      <button class="blue-btn" style="margin-top:6px" onclick="joinTeam('blue')">Join Blue</button>
+    </div>
+  </div>
+
+  <div class="card" id="spymasterToggleBox" style="display:none">
+    <button class="secondary" id="spymasterToggleBtn" onclick="toggleSpymaster()">Become Spymaster</button>
+  </div>
+
+  <div class="card" id="hostControlsBox" style="display:none">
+    <h2 style="margin-top:0">Word list</h2>
+    <div class="toggle-row" style="margin-bottom:8px">
+      <button class="secondary" id="defaultListBtn" onclick="setWordMode('default')">Default list</button>
+      <button class="secondary" id="customListBtn" onclick="setWordMode('custom')">Custom list</button>
+    </div>
+    <div id="customWordsBox" style="display:none">
+      <textarea id="customWordsInput" placeholder="Enter at least 25 words, separated by commas or new lines"></textarea>
+      <button class="secondary" onclick="saveCustomWords()">Save Word List</button>
+      <p class="small" id="customWordsStatus"></p>
+    </div>
+    <p class="small" id="lobbyWarning"></p>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+  <div class="card center" id="lobbyWaitBox" style="display:none">
+    <p class="small">Waiting for the host to configure and start the game...</p>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="status-pill" id="turnPill">-</div>
+  <div class="scoreboard">
+    <span class="r" id="redScore">Red: 0</span>
+    <span class="b" id="blueScore">Blue: 0</span>
+  </div>
+  <div class="role-banner" id="roleBanner"></div>
+
+  <div id="clueGiveBox" class="card" style="display:none">
+    <h2 style="margin-top:0">Give your team a clue</h2>
+    <input type="text" id="clueWordInput" placeholder="One word clue" maxlength="24">
+    <label class="small">Number of related cards</label>
+    <input type="number" id="clueNumberInput" min="0" max="9" value="1">
+    <button style="margin-top:8px" onclick="submitClue()">Give Clue</button>
+  </div>
+
+  <div id="clueDisplayBox" class="clue-display" style="display:none">
+    <p class="small" style="margin:0">Clue</p>
+    <div class="word" id="clueWordDisplay">-</div>
+    <p class="small" id="clueNumberDisplay" style="margin:4px 0 0 0"></p>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div id="endTurnBox" style="display:none">
+    <button class="secondary" onclick="endTurnManually()">End Turn</button>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Game log</h2>
+    <div id="cnLogList"></div>
+  </div>
+</div>
+
+<!-- ENDED -->
+<div id="screen-ended" class="screen">
+  <div class="card center">
+    <h2 style="margin-top:0" id="cnWinnerTitle">Game Over</h2>
+    <p class="small" id="cnWinnerSub"></p>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Final board</h2>
+    <div class="final-list" id="finalBoardList"></div>
+  </div>
+  <button class="secondary" onclick="cnBackToStart()">Back to start</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+// ====== PASTE YOUR FIREBASE CONFIG HERE ======
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+// ==============================================
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let uid = null;
+let gameCode = null;
+let isHost = false;
+let playerName = "";
+let gameData = null;
+let gameRef = null;
+
+const DEFAULT_WORDS = [
+  "APPLE","RIVER","GUITAR","ROCKET","TIGER","CASTLE","ANCHOR","PLANET","DESERT","HAMMER",
+  "ISLAND","JUNGLE","KETTLE","LANTERN","MIRROR","NEEDLE","OCEAN","PENCIL","QUARRY","RIBBON",
+  "SATELLITE","TRUMPET","UMBRELLA","VOLCANO","WHISTLE","ZEBRA","ARROW","BRIDGE","CANDLE","DIAMOND",
+  "ENGINE","FEATHER","GARDEN","HELMET","IGLOO","JACKET","KITE","LADDER","MAGNET","NOTEBOOK",
+  "ORCHARD","PYRAMID","QUILT","SADDLE","TELESCOPE","UNICORN","VELVET","WINDMILL","YACHT","ANTLER",
+  "BALLOON","CACTUS","DOLPHIN","EAGLE","FOUNTAIN","GLACIER","HARBOR","IVORY","JIGSAW","KOALA",
+  "LIGHTHOUSE","MERMAID","NEBULA","OYSTER","PARROT","QUASAR","RAINBOW","SCORPION","THUNDER","URCHIN",
+  "VULTURE","WALRUS","XYLOPHONE","YOGURT","ZEPPELIN","BEACON","COMPASS","DRAGON","EMBER","FALCON",
+  "GONDOLA","HAWK","IMPULSE","JASMINE","KIMONO","LOTUS","MAPLE","NECTAR","OASIS","PEBBLE",
+  "QUIVER","RAVEN","SPARROW","TORNADO","UTOPIA","VORTEX","WHISKER","XENON","YARDSTICK","ZODIAC",
+  "ALMOND","BARREL","CANYON","DAGGER","ECLIPSE","FROST","GRANITE","HORIZON","ICICLE","JUNIPER",
+  "KRAKEN","LAGOON","MARBLE","NIGHTFALL","OBSIDIAN","PRISM","QUARTZ","REEF","SIERRA","TIDE",
+  "UNDERTOW","VELOCITY","WISTERIA","YEARLING","ZENITH","AMBER","BOULDER","CINDER","DUNE","ESTUARY",
+  "FJORD","GEYSER","HOLLOW","INLET","JUNCTION","KELP","LEDGE","MESA","NOOK","OUTPOST",
+  "PLATEAU","QUAY","RIDGE","SUMMIT","THICKET","UPLAND","VALLEY","WHARF","YIELD","ZEPHYR",
+  "ATLAS","BUGLE","CRATER","DOMINO","EMBASSY","TALON","GALAXY","HORNET","IMPACT","JOCKEY"
+];
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function showError(msg) { document.getElementById("landingError").textContent = msg; }
+function escapeHtml(str) { const d = document.createElement("div"); d.textContent = str; return d.innerHTML; }
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+auth.onAuthStateChanged(user => { if (user) uid = user.uid; });
+auth.signInAnonymously().catch(e => showError("Connection error: " + e.message));
+
+function genRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+// ---------- CREATE / JOIN ----------
+function createGame() {
+  playerName = document.getElementById("nameInput").value.trim();
+  if (!playerName) return showError("Enter your name first.");
+  if (!uid) return showError("Still connecting, try again in a second.");
+  gameCode = genRoomCode();
+  isHost = true;
+  gameRef = db.ref("games/" + gameCode);
+  gameRef.set({
+    hostUid: uid,
+    status: "lobby",
+    wordListMode: "default",
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    players: {
+      [uid]: { name: playerName, team: null, isSpymaster: false }
+    },
+    log: { init: { text: "Game created. Waiting for players to join.", ts: firebase.database.ServerValue.TIMESTAMP } }
+  }).then(() => attachGameListener()).catch(e => showError("Could not create game: " + e.message));
+}
+
+function joinGame() {
+  playerName = document.getElementById("nameInput").value.trim();
+  const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
+  if (!playerName) return showError("Enter your name first.");
+  if (!code) return showError("Enter a room code.");
+  if (!uid) return showError("Still connecting, try again in a second.");
+  gameRef = db.ref("games/" + code);
+  gameRef.once("value").then(snap => {
+    const data = snap.val();
+    if (!data) return showError("No game found with that code.");
+    if (data.status !== "lobby") return showError("That game has already started.");
+    gameCode = code;
+    isHost = false;
+    return gameRef.child("players/" + uid).set({ name: playerName, team: null, isSpymaster: false });
+  }).then(() => { if (gameCode) attachGameListener(); })
+    .catch(e => showError("Could not join: " + e.message));
+}
+
+// ---------- LIVE LISTENER ----------
+function attachGameListener() {
+  gameRef.on("value", snap => {
+    gameData = snap.val();
+    if (!gameData) return;
+    if (gameData.hostUid === uid) isHost = true;
+    render();
+  });
+}
+
+// ---------- MAIN ROUTER ----------
+function render() {
+  if (!gameData) return;
+  document.getElementById("topSub").textContent = "Room " + gameCode;
+  if (gameData.status === "lobby") renderLobby();
+  else if (gameData.status === "playing") renderGame();
+  else if (gameData.status === "ended") renderEnded();
+}
+
+// ---------- LOBBY ----------
+function renderLobby() {
+  showScreen("screen-lobby");
+  document.getElementById("lobbyCode").textContent = gameCode;
+  const players = gameData.players || {};
+  const me = players[uid];
+
+  const redList = Object.values(players).filter(p => p.team === "red");
+  const blueList = Object.values(players).filter(p => p.team === "blue");
+
+  document.getElementById("redPlayerList").innerHTML = redList.map(p =>
+    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
+  ).join("") || `<p class="small">No one yet.</p>`;
+  document.getElementById("bluePlayerList").innerHTML = blueList.map(p =>
+    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
+  ).join("") || `<p class="small">No one yet.</p>`;
+
+  document.getElementById("spymasterToggleBox").style.display = me && me.team ? "block" : "none";
+  if (me && me.team) {
+    document.getElementById("spymasterToggleBtn").textContent = me.isSpymaster ? "Give up Spymaster" : "Become Spymaster";
+  }
+
+  document.getElementById("hostControlsBox").style.display = isHost ? "block" : "none";
+  document.getElementById("lobbyWaitBox").style.display = isHost ? "none" : "block";
+
+  if (isHost) {
+    const mode = gameData.wordListMode || "default";
+    document.getElementById("customWordsBox").style.display = mode === "custom" ? "block" : "none";
+    document.getElementById("defaultListBtn").style.opacity = mode === "default" ? "1" : "0.5";
+    document.getElementById("customListBtn").style.opacity = mode === "custom" ? "1" : "0.5";
+
+    const total = Object.keys(players).length;
+    const redSpy = redList.filter(p => p.isSpymaster).length;
+    const blueSpy = blueList.filter(p => p.isSpymaster).length;
+    let warning = `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
+    if (total < 4) warning += " Need at least 4 total.";
+    if (redList.length < 2 || blueList.length < 2) warning += " Each team needs 1 Spymaster + 1 Operative.";
+    if (redSpy !== 1 || blueSpy !== 1) warning += " Each team needs exactly 1 Spymaster.";
+    if (mode === "custom" && (!gameData.customWords || gameData.customWords.length < 25)) warning += " Custom word list needs at least 25 words saved.";
+    document.getElementById("lobbyWarning").textContent = warning;
+  }
+}
+
+function joinTeam(team) {
+  gameRef.child("players/" + uid).update({ team, isSpymaster: false });
+}
+
+function toggleSpymaster() {
+  const players = gameData.players || {};
+  const me = players[uid];
+  if (!me || !me.team) return;
+  if (!me.isSpymaster) {
+    const existing = Object.entries(players).find(([id, p]) => p.team === me.team && p.isSpymaster);
+    if (existing) { alert("This team already has a Spymaster."); return; }
+  }
+  gameRef.child("players/" + uid + "/isSpymaster").set(!me.isSpymaster);
+}
+
+function setWordMode(mode) {
+  gameRef.update({ wordListMode: mode });
+}
+
+function saveCustomWords() {
+  const raw = document.getElementById("customWordsInput").value;
+  const words = [...new Set(raw.split(/[\n,]/).map(w => w.trim().toUpperCase()).filter(Boolean))];
+  if (words.length < 25) {
+    document.getElementById("customWordsStatus").textContent = `Only ${words.length} unique words — need at least 25.`;
+    return;
+  }
+  gameRef.update({ customWords: words, wordListMode: "custom" }).then(() => {
+    document.getElementById("customWordsStatus").textContent = `Saved ${words.length} words.`;
+  });
+}
+
+function getWordsForGame() {
+  const mode = gameData.wordListMode || "default";
+  const pool = (mode === "custom" && gameData.customWords && gameData.customWords.length >= 25)
+    ? gameData.customWords
+    : DEFAULT_WORDS;
+  return shuffle(pool).slice(0, 25);
+}
+
+function startGame() {
+  const players = gameData.players || {};
+  const uids = Object.keys(players);
+  const redList = uids.filter(id => players[id].team === "red");
+  const blueList = uids.filter(id => players[id].team === "blue");
+  const redSpy = redList.filter(id => players[id].isSpymaster);
+  const blueSpy = blueList.filter(id => players[id].isSpymaster);
+
+  if (uids.length < 4) return alert("Need at least 4 players total.");
+  if (redList.length < 2 || blueList.length < 2) return alert("Each team needs at least 1 Spymaster and 1 Operative.");
+  if (redSpy.length !== 1 || blueSpy.length !== 1) return alert("Each team needs exactly 1 Spymaster.");
+
+  const mode = gameData.wordListMode || "default";
+  if (mode === "custom" && (!gameData.customWords || gameData.customWords.length < 25)) {
+    return alert("Save a custom word list with at least 25 words first, or switch to the default list.");
+  }
+
+  const words = getWordsForGame();
+  const startingTeam = Math.random() < 0.5 ? "red" : "blue";
+  const counts = startingTeam === "red" ? { red: 9, blue: 8 } : { red: 8, blue: 9 };
+  const colors = [];
+  for (let i = 0; i < counts.red; i++) colors.push("red");
+  for (let i = 0; i < counts.blue; i++) colors.push("blue");
+  for (let i = 0; i < 7; i++) colors.push("yellow");
+  colors.push("black");
+  const shuffledColors = shuffle(colors);
+
+  const board = words.map((w, i) => ({ word: w, color: shuffledColors[i], revealed: false }));
+
+  const updates = {};
+  updates["board"] = board;
+  updates["status"] = "playing";
+  updates["startingTeam"] = startingTeam;
+  updates["currentTurn"] = startingTeam;
+  updates["redRemaining"] = counts.red;
+  updates["blueRemaining"] = counts.blue;
+  updates["clue"] = null;
+  updates["winner"] = null;
+  pushCNLog(updates, `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`);
+  gameRef.update(updates);
+}
+
+// ---------- GAME ----------
+function renderGame() {
+  showScreen("screen-game");
+  const players = gameData.players || {};
+  const me = players[uid];
+  const currentTurn = gameData.currentTurn;
+
+  document.getElementById("turnPill").textContent = capitalize(currentTurn) + "'s turn";
+  document.getElementById("turnPill").className = "status-pill turn-" + currentTurn;
+  document.getElementById("redScore").textContent = "Red: " + (gameData.redRemaining ?? 9);
+  document.getElementById("blueScore").textContent = "Blue: " + (gameData.blueRemaining ?? 8);
+
+  const roleBanner = document.getElementById("roleBanner");
+  if (!me || !me.team) {
+    roleBanner.textContent = "You're spectating this game.";
+  } else {
+    roleBanner.textContent = `You are on ${capitalize(me.team)} Team${me.isSpymaster ? " — Spymaster" : " — Operative"}.`;
+  }
+
+  const clue = gameData.clue;
+  const isMyTurnTeam = me && me.team === currentTurn;
+  const iAmSpymasterGivingClue = me && me.isSpymaster && isMyTurnTeam && !clue;
+
+  document.getElementById("clueGiveBox").style.display = iAmSpymasterGivingClue ? "block" : "none";
+
+  if (clue) {
+    document.getElementById("clueDisplayBox").style.display = "block";
+    document.getElementById("clueWordDisplay").textContent = clue.word;
+    document.getElementById("clueNumberDisplay").textContent =
+      `${clue.number} card${clue.number === 1 ? "" : "s"} · ${clue.guessesMade || 0} guessed so far`;
+  } else {
+    document.getElementById("clueDisplayBox").style.display = "none";
+  }
+
+  const canGuess = me && !me.isSpymaster && isMyTurnTeam && !!clue;
+  document.getElementById("endTurnBox").style.display = canGuess ? "block" : "none";
+
+  renderBoard(me, canGuess);
+  renderCNLog();
+}
+
+function renderBoard(me, canGuess) {
+  const board = gameData.board || [];
+  const boardEl = document.getElementById("board");
+  boardEl.innerHTML = "";
+  board.forEach((card, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "cn-card";
+    btn.textContent = card.word;
+    if (card.revealed) {
+      btn.classList.add("revealed-" + card.color);
+      btn.disabled = true;
+    } else if (card.color) {
+      // color only present in our data if we're a spymaster (security rule)
+      btn.classList.add("spy-" + card.color);
+    }
+    if (!card.revealed && canGuess) {
+      btn.onclick = () => selectCard(idx);
+    } else {
+      btn.disabled = true;
+    }
+    boardEl.appendChild(btn);
+  });
+}
+
+function submitClue() {
+  const word = document.getElementById("clueWordInput").value.trim();
+  const number = parseInt(document.getElementById("clueNumberInput").value, 10);
+  if (!word) return alert("Enter a one-word clue.");
+  if (isNaN(number) || number < 0 || number > 9) return alert("Enter a valid number (0-9).");
+  const updates = {};
+  updates["clue"] = { word, number, team: gameData.currentTurn, guessesMade: 0, givenBy: uid };
+  pushCNLog(updates, `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`);
+  gameRef.update(updates);
+  document.getElementById("clueWordInput").value = "";
+  document.getElementById("clueNumberInput").value = "1";
+}
+
+function selectCard(idx) {
+  gameRef.child("board/" + idx + "/revealed").set(true)
+    .then(() => gameRef.child("board/" + idx).once("value"))
+    .then(snap => {
+      const card = snap.val();
+      processGuessResult(idx, card.color, card.word);
+    });
+}
+
+function processGuessResult(idx, color, word) {
+  const myTeam = gameData.currentTurn;
+  const updates = {};
+  let text = "";
+
+  if (color === "black") {
+    const winner = myTeam === "red" ? "blue" : "red";
+    updates["status"] = "ended";
+    updates["winner"] = winner;
+    text = `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
+    pushCNLog(updates, text);
+    gameRef.update(updates);
+    return;
+  }
+
+  if (color === myTeam) {
+    const remainingKey = myTeam + "Remaining";
+    const newRemaining = (gameData[remainingKey] || 0) - 1;
+    updates[remainingKey] = newRemaining;
+
+    if (newRemaining <= 0) {
+      updates["status"] = "ended";
+      updates["winner"] = myTeam;
+      text = `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
+      pushCNLog(updates, text);
+      gameRef.update(updates);
+      return;
+    }
+
+    const guessesMade = (gameData.clue.guessesMade || 0) + 1;
+    updates["clue/guessesMade"] = guessesMade;
+    if (guessesMade >= gameData.clue.number + 1) {
+      updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
+      updates["clue"] = null;
+      text = `${word} was correct, but out of guesses for this clue. Turn passes.`;
+    } else {
+      text = `${word} was correct! Keep guessing.`;
+    }
+  } else if (color === "yellow") {
+    updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
+    updates["clue"] = null;
+    text = `${word} was an innocent bystander. Turn ends.`;
+  } else {
+    const oppTeam = color;
+    const oppRemainingKey = oppTeam + "Remaining";
+    const newOppRemaining = (gameData[oppRemainingKey] || 0) - 1;
+    updates[oppRemainingKey] = newOppRemaining;
+    updates["currentTurn"] = myTeam === "red" ? "blue" : "red";
+    updates["clue"] = null;
+    text = `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
+    if (newOppRemaining <= 0) {
+      updates["status"] = "ended";
+      updates["winner"] = oppTeam;
+      text += ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
+    }
+  }
+
+  pushCNLog(updates, text);
+  gameRef.update(updates);
+}
+
+function endTurnManually() {
+  const updates = {};
+  updates["currentTurn"] = gameData.currentTurn === "red" ? "blue" : "red";
+  updates["clue"] = null;
+  pushCNLog(updates, `${capitalize(gameData.currentTurn)} ended their turn.`);
+  gameRef.update(updates);
+}
+
+function pushCNLog(updates, text) {
+  const key = "log/entry_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+  updates[key] = { text, ts: firebase.database.ServerValue.TIMESTAMP };
+}
+
+function renderCNLog() {
+  const log = gameData.log || {};
+  const entries = Object.values(log).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  document.getElementById("cnLogList").innerHTML = entries.map(e =>
+    `<div class="log-entry">${escapeHtml(e.text)}</div>`
+  ).join("") || `<p class="small">No events yet.</p>`;
+}
+
+// ---------- ENDED ----------
+function renderEnded() {
+  showScreen("screen-ended");
+  const winner = gameData.winner;
+  document.getElementById("cnWinnerTitle").textContent =
+    winner === "red" ? "🔴 Red Team Wins!" : "🔵 Blue Team Wins!";
+  document.getElementById("cnWinnerSub").textContent = "";
+
+  const board = gameData.board || [];
+  document.getElementById("finalBoardList").innerHTML = board.map(c =>
+    `<div class="final-row"><span>${escapeHtml(c.word)}</span><span style="color:var(--${c.color === 'yellow' ? 'yellow' : c.color === 'black' ? 'muted' : c.color})">${c.color.toUpperCase()}</span></div>`
+  ).join("");
+}
+
+function cnBackToStart() {
+  if (gameRef) {
+    gameRef.remove().catch(e => console.warn("Could not delete game data:", e)).finally(() => location.reload());
+  } else {
+    location.reload();
+  }
+}
+</script>
+</body>
+</html>
