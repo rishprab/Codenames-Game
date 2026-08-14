@@ -611,9 +611,7 @@ button:disabled {
 // CODENAMES - FIREBASE GAME LOGIC
 // ============================================================
 
-// ------------------------------------------------------------
-// FIREBASE CONFIG
-// ------------------------------------------------------------
+// ---------- FIREBASE CONFIG ----------
 
 const firebaseConfig = {
   apiKey: "AIzaSyDRgXgUbQB36hVUPi7t4z3EH44ZztaKfZQ",
@@ -631,13 +629,11 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 
-// ------------------------------------------------------------
+// ============================================================
 // GLOBAL STATE
-// ------------------------------------------------------------
+// ============================================================
 
 let uid = null;
-let authReady = false;
-
 let gameCode = null;
 let isHost = false;
 let playerName = "";
@@ -645,46 +641,63 @@ let playerName = "";
 let gameData = null;
 let gameRef = null;
 
-let cardColorsData = {};
+let secretColorsData = {};
+let resolvingGuess = false;
 
 
-// ------------------------------------------------------------
-// DEFAULT WORD LIST
-// ------------------------------------------------------------
+// ============================================================
+// WORD LIST
+// ============================================================
 
 const DEFAULT_WORDS = [
-  "APPLE","RIVER","GUITAR","ROCKET","TIGER","CASTLE","ANCHOR","PLANET","DESERT","HAMMER",
-  "ISLAND","JUNGLE","KETTLE","LANTERN","MIRROR","NEEDLE","OCEAN","PENCIL","QUARRY","RIBBON",
-  "SATELLITE","TRUMPET","UMBRELLA","VOLCANO","WHISTLE","ZEBRA","ARROW","BRIDGE","CANDLE","DIAMOND",
-  "ENGINE","FEATHER","GARDEN","HELMET","IGLOO","JACKET","KITE","LADDER","MAGNET","NOTEBOOK",
-  "ORCHARD","PYRAMID","QUILT","SADDLE","TELESCOPE","UNICORN","VELVET","WINDMILL","YACHT","ANTLER",
-  "BALLOON","CACTUS","DOLPHIN","EAGLE","FOUNTAIN","GLACIER","HARBOR","IVORY","JIGSAW","KOALA",
-  "LIGHTHOUSE","MERMAID","NEBULA","OYSTER","PARROT","QUASAR","RAINBOW","SCORPION","THUNDER","URCHIN",
-  "VULTURE","WALRUS","XYLOPHONE","YOGURT","ZEPPELIN","BEACON","COMPASS","DRAGON","EMBER","FALCON",
-  "GONDOLA","HAWK","IMPULSE","JASMINE","KIMONO","LOTUS","MAPLE","NECTAR","OASIS","PEBBLE",
-  "QUIVER","RAVEN","SPARROW","TORNADO","UTOPIA","VORTEX","WHISKER","XENON","YARDSTICK","ZODIAC",
-  "ALMOND","BARREL","CANYON","DAGGER","ECLIPSE","FROST","GRANITE","HORIZON","ICICLE","JUNIPER",
-  "KRAKEN","LAGOON","MARBLE","NIGHTFALL","OBSIDIAN","PRISM","QUARTZ","REEF","SIERRA","TIDE",
-  "UNDERTOW","VELOCITY","WISTERIA","YEARLING","ZENITH","AMBER","BOULDER","CINDER","DUNE","ESTUARY",
-  "FJORD","GEYSER","HOLLOW","INLET","JUNCTION","KELP","LEDGE","MESA","NOOK","OUTPOST",
-  "PLATEAU","QUAY","RIDGE","SUMMIT","THICKET","UPLAND","VALLEY","WHARF","YIELD","ZEPHYR",
-  "ATLAS","BUGLE","CRATER","DOMINO","EMBASSY","TALON","GALAXY","HORNET","IMPACT","JOCKEY"
+  "APPLE","RIVER","GUITAR","ROCKET","TIGER",
+  "CASTLE","ANCHOR","PLANET","DESERT","HAMMER",
+  "ISLAND","JUNGLE","KETTLE","LANTERN","MIRROR",
+  "NEEDLE","OCEAN","PENCIL","QUARRY","RIBBON",
+  "SATELLITE","TRUMPET","UMBRELLA","VOLCANO","WHISTLE",
+  "ZEBRA","ARROW","BRIDGE","CANDLE","DIAMOND",
+  "ENGINE","FEATHER","GARDEN","HELMET","IGLOO",
+  "JACKET","KITE","LADDER","MAGNET","NOTEBOOK",
+  "ORCHARD","PYRAMID","QUILT","SADDLE","TELESCOPE",
+  "UNICORN","VELVET","WINDMILL","YACHT","ANTLER",
+  "BALLOON","CACTUS","DOLPHIN","EAGLE","FOUNTAIN",
+  "GLACIER","HARBOR","IVORY","JIGSAW","KOALA",
+  "LIGHTHOUSE","MERMAID","NEBULA","OYSTER","PARROT",
+  "QUASAR","RAINBOW","SCORPION","THUNDER","URCHIN",
+  "VULTURE","WALRUS","XYLOPHONE","YOGURT","ZEPPELIN",
+  "BEACON","COMPASS","DRAGON","EMBER","FALCON",
+  "GONDOLA","HAWK","IMPULSE","JASMINE","KIMONO",
+  "LOTUS","MAPLE","NECTAR","OASIS","PEBBLE",
+  "QUIVER","RAVEN","SPARROW","TORNADO","UTOPIA",
+  "VORTEX","WHISKER","XENON","YARDSTICK","ZODIAC",
+  "ALMOND","BARREL","CANYON","DAGGER","ECLIPSE",
+  "FROST","GRANITE","HORIZON","ICICLE","JUNIPER",
+  "KRAKEN","LAGOON","MARBLE","NIGHTFALL","OBSIDIAN",
+  "PRISM","QUARTZ","REEF","SIERRA","TIDE",
+  "UNDERTOW","VELOCITY","WISTERIA","YEARLING","ZENITH",
+  "AMBER","BOULDER","CINDER","DUNE","ESTUARY",
+  "FJORD","GEYSER","HOLLOW","INLET","JUNCTION",
+  "KELP","LEDGE","MESA","NOOK","OUTPOST",
+  "PLATEAU","QUAY","RIDGE","SUMMIT","THICKET",
+  "UPLAND","VALLEY","WHARF","YIELD","ZEPHYR",
+  "ATLAS","BUGLE","CRATER","DOMINO","EMBASSY",
+  "TALON","GALAXY","HORNET","IMPACT","JOCKEY"
 ];
 
 
-// ------------------------------------------------------------
+// ============================================================
 // UTILITY FUNCTIONS
-// ------------------------------------------------------------
+// ============================================================
 
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(screen => {
     screen.classList.remove("active");
   });
 
-  const target = document.getElementById(id);
+  const element = document.getElementById(id);
 
-  if (target) {
-    target.classList.add("active");
+  if (element) {
+    element.classList.add("active");
   }
 }
 
@@ -708,9 +721,9 @@ function escapeHtml(str) {
 
 
 function capitalize(str) {
-  if (!str) return str;
-
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str
+    ? str.charAt(0).toUpperCase() + str.slice(1)
+    : str;
 }
 
 
@@ -727,247 +740,106 @@ function shuffle(array) {
 }
 
 
-function requireAuth() {
-  if (!authReady || !uid) {
-    showError("Still connecting to Firebase. Please try again in a moment.");
-    return false;
-  }
-
-  return true;
-}
-
-
-// ------------------------------------------------------------
+// ============================================================
 // AUTHENTICATION
-// ------------------------------------------------------------
+// ============================================================
 
 auth.onAuthStateChanged(user => {
 
   if (user) {
     uid = user.uid;
-    authReady = true;
 
-    console.log("Firebase authentication ready.");
-    console.log("Authenticated UID:", uid);
+    console.log("Authenticated:", uid);
 
   } else {
-
     uid = null;
-    authReady = false;
 
-    console.log("No authenticated Firebase user.");
-
+    console.log("Not authenticated.");
   }
 
 });
 
 
 auth.signInAnonymously()
-  .then(result => {
-
-    uid = result.user.uid;
-    authReady = true;
-
-    console.log("Anonymous Firebase authentication successful.");
-    console.log("UID:", uid);
-
+  .then(() => {
+    console.log("Anonymous authentication successful.");
   })
   .catch(error => {
 
-    console.error("Firebase authentication failed:", error);
-
-    authReady = false;
+    console.error("Authentication error:", error);
 
     showError(
-      "Firebase authentication failed: " + error.message
+      "Connection error: " + error.message
     );
 
   });
 
 
-// ------------------------------------------------------------
+// ============================================================
 // ROOM CODE
-// ------------------------------------------------------------
+// ============================================================
 
 function genRoomCode() {
 
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
   let code = "";
 
   for (let i = 0; i < 4; i++) {
+
     code += chars[
       Math.floor(Math.random() * chars.length)
     ];
+
   }
 
   return code;
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // CREATE GAME
-// ------------------------------------------------------------
+// ============================================================
 
-async function createGame() {
+function createGame() {
 
-  try {
+  playerName =
+    document.getElementById("nameInput")
+      .value
+      .trim();
 
-    playerName =
-      document.getElementById("nameInput").value.trim();
-
-    if (!playerName) {
-      showError("Enter your name first.");
-      return;
-    }
-
-    if (!requireAuth()) {
-      return;
-    }
-
-    gameCode = genRoomCode();
-
-    isHost = true;
-
-    gameRef = db.ref("games/" + gameCode);
-
-    console.log("Creating game:", gameCode);
-    console.log("Host UID:", uid);
-
-    const gameDataToCreate = {
-
-      hostUid: uid,
-
-      status: "lobby",
-
-      wordListMode: "default",
-
-      createdAt:
-        firebase.database.ServerValue.TIMESTAMP,
-
-      players: {
-
-        [uid]: {
-          name: playerName,
-          team: null,
-          isSpymaster: false
-        }
-
-      },
-
-      log: {
-
-        init: {
-          text: "Game created. Waiting for players to join.",
-          ts: firebase.database.ServerValue.TIMESTAMP
-        }
-
-      }
-
-    };
-
-
-    await gameRef.set(gameDataToCreate);
-
-    console.log(
-      "Game successfully created at /games/" + gameCode
-    );
-
-    attachGameListener();
-
+  if (!playerName) {
+    return showError("Enter your name first.");
   }
 
-  catch (error) {
-
-    console.error("CREATE GAME ERROR:", error);
-
-    showError(
-      "Could not create game: " +
-      error.message
+  if (!uid) {
+    return showError(
+      "Still connecting, try again in a second."
     );
-
   }
 
-}
+  gameCode = genRoomCode();
 
+  isHost = true;
 
-// ------------------------------------------------------------
-// JOIN GAME
-// ------------------------------------------------------------
+  gameRef =
+    db.ref("games/" + gameCode);
 
-async function joinGame() {
+  const gameDataToCreate = {
 
-  try {
+    hostUid: uid,
 
-    playerName =
-      document.getElementById("nameInput").value.trim();
+    status: "lobby",
 
-    const code =
-      document.getElementById("joinCodeInput").value
-        .trim()
-        .toUpperCase();
+    wordListMode: "default",
 
+    createdAt:
+      firebase.database.ServerValue.TIMESTAMP,
 
-    if (!playerName) {
-      showError("Enter your name first.");
-      return;
-    }
+    players: {
 
-    if (!code) {
-      showError("Enter a room code.");
-      return;
-    }
-
-    if (!requireAuth()) {
-      return;
-    }
-
-
-    console.log("Looking for game:", code);
-
-    const ref = db.ref("games/" + code);
-
-    const snapshot = await ref.once("value");
-
-    const data = snapshot.val();
-
-
-    if (!data) {
-
-      showError(
-        "No game found with that code."
-      );
-
-      return;
-    }
-
-
-    if (data.status !== "lobby") {
-
-      showError(
-        "That game has already started."
-      );
-
-      return;
-    }
-
-
-    gameCode = code;
-
-    isHost = false;
-
-    gameRef = ref;
-
-
-    console.log("Joining game:", gameCode);
-
-    console.log("Player UID:", uid);
-
-
-    await gameRef
-      .child("players")
-      .child(uid)
-      .set({
+      [uid]: {
 
         name: playerName,
 
@@ -975,43 +847,170 @@ async function joinGame() {
 
         isSpymaster: false
 
-      });
+      }
+
+    },
+
+    log: {
+
+      init: {
+
+        text:
+          "Game created. Waiting for players to join.",
+
+        ts:
+          firebase.database.ServerValue.TIMESTAMP
+
+      }
+
+    }
+
+  };
 
 
-    console.log("Successfully joined game.");
+  gameRef
+    .set(gameDataToCreate)
 
-    attachGameListener();
+    .then(() => {
 
-  }
+      console.log(
+        "Game created:",
+        gameCode
+      );
 
-  catch (error) {
+      attachGameListener();
 
-    console.error("JOIN GAME ERROR:", error);
+    })
 
-    showError(
-      "Could not join: " +
-      error.message
-    );
+    .catch(error => {
 
-  }
+      console.error(
+        "Could not create game:",
+        error
+      );
+
+      showError(
+        "Could not create game: " +
+        error.message
+      );
+
+    });
 
 }
 
 
-// ------------------------------------------------------------
-// LIVE GAME LISTENER
-// ------------------------------------------------------------
+// ============================================================
+// JOIN GAME
+// ============================================================
+
+function joinGame() {
+
+  playerName =
+    document.getElementById("nameInput")
+      .value
+      .trim();
+
+  const code =
+    document.getElementById("joinCodeInput")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  if (!playerName) {
+    return showError("Enter your name first.");
+  }
+
+  if (!code) {
+    return showError("Enter a room code.");
+  }
+
+  if (!uid) {
+    return showError(
+      "Still connecting, try again in a second."
+    );
+  }
+
+
+  gameRef =
+    db.ref("games/" + code);
+
+
+  gameRef
+    .once("value")
+
+    .then(snapshot => {
+
+      const data = snapshot.val();
+
+      if (!data) {
+        throw new Error(
+          "No game found with that code."
+        );
+      }
+
+      if (data.status !== "lobby") {
+        throw new Error(
+          "That game has already started."
+        );
+      }
+
+      gameCode = code;
+
+      isHost = false;
+
+      return gameRef
+        .child("players/" + uid)
+        .set({
+
+          name: playerName,
+
+          team: null,
+
+          isSpymaster: false
+
+        });
+
+    })
+
+    .then(() => {
+
+      attachGameListener();
+
+    })
+
+    .catch(error => {
+
+      console.error(
+        "Could not join game:",
+        error
+      );
+
+      showError(
+        "Could not join: " +
+        error.message
+      );
+
+    });
+
+}
+
+
+// ============================================================
+// GAME LISTENERS
+// ============================================================
 
 function attachGameListener() {
 
   if (!gameRef) {
-    console.error("Cannot attach game listener: gameRef is missing.");
+    console.error("No gameRef available.");
     return;
   }
 
 
   console.log(
-    "Listening to /games/" + gameCode
+    "Attaching listener to:",
+    "games/" + gameCode
   );
 
 
@@ -1019,72 +1018,62 @@ function attachGameListener() {
 
     gameData = snapshot.val();
 
-
     if (!gameData) {
-
       console.warn("Game no longer exists.");
-
       return;
     }
 
 
-    // Always derive host status from Firebase data.
-    isHost = gameData.hostUid === uid;
-
-
-    console.log(
-      "Game updated:",
-      gameData.status,
-      "Host:",
-      isHost
-    );
+    if (gameData.hostUid === uid) {
+      isHost = true;
+    }
 
 
     render();
 
+  });
+
+
+  // SECRET COLOURS
+  //
+  // Only spymasters and ended games should be allowed
+  // to read this location according to Firebase rules.
+
+  const secretRef =
+    db.ref("secretColors/" + gameCode);
+
+
+  secretRef.on("value", snapshot => {
+
+    secretColorsData =
+      snapshot.val() || {};
+
+
+    console.log(
+      "Secret colours updated:",
+      secretColorsData
+    );
+
+
+    if (gameData) {
+      render();
+    }
+
   }, error => {
 
-    console.error(
-      "GAME LISTENER ERROR:",
-      error
+    console.warn(
+      "Could not read secret colours:",
+      error.message
     );
 
   });
 
-
-  // Listen to secret card colours.
-  //
-  // Firebase security rules determine which colours
-  // the current user is actually allowed to receive.
-
-  db.ref("cardColors/" + gameCode).on(
-    "value",
-    snapshot => {
-
-      cardColorsData =
-        snapshot.val() || {};
-
-      if (gameData) {
-        render();
-      }
-
-    },
-    error => {
-
-      console.warn(
-        "Card colour read blocked:",
-        error
-      );
-
-    }
-  );
-
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // MAIN ROUTER
-// ------------------------------------------------------------
+// ============================================================
 
 function render() {
 
@@ -1093,8 +1082,9 @@ function render() {
   }
 
 
-  document.getElementById("topSub").textContent =
-    "Room " + gameCode;
+  document.getElementById("topSub")
+    .textContent =
+      "Room " + gameCode;
 
 
   if (gameData.status === "lobby") {
@@ -1118,17 +1108,17 @@ function render() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // LOBBY
-// ------------------------------------------------------------
+// ============================================================
 
 function renderLobby() {
 
   showScreen("screen-lobby");
 
 
-  document.getElementById("lobbyCode").textContent =
-    gameCode;
+  document.getElementById("lobbyCode")
+    .textContent = gameCode;
 
 
   const players =
@@ -1141,62 +1131,69 @@ function renderLobby() {
 
   const redList =
     Object.values(players)
-      .filter(player => player.team === "red");
+      .filter(player =>
+        player.team === "red"
+      );
 
 
   const blueList =
     Object.values(players)
-      .filter(player => player.team === "blue");
+      .filter(player =>
+        player.team === "blue"
+      );
 
 
-  document.getElementById("redPlayerList").innerHTML =
+  document.getElementById("redPlayerList")
+    .innerHTML =
 
-    redList.map(player =>
+    redList
+      .map(player =>
 
-      `<div class="player-chip">
-        ${escapeHtml(player.name)}
-        ${
-          player.isSpymaster
-            ? '<span class="tag">Spymaster</span>'
-            : ""
-        }
-      </div>`
+        `<div class="player-chip">
+          ${escapeHtml(player.name)}
+          ${
+            player.isSpymaster
+              ? '<span class="tag">Spymaster</span>'
+              : ""
+          }
+        </div>`
 
-    ).join("")
+      )
+      .join("")
 
-    ||
+      ||
 
-    `<p class="small">No one yet.</p>`;
-
-
-  document.getElementById("bluePlayerList").innerHTML =
-
-    blueList.map(player =>
-
-      `<div class="player-chip">
-        ${escapeHtml(player.name)}
-        ${
-          player.isSpymaster
-            ? '<span class="tag">Spymaster</span>'
-            : ""
-        }
-      </div>`
-
-    ).join("")
-
-    ||
-
-    `<p class="small">No one yet.</p>`;
+      `<p class="small">No one yet.</p>`;
 
 
-  // Spymaster controls
+  document.getElementById("bluePlayerList")
+    .innerHTML =
 
-  document.getElementById(
-    "spymasterToggleBox"
-  ).style.display =
-    me && me.team
-      ? "block"
-      : "none";
+    blueList
+      .map(player =>
+
+        `<div class="player-chip">
+          ${escapeHtml(player.name)}
+          ${
+            player.isSpymaster
+              ? '<span class="tag">Spymaster</span>'
+              : ""
+          }
+        </div>`
+
+      )
+      .join("")
+
+      ||
+
+      `<p class="small">No one yet.</p>`;
+
+
+  document.getElementById("spymasterToggleBox")
+    .style.display =
+      me && me.team
+        ? "block"
+        : "none";
 
 
   if (me && me.team) {
@@ -1212,22 +1209,18 @@ function renderLobby() {
   }
 
 
-  // Host controls
-
-  document.getElementById(
-    "hostControlsBox"
-  ).style.display =
-    isHost
-      ? "block"
-      : "none";
+  document.getElementById("hostControlsBox")
+    .style.display =
+      isHost
+        ? "block"
+        : "none";
 
 
-  document.getElementById(
-    "lobbyWaitBox"
-  ).style.display =
-    isHost
-      ? "none"
-      : "block";
+  document.getElementById("lobbyWaitBox")
+    .style.display =
+      isHost
+        ? "none"
+        : "block";
 
 
   if (!isHost) {
@@ -1239,28 +1232,25 @@ function renderLobby() {
     gameData.wordListMode || "default";
 
 
-  document.getElementById(
-    "customWordsBox"
-  ).style.display =
-    mode === "custom"
-      ? "block"
-      : "none";
+  document.getElementById("customWordsBox")
+    .style.display =
+      mode === "custom"
+        ? "block"
+        : "none";
 
 
-  document.getElementById(
-    "defaultListBtn"
-  ).style.opacity =
-    mode === "default"
-      ? "1"
-      : "0.5";
+  document.getElementById("defaultListBtn")
+    .style.opacity =
+      mode === "default"
+        ? "1"
+        : "0.5";
 
 
-  document.getElementById(
-    "customListBtn"
-  ).style.opacity =
-    mode === "custom"
-      ? "1"
-      : "0.5";
+  document.getElementById("customListBtn")
+    .style.opacity =
+      mode === "custom"
+        ? "1"
+        : "0.5";
 
 
   const total =
@@ -1284,10 +1274,8 @@ function renderLobby() {
 
 
   if (total < 4) {
-
     warning +=
       " Need at least 4 total.";
-
   }
 
 
@@ -1327,249 +1315,215 @@ function renderLobby() {
   }
 
 
-  document.getElementById(
-    "lobbyWarning"
-  ).textContent = warning;
+  document.getElementById("lobbyWarning")
+    .textContent = warning;
 
 }
 
 
-// ------------------------------------------------------------
-// JOIN TEAM
-// ------------------------------------------------------------
+// ============================================================
+// TEAM SELECTION
+// ============================================================
 
-async function joinTeam(team) {
+function joinTeam(team) {
 
-  try {
-
-    if (!requireAuth()) {
-      return;
-    }
-
-
-    if (!gameRef) {
-      return;
-    }
-
-
-    if (
-      team !== "red" &&
-      team !== "blue"
-    ) {
-      return;
-    }
-
-
-    await gameRef
-      .child("players")
-      .child(uid)
-      .update({
-
-        team: team,
-
-        isSpymaster: false
-
-      });
-
+  if (!gameRef || !uid) {
+    return;
   }
 
-  catch (error) {
 
-    console.error(
-      "JOIN TEAM ERROR:",
-      error
-    );
+  gameRef
+    .child("players/" + uid)
+    .update({
 
-    alert(
-      "Could not join team: " +
-      error.message
-    );
+      team: team,
 
-  }
+      isSpymaster: false
 
-}
+    })
 
+    .catch(error => {
 
-// ------------------------------------------------------------
-// SPYMASTER
-// ------------------------------------------------------------
+      console.error(
+        "Could not join team:",
+        error
+      );
 
-async function toggleSpymaster() {
+      alert(
+        "Could not join team: " +
+        error.message
+      );
 
-  try {
-
-    const players =
-      gameData.players || {};
-
-
-    const me =
-      players[uid];
-
-
-    if (!me || !me.team) {
-      return;
-    }
-
-
-    if (!me.isSpymaster) {
-
-      const existing =
-        Object.entries(players)
-          .find(([id, player]) =>
-            player.team === me.team &&
-            player.isSpymaster
-          );
-
-
-      if (existing) {
-
-        alert(
-          "This team already has a Spymaster."
-        );
-
-        return;
-      }
-
-    }
-
-
-    await gameRef
-      .child("players")
-      .child(uid)
-      .child("isSpymaster")
-      .set(!me.isSpymaster);
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "SPYMASTER ERROR:",
-      error
-    );
-
-    alert(
-      "Could not change Spymaster status: " +
-      error.message
-    );
-
-  }
-
-}
-
-
-// ------------------------------------------------------------
-// WORD LIST
-// ------------------------------------------------------------
-
-async function setWordMode(mode) {
-
-  try {
-
-    if (!isHost) {
-      alert("Only the host can change the word list.");
-      return;
-    }
-
-
-    await gameRef.update({
-      wordListMode: mode
     });
 
+}
+
+
+// ============================================================
+// SPYMASTER
+// ============================================================
+
+function toggleSpymaster() {
+
+  const players =
+    gameData.players || {};
+
+
+  const me =
+    players[uid];
+
+
+  if (!me || !me.team) {
+    return;
   }
 
-  catch (error) {
 
-    console.error(
-      "WORD MODE ERROR:",
-      error
-    );
+  if (!me.isSpymaster) {
 
-    alert(
-      "Could not change word list: " +
-      error.message
-    );
+    const existing =
+      Object.entries(players)
+        .find(([id, player]) =>
+
+          id !== uid &&
+          player.team === me.team &&
+          player.isSpymaster === true
+
+        );
+
+
+    if (existing) {
+
+      alert(
+        "This team already has a Spymaster."
+      );
+
+      return;
+
+    }
 
   }
+
+
+  gameRef
+    .child(
+      "players/" +
+      uid +
+      "/isSpymaster"
+    )
+
+    .set(!me.isSpymaster)
+
+    .catch(error => {
+
+      console.error(
+        "Could not change spymaster status:",
+        error
+      );
+
+      alert(
+        "Could not change spymaster status: " +
+        error.message
+      );
+
+    });
 
 }
 
 
-async function saveCustomWords() {
+// ============================================================
+// WORD LIST
+// ============================================================
 
-  try {
+function setWordMode(mode) {
 
-    if (!isHost) {
-      alert("Only the host can change the word list.");
-      return;
-    }
+  gameRef
+    .update({
+      wordListMode: mode
+    })
 
+    .catch(error => {
 
-    const raw =
-      document.getElementById(
-        "customWordsInput"
-      ).value;
+      console.error(error);
 
+      alert(
+        "Could not change word list: " +
+        error.message
+      );
 
-    const words = [
-      ...new Set(
-        raw
-          .split(/[\n,]/)
-          .map(word =>
-            word.trim().toUpperCase()
-          )
-          .filter(Boolean)
-      )
-    ];
+    });
+
+}
 
 
-    if (words.length < 25) {
+function saveCustomWords() {
 
-      document.getElementById(
-        "customWordsStatus"
-      ).textContent =
-        `Only ${words.length} unique words — need at least 25.`;
-
-      return;
-    }
+  const raw =
+    document.getElementById(
+      "customWordsInput"
+    ).value;
 
 
-    await gameRef.update({
+  const words = [
+
+    ...new Set(
+
+      raw
+        .split(/[\n,]/)
+        .map(word =>
+          word.trim().toUpperCase()
+        )
+        .filter(Boolean)
+
+    )
+
+  ];
+
+
+  if (words.length < 25) {
+
+    document.getElementById(
+      "customWordsStatus"
+    ).textContent =
+
+      `Only ${words.length} unique words — need at least 25.`;
+
+    return;
+
+  }
+
+
+  gameRef
+    .update({
 
       customWords: words,
 
       wordListMode: "custom"
 
+    })
+
+    .then(() => {
+
+      document.getElementById(
+        "customWordsStatus"
+      ).textContent =
+
+        `Saved ${words.length} words.`;
+
+    })
+
+    .catch(error => {
+
+      console.error(error);
+
+      alert(
+        "Could not save word list: " +
+        error.message
+      );
+
     });
-
-
-    document.getElementById(
-      "customWordsStatus"
-    ).textContent =
-      `Saved ${words.length} words.`;
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "CUSTOM WORD ERROR:",
-      error
-    );
-
-    alert(
-      "Could not save word list: " +
-      error.message
-    );
-
-  }
 
 }
 
-
-// ------------------------------------------------------------
-// GET GAME WORDS
-// ------------------------------------------------------------
 
 function getWordsForGame() {
 
@@ -1579,11 +1533,9 @@ function getWordsForGame() {
 
   const pool =
 
-    (
-      mode === "custom" &&
-      gameData.customWords &&
-      gameData.customWords.length >= 25
-    )
+    mode === "custom" &&
+    gameData.customWords &&
+    gameData.customWords.length >= 25
 
       ? gameData.customWords
 
@@ -1595,378 +1547,319 @@ function getWordsForGame() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // START GAME
-// ------------------------------------------------------------
+// ============================================================
 
-async function startGame() {
+function startGame() {
 
-  console.log("================================");
-  console.log("START GAME CLICKED");
-  console.log("================================");
+  console.log("START GAME clicked.");
 
+  console.log("UID:", uid);
+  console.log("Game:", gameCode);
+  console.log("Host:", isHost);
+  console.log("Game data:", gameData);
 
-  try {
 
-    // --------------------------------------------------------
-    // BASIC CHECKS
-    // --------------------------------------------------------
+  if (!isHost) {
 
-    if (!requireAuth()) {
-      return;
-    }
-
-
-    if (!gameRef) {
-
-      console.error(
-        "startGame(): gameRef does not exist."
-      );
-
-      alert(
-        "Game connection is not ready. Please refresh and try again."
-      );
-
-      return;
-    }
-
-
-    if (!gameData) {
-
-      console.error(
-        "startGame(): gameData does not exist."
-      );
-
-      alert(
-        "Game data has not loaded yet. Please wait a moment."
-      );
-
-      return;
-    }
-
-
-    if (!isHost) {
-
-      console.error(
-        "startGame(): current user is not host."
-      );
-
-      alert(
-        "Only the host can start the game."
-      );
-
-      return;
-    }
-
-
-    console.log("Authenticated UID:", uid);
-    console.log("Game:", gameCode);
-    console.log("Host UID:", gameData.hostUid);
-
-
-    // --------------------------------------------------------
-    // PLAYER VALIDATION
-    // --------------------------------------------------------
-
-    const players =
-      gameData.players || {};
-
-
-    const uids =
-      Object.keys(players);
-
-
-    const redList =
-      uids.filter(
-        id => players[id].team === "red"
-      );
-
-
-    const blueList =
-      uids.filter(
-        id => players[id].team === "blue"
-      );
-
-
-    const redSpy =
-      redList.filter(
-        id => players[id].isSpymaster
-      );
-
-
-    const blueSpy =
-      blueList.filter(
-        id => players[id].isSpymaster
-      );
-
-
-    console.log("Players:", uids.length);
-    console.log("Red:", redList.length);
-    console.log("Blue:", blueList.length);
-    console.log("Red Spymasters:", redSpy.length);
-    console.log("Blue Spymasters:", blueSpy.length);
-
-
-    if (uids.length < 4) {
-
-      alert(
-        "Need at least 4 players total."
-      );
-
-      return;
-    }
-
-
-    if (
-      redList.length < 2 ||
-      blueList.length < 2
-    ) {
-
-      alert(
-        "Each team needs at least 1 Spymaster and 1 Operative."
-      );
-
-      return;
-    }
-
-
-    if (
-      redSpy.length !== 1 ||
-      blueSpy.length !== 1
-    ) {
-
-      alert(
-        "Each team needs exactly 1 Spymaster."
-      );
-
-      return;
-    }
-
-
-    // --------------------------------------------------------
-    // WORD LIST VALIDATION
-    // --------------------------------------------------------
-
-    const mode =
-      gameData.wordListMode || "default";
-
-
-    if (
-      mode === "custom" &&
-      (
-        !gameData.customWords ||
-        gameData.customWords.length < 25
-      )
-    ) {
-
-      alert(
-        "Save a custom word list with at least 25 words first, or switch to the default list."
-      );
-
-      return;
-    }
-
-
-    // --------------------------------------------------------
-    // CREATE BOARD
-    // --------------------------------------------------------
-
-    const words =
-      getWordsForGame();
-
-
-    if (words.length !== 25) {
-
-      alert(
-        "Could not generate the 25-word board."
-      );
-
-      return;
-    }
-
-
-    const startingTeam =
-      Math.random() < 0.5
-        ? "red"
-        : "blue";
-
-
-    const counts =
-      startingTeam === "red"
-
-        ? {
-            red: 9,
-            blue: 8
-          }
-
-        : {
-            red: 8,
-            blue: 9
-          };
-
-
-    const colors = [];
-
-
-    for (
-      let i = 0;
-      i < counts.red;
-      i++
-    ) {
-
-      colors.push("red");
-
-    }
-
-
-    for (
-      let i = 0;
-      i < counts.blue;
-      i++
-    ) {
-
-      colors.push("blue");
-
-    }
-
-
-    for (
-      let i = 0;
-      i < 7;
-      i++
-    ) {
-
-      colors.push("yellow");
-
-    }
-
-
-    colors.push("black");
-
-
-    const shuffledColors =
-      shuffle(colors);
-
-
-    const board =
-      words.map(word => ({
-
-        word: word,
-
-        revealed: false
-
-      }));
-
-
-    const colorsUpdate = {};
-
-
-    shuffledColors.forEach(
-      (color, index) => {
-
-        colorsUpdate[index] =
-          color;
-
-      }
+    alert(
+      "Only the host can start the game."
     );
 
-
-    // --------------------------------------------------------
-    // GAME DATA
-    // --------------------------------------------------------
-
-    const updates = {
-
-      board: board,
-
-      status: "playing",
-
-      startingTeam: startingTeam,
-
-      currentTurn: startingTeam,
-
-      redRemaining: counts.red,
-
-      blueRemaining: counts.blue,
-
-      clue: null,
-
-      winner: null
-
-    };
-
-
-    pushCNLog(
-      updates,
-      `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`
-    );
-
-
-    console.log(
-      "Writing secret card colours..."
-    );
-
-
-    // --------------------------------------------------------
-    // IMPORTANT:
-    //
-    // Write card colours first.
-    //
-    // Our Firebase rules only allow the host to write here.
-    // --------------------------------------------------------
-
-    await db
-      .ref("cardColors/" + gameCode)
-      .set(colorsUpdate);
-
-
-    console.log(
-      "Card colours written successfully."
-    );
-
-
-    // --------------------------------------------------------
-    // NOW START THE GAME
-    // --------------------------------------------------------
-
-    console.log(
-      "Updating /games/" + gameCode
-    );
-
-
-    await gameRef.update(updates);
-
-
-    console.log(
-      "================================"
-    );
-
-    console.log(
-      "GAME STARTED SUCCESSFULLY"
-    );
-
-    console.log(
-      "================================"
-    );
+    return;
 
   }
 
-  catch (error) {
 
-    console.error(
-      "================================"
+  if (!gameData) {
+
+    alert(
+      "Game data has not loaded yet."
     );
 
-    console.error(
-      "START GAME FAILED"
+    return;
+
+  }
+
+
+  const players =
+    gameData.players || {};
+
+
+  const uids =
+    Object.keys(players);
+
+
+  const redList =
+    uids.filter(id =>
+      players[id].team === "red"
     );
 
+
+  const blueList =
+    uids.filter(id =>
+      players[id].team === "blue"
+    );
+
+
+  const redSpy =
+    redList.filter(id =>
+      players[id].isSpymaster === true
+    );
+
+
+  const blueSpy =
+    blueList.filter(id =>
+      players[id].isSpymaster === true
+    );
+
+
+  console.log("Players:", uids);
+  console.log("Red:", redList);
+  console.log("Blue:", blueList);
+  console.log("Red spies:", redSpy);
+  console.log("Blue spies:", blueSpy);
+
+
+  if (uids.length < 4) {
+
+    alert(
+      "Need at least 4 players total."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    redList.length < 2 ||
+    blueList.length < 2
+  ) {
+
+    alert(
+      "Each team needs at least 1 Spymaster and 1 Operative."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    redSpy.length !== 1 ||
+    blueSpy.length !== 1
+  ) {
+
+    alert(
+      "Each team needs exactly 1 Spymaster."
+    );
+
+    return;
+
+  }
+
+
+  const mode =
+    gameData.wordListMode || "default";
+
+
+  if (
+    mode === "custom" &&
+    (
+      !gameData.customWords ||
+      gameData.customWords.length < 25
+    )
+  ) {
+
+    alert(
+      "Save a custom word list with at least 25 words first, or switch to the default list."
+    );
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // GENERATE BOARD
+  // ----------------------------------------------------------
+
+  const words =
+    getWordsForGame();
+
+
+  const startingTeam =
+    Math.random() < 0.5
+      ? "red"
+      : "blue";
+
+
+  const counts =
+
+    startingTeam === "red"
+
+      ? {
+          red: 9,
+          blue: 8
+        }
+
+      : {
+          red: 8,
+          blue: 9
+        };
+
+
+  const colors = [];
+
+
+  for (
+    let i = 0;
+    i < counts.red;
+    i++
+  ) {
+
+    colors.push("red");
+
+  }
+
+
+  for (
+    let i = 0;
+    i < counts.blue;
+    i++
+  ) {
+
+    colors.push("blue");
+
+  }
+
+
+  for (let i = 0; i < 7; i++) {
+
+    colors.push("yellow");
+
+  }
+
+
+  colors.push("black");
+
+
+  const shuffledColors =
+    shuffle(colors);
+
+
+  const board =
+    words.map(word => ({
+
+      word: word,
+
+      revealed: false
+
+    }));
+
+
+  const secretColors = {};
+
+
+  shuffledColors.forEach(
+    (color, index) => {
+
+      secretColors[index] = color;
+
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // GAME DATA
+  // ----------------------------------------------------------
+
+  const updates = {
+
+    board: board,
+
+    status: "playing",
+
+    startingTeam: startingTeam,
+
+    currentTurn: startingTeam,
+
+    redRemaining: counts.red,
+
+    blueRemaining: counts.blue,
+
+    clue: null,
+
+    winner: null
+
+  };
+
+
+  // Add game-start log
+  updates[
+    "log/entry_" +
+    Date.now() +
+    "_" +
+    Math.floor(Math.random() * 1000)
+  ] = {
+
+    text:
+      `Game started with ${words.length} words. ${capitalize(startingTeam)} team goes first.`,
+
+    ts:
+      firebase.database.ServerValue.TIMESTAMP
+
+  };
+
+
+  console.log(
+    "Writing secret colours..."
+  );
+
+
+  // ----------------------------------------------------------
+  // IMPORTANT:
+  // Write the secret colours first.
+  // ----------------------------------------------------------
+
+  db.ref(
+    "secretColors/" +
+    gameCode
+  )
+
+  .set(secretColors)
+
+  .then(() => {
+
+    console.log(
+      "Secret colours written successfully."
+    );
+
+
+    console.log(
+      "Updating game to playing..."
+    );
+
+
+    return gameRef.update(updates);
+
+  })
+
+  .then(() => {
+
+    console.log(
+      "GAME STARTED SUCCESSFULLY."
+    );
+
+  })
+
+  .catch(error => {
+
     console.error(
+      "START GAME FAILED:",
       error
-    );
-
-    console.error(
-      "================================"
     );
 
 
@@ -1975,14 +1868,14 @@ async function startGame() {
       error.message
     );
 
-  }
+  });
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // GAME SCREEN
-// ------------------------------------------------------------
+// ============================================================
 
 function renderGame() {
 
@@ -2004,13 +1897,15 @@ function renderGame() {
   document.getElementById(
     "turnPill"
   ).textContent =
-    capitalize(currentTurn) + "'s turn";
+    capitalize(currentTurn) +
+    "'s turn";
 
 
   document.getElementById(
     "turnPill"
   ).className =
-    "status-pill turn-" + currentTurn;
+    "status-pill turn-" +
+    currentTurn;
 
 
   document.getElementById(
@@ -2085,8 +1980,7 @@ function renderGame() {
 
     document.getElementById(
       "clueDisplayBox"
-    ).style.display =
-      "block";
+    ).style.display = "block";
 
 
     document.getElementById(
@@ -2111,8 +2005,7 @@ function renderGame() {
 
     document.getElementById(
       "clueDisplayBox"
-    ).style.display =
-      "none";
+    ).style.display = "none";
 
   }
 
@@ -2145,9 +2038,9 @@ function renderGame() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // BOARD
-// ------------------------------------------------------------
+// ============================================================
 
 function renderBoard(
   me,
@@ -2167,8 +2060,8 @@ function renderBoard(
   boardEl.innerHTML = "";
 
 
-  Object.entries(board).forEach(
-    ([idx, card]) => {
+  Object.values(board)
+    .forEach((card, idx) => {
 
       const btn =
         document.createElement(
@@ -2185,8 +2078,12 @@ function renderBoard(
 
 
       const color =
-        cardColorsData[idx];
+        secretColorsData[idx];
 
+
+      // ------------------------------------------------------
+      // Revealed card
+      // ------------------------------------------------------
 
       if (card.revealed) {
 
@@ -2206,457 +2103,292 @@ function renderBoard(
 
       }
 
-      else if (color) {
-
-        // This will normally only happen
-        // for a Spymaster.
-
-        btn.classList.add(
-          "color-" + color
-        );
-
-      }
-
-
-      if (
-        !card.revealed &&
-        canGuess
-      ) {
-
-        btn.onclick =
-          () => selectCard(idx);
-
-      }
+      // ------------------------------------------------------
+      // Unrevealed card
+      // ------------------------------------------------------
 
       else {
 
-        btn.disabled = true;
+        // Spymasters see the whole key.
+        if (
+          me &&
+          me.isSpymaster &&
+          color
+        ) {
+
+          btn.classList.add(
+            "color-" + color
+          );
+
+        }
+
+
+        if (canGuess) {
+
+          btn.onclick = () =>
+            selectCard(idx);
+
+        }
+
+        else {
+
+          btn.disabled = true;
+
+        }
 
       }
 
 
       boardEl.appendChild(btn);
 
-    }
-  );
+    });
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // SUBMIT CLUE
-// ------------------------------------------------------------
+// ============================================================
 
-async function submitClue() {
+function submitClue() {
 
-  try {
+  const word =
+    document.getElementById(
+      "clueWordInput"
+    ).value.trim();
 
-    const word =
+
+  const number =
+    parseInt(
       document.getElementById(
-        "clueWordInput"
-      ).value.trim();
+        "clueNumberInput"
+      ).value,
+      10
+    );
 
 
-    const number =
-      parseInt(
-        document.getElementById(
-          "clueNumberInput"
-        ).value,
-        10
-      );
+  if (!word) {
+
+    return alert(
+      "Enter a one-word clue."
+    );
+
+  }
 
 
-    if (!word) {
+  if (
+    isNaN(number) ||
+    number < 0 ||
+    number > 9
+  ) {
 
-      alert(
-        "Enter a one-word clue."
-      );
+    return alert(
+      "Enter a valid number (0-9)."
+    );
 
-      return;
-    }
-
-
-    if (
-      isNaN(number) ||
-      number < 0 ||
-      number > 9
-    ) {
-
-      alert(
-        "Enter a valid number (0-9)."
-      );
-
-      return;
-    }
+  }
 
 
-    const updates = {};
+  const updates = {
 
-
-    updates["clue"] = {
+    clue: {
 
       word: word,
 
       number: number,
 
-      team: gameData.currentTurn,
+      team:
+        gameData.currentTurn,
 
       guessesMade: 0,
 
       givenBy: uid
 
-    };
+    }
+
+  };
 
 
-    pushCNLog(
-      updates,
-      `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
-    );
+  pushCNLog(
+
+    updates,
+
+    `${capitalize(gameData.currentTurn)} Spymaster's clue: "${word}" for ${number}.`
+
+  );
 
 
-    await gameRef.update(
-      updates
-    );
+  gameRef
+    .update(updates)
+
+    .catch(error => {
+
+      console.error(error);
+
+      alert(
+        "Could not submit clue: " +
+        error.message
+      );
+
+    });
 
 
-    document.getElementById(
-      "clueWordInput"
-    ).value = "";
+  document.getElementById(
+    "clueWordInput"
+  ).value = "";
 
 
-    document.getElementById(
-      "clueNumberInput"
-    ).value = "1";
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "SUBMIT CLUE ERROR:",
-      error
-    );
-
-    alert(
-      "Could not submit clue: " +
-      error.message
-    );
-
-  }
+  document.getElementById(
+    "clueNumberInput"
+  ).value = "1";
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // SELECT CARD
-// ------------------------------------------------------------
+// ============================================================
 
-async function selectCard(idx) {
+function selectCard(idx) {
 
-  try {
-
-    if (
-      !gameData ||
-      !gameData.board ||
-      !gameData.board[idx]
-    ) {
-
-      return;
-    }
+  if (resolvingGuess) {
+    return;
+  }
 
 
-    const card =
-      gameData.board[idx];
+  resolvingGuess = true;
 
 
-    if (card.revealed) {
-      return;
-    }
+  const cardRef =
+    gameRef.child(
+      "board/" +
+      idx +
+      "/revealed"
+    );
 
 
-    // Reveal card.
+  cardRef
+    .set(true)
 
-    await gameRef
-      .child("board")
-      .child(idx)
-      .child("revealed")
-      .set(true);
+    .then(() => {
 
-
-    // Get the secret colour.
-
-    const snap =
-      await db
+      return db
         .ref(
-          "cardColors/" +
+          "secretColors/" +
           gameCode +
           "/" +
           idx
         )
         .once("value");
 
+    })
 
-    const color =
-      snap.val();
+    .then(snapshot => {
+
+      const color =
+        snapshot.val();
 
 
-    if (!color) {
+      if (!color) {
 
-      console.error(
-        "No colour found for card:",
-        idx
+        throw new Error(
+          "Could not retrieve card colour."
+        );
+
+      }
+
+
+      const board =
+        gameData.board || {};
+
+
+      const card =
+        board[idx];
+
+
+      if (!card) {
+
+        throw new Error(
+          "Could not find selected card."
+        );
+
+      }
+
+
+      processGuessResult(
+        idx,
+        color,
+        card.word
       );
 
-      return;
-    }
+    })
+
+    .catch(error => {
+
+      console.error(
+        "Could not process guess:",
+        error
+      );
 
 
-    processGuessResult(
-      idx,
-      color,
-      card.word
-    );
+      alert(
+        "Could not process guess: " +
+        error.message
+      );
 
-  }
+    })
 
-  catch (error) {
+    .finally(() => {
 
-    console.error(
-      "SELECT CARD ERROR:",
-      error
-    );
+      resolvingGuess = false;
 
-    alert(
-      "Could not reveal card: " +
-      error.message
-    );
-
-  }
+    });
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // PROCESS GUESS
-// ------------------------------------------------------------
+// ============================================================
 
-async function processGuessResult(
+function processGuessResult(
   idx,
   color,
   word
 ) {
 
-  try {
+  const myTeam =
+    gameData.currentTurn;
 
-    const myTeam =
-      gameData.currentTurn;
 
+  const updates = {};
 
-    const updates = {};
 
-    let text = "";
+  let text = "";
 
 
-    // ASSASSIN
+  // ----------------------------------------------------------
+  // ASSASSIN
+  // ----------------------------------------------------------
 
-    if (color === "black") {
+  if (color === "black") {
 
-      const winner =
-        myTeam === "red"
-          ? "blue"
-          : "red";
+    const winner =
+      myTeam === "red"
+        ? "blue"
+        : "red";
 
 
-      updates["status"] =
-        "ended";
+    updates.status =
+      "ended";
 
 
-      updates["winner"] =
-        winner;
+    updates.winner =
+      winner;
 
 
-      text =
-        `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
-
-
-      pushCNLog(
-        updates,
-        text
-      );
-
-
-      await gameRef.update(
-        updates
-      );
-
-
-      return;
-
-    }
-
-
-    // CORRECT TEAM
-
-    if (color === myTeam) {
-
-      const remainingKey =
-        myTeam + "Remaining";
-
-
-      const newRemaining =
-        (gameData[remainingKey] || 0) - 1;
-
-
-      updates[remainingKey] =
-        newRemaining;
-
-
-      if (newRemaining <= 0) {
-
-        updates["status"] =
-          "ended";
-
-
-        updates["winner"] =
-          myTeam;
-
-
-        text =
-          `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
-
-
-        pushCNLog(
-          updates,
-          text
-        );
-
-
-        await gameRef.update(
-          updates
-        );
-
-
-        return;
-
-      }
-
-
-      const guessesMade =
-        (
-          gameData.clue.guessesMade ||
-          0
-        ) + 1;
-
-
-      updates["clue/guessesMade"] =
-        guessesMade;
-
-
-      if (
-        guessesMade >=
-        gameData.clue.number + 1
-      ) {
-
-        updates["currentTurn"] =
-          myTeam === "red"
-            ? "blue"
-            : "red";
-
-
-        updates["clue"] =
-          null;
-
-
-        text =
-          `${word} was correct, but out of guesses for this clue. Turn passes.`;
-
-      }
-
-      else {
-
-        text =
-          `${word} was correct! Keep guessing.`;
-
-      }
-
-    }
-
-
-    // BYSTANDER
-
-    else if (color === "yellow") {
-
-      updates["currentTurn"] =
-        myTeam === "red"
-          ? "blue"
-          : "red";
-
-
-      updates["clue"] =
-        null;
-
-
-      text =
-        `${word} was an innocent bystander. Turn ends.`;
-
-    }
-
-
-    // OPPOSING TEAM
-
-    else {
-
-      const oppTeam =
-        color;
-
-
-      const oppRemainingKey =
-        oppTeam + "Remaining";
-
-
-      const newOppRemaining =
-        (
-          gameData[oppRemainingKey] ||
-          0
-        ) - 1;
-
-
-      updates[oppRemainingKey] =
-        newOppRemaining;
-
-
-      updates["currentTurn"] =
-        myTeam === "red"
-          ? "blue"
-          : "red";
-
-
-      updates["clue"] =
-        null;
-
-
-      text =
-        `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
-
-
-      if (
-        newOppRemaining <= 0
-      ) {
-
-        updates["status"] =
-          "ended";
-
-
-        updates["winner"] =
-          oppTeam;
-
-
-        text +=
-          ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
-
-      }
-
-    }
+    text =
+      `${word} was the ASSASSIN! ${capitalize(myTeam)} loses immediately.`;
 
 
     pushCNLog(
@@ -2665,77 +2397,247 @@ async function processGuessResult(
     );
 
 
-    await gameRef.update(
-      updates
-    );
+    gameRef.update(updates);
+
+    return;
 
   }
 
-  catch (error) {
 
-    console.error(
-      "PROCESS GUESS ERROR:",
-      error
-    );
+  // ----------------------------------------------------------
+  // CORRECT TEAM
+  // ----------------------------------------------------------
+
+  if (color === myTeam) {
+
+    const remainingKey =
+      myTeam + "Remaining";
+
+
+    const newRemaining =
+
+      (gameData[remainingKey] || 0) - 1;
+
+
+    updates[remainingKey] =
+      newRemaining;
+
+
+    if (newRemaining <= 0) {
+
+      updates.status =
+        "ended";
+
+
+      updates.winner =
+        myTeam;
+
+
+      text =
+        `${word} was ${capitalize(myTeam)}'s! ${capitalize(myTeam)} found all their words and wins!`;
+
+
+      pushCNLog(
+        updates,
+        text
+      );
+
+
+      gameRef.update(updates);
+
+      return;
+
+    }
+
+
+    const guessesMade =
+
+      (gameData.clue.guessesMade || 0) + 1;
+
+
+    updates["clue/guessesMade"] =
+      guessesMade;
+
+
+    if (
+      guessesMade >=
+      gameData.clue.number + 1
+    ) {
+
+      updates.currentTurn =
+        myTeam === "red"
+          ? "blue"
+          : "red";
+
+
+      updates.clue =
+        null;
+
+
+      text =
+        `${word} was correct, but out of guesses for this clue. Turn passes.`;
+
+    }
+
+    else {
+
+      text =
+        `${word} was correct! Keep guessing.`;
+
+    }
 
   }
 
-}
 
+  // ----------------------------------------------------------
+  // INNOCENT BYSTANDER
+  // ----------------------------------------------------------
 
-// ------------------------------------------------------------
-// END TURN
-// ------------------------------------------------------------
+  else if (color === "yellow") {
 
-async function endTurnManually() {
-
-  try {
-
-    const updates = {};
-
-
-    updates["currentTurn"] =
-      gameData.currentTurn === "red"
+    updates.currentTurn =
+      myTeam === "red"
         ? "blue"
         : "red";
 
 
-    updates["clue"] =
+    updates.clue =
       null;
 
 
-    pushCNLog(
-      updates,
-      `${capitalize(gameData.currentTurn)} ended their turn.`
-    );
-
-
-    await gameRef.update(
-      updates
-    );
+    text =
+      `${word} was an innocent bystander. Turn ends.`;
 
   }
 
-  catch (error) {
 
-    console.error(
-      "END TURN ERROR:",
-      error
-    );
+  // ----------------------------------------------------------
+  // OPPONENT CARD
+  // ----------------------------------------------------------
 
-    alert(
-      "Could not end turn: " +
-      error.message
-    );
+  else {
+
+    const oppTeam =
+      color;
+
+
+    const oppRemainingKey =
+      oppTeam + "Remaining";
+
+
+    const newOppRemaining =
+
+      (gameData[oppRemainingKey] || 0) - 1;
+
+
+    updates[oppRemainingKey] =
+      newOppRemaining;
+
+
+    updates.currentTurn =
+      myTeam === "red"
+        ? "blue"
+        : "red";
+
+
+    updates.clue =
+      null;
+
+
+    text =
+      `${word} belonged to ${capitalize(oppTeam)}! Turn ends.`;
+
+
+    if (newOppRemaining <= 0) {
+
+      updates.status =
+        "ended";
+
+
+      updates.winner =
+        oppTeam;
+
+
+      text +=
+        ` ${capitalize(oppTeam)} now has all their words revealed and wins!`;
+
+    }
 
   }
+
+
+  pushCNLog(
+    updates,
+    text
+  );
+
+
+  gameRef
+    .update(updates)
+
+    .catch(error => {
+
+      console.error(
+        "Could not update game:",
+        error
+      );
+
+    });
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
+// END TURN
+// ============================================================
+
+function endTurnManually() {
+
+  const nextTeam =
+
+    gameData.currentTurn === "red"
+      ? "blue"
+      : "red";
+
+
+  const updates = {
+
+    currentTurn: nextTeam,
+
+    clue: null
+
+  };
+
+
+  pushCNLog(
+
+    updates,
+
+    `${capitalize(gameData.currentTurn)} ended their turn.`
+
+  );
+
+
+  gameRef
+    .update(updates)
+
+    .catch(error => {
+
+      console.error(error);
+
+      alert(
+        "Could not end turn: " +
+        error.message
+      );
+
+    });
+
+}
+
+
+// ============================================================
 // GAME LOG
-// ------------------------------------------------------------
+// ============================================================
 
 function pushCNLog(
   updates,
@@ -2743,6 +2645,7 @@ function pushCNLog(
 ) {
 
   const key =
+
     "log/entry_" +
     Date.now() +
     "_" +
@@ -2782,26 +2685,30 @@ function renderCNLog() {
     "cnLogList"
   ).innerHTML =
 
-    entries.map(entry =>
+    entries
 
-      `<div class="log-entry">
-        ${escapeHtml(entry.text)}
-      </div>`
+      .map(entry =>
 
-    ).join("")
+        `<div class="log-entry">
+          ${escapeHtml(entry.text)}
+        </div>`
 
-    ||
+      )
 
-    `<p class="small">
-      No events yet.
-    </p>`;
+      .join("")
+
+      ||
+
+      `<p class="small">
+        No events yet.
+      </p>`;
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // ENDED GAME
-// ------------------------------------------------------------
+// ============================================================
 
 function renderEnded() {
 
@@ -2838,22 +2745,24 @@ function renderEnded() {
     "finalBoardList"
   ).innerHTML =
 
-    Object.entries(board)
-      .map(([idx, card]) => {
+    Object.values(board)
+
+      .map((card, idx) => {
 
         const color =
-          cardColorsData[idx] || "?";
+          secretColorsData[idx] || "?";
 
 
-        const cssColor =
+        let cssColor = color;
 
-          color === "yellow"
-            ? "yellow"
 
-          : color === "black"
-            ? "muted"
+        if (color === "yellow") {
+          cssColor = "yellow";
+        }
 
-          : color;
+        else if (color === "black") {
+          cssColor = "muted";
+        }
 
 
         return `
@@ -2864,9 +2773,7 @@ function renderEnded() {
               ${escapeHtml(card.word)}
             </span>
 
-            <span
-              style="color:var(--${cssColor})"
-            >
+            <span style="color:var(--${cssColor})">
               ${color.toUpperCase()}
             </span>
 
@@ -2875,67 +2782,69 @@ function renderEnded() {
         `;
 
       })
+
       .join("");
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // BACK TO START
-// ------------------------------------------------------------
+// ============================================================
 
-async function cnBackToStart() {
+function cnBackToStart() {
 
-  try {
-
-    const tasks = [];
+  const tasks = [];
 
 
-    if (gameRef) {
+  if (gameRef) {
 
-      tasks.push(
-        gameRef
-          .remove()
-          .catch(error =>
-            console.warn(
-              "Could not delete game data:",
-              error
-            )
+    tasks.push(
+
+      gameRef
+        .remove()
+        .catch(error =>
+          console.warn(
+            "Could not delete game:",
+            error
           )
-      );
+        )
 
-    }
-
-
-    if (gameCode) {
-
-      tasks.push(
-        db
-          .ref(
-            "cardColors/" +
-            gameCode
-          )
-          .remove()
-          .catch(error =>
-            console.warn(
-              "Could not delete card colours:",
-              error
-            )
-          )
-      );
-
-    }
-
-
-    await Promise.all(tasks);
+    );
 
   }
 
-  finally {
 
-    location.reload();
+  if (gameCode) {
+
+    tasks.push(
+
+      db.ref(
+        "secretColors/" +
+        gameCode
+      )
+
+      .remove()
+
+      .catch(error =>
+        console.warn(
+          "Could not delete secret colours:",
+          error
+        )
+      )
+
+    );
 
   }
+
+
+  Promise
+    .all(tasks)
+    .finally(() => {
+
+      location.reload();
+
+    });
 
 }
 </script>
