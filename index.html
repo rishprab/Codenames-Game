@@ -134,8 +134,6 @@
   .log-entry { font-size: 0.8rem; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--line); }
   .log-entry:last-child { border-bottom: none; }
   .role-banner { text-align: center; padding: 8px; margin-bottom: 10px; font-size: 0.85rem; border-radius: 8px; background: var(--panel2); }
-  .final-list { font-size: 0.82rem; }
-  .final-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -244,10 +242,7 @@
     <h2 style="margin-top:0" id="cnWinnerTitle">Game Over</h2>
     <p class="small" id="cnWinnerSub"></p>
   </div>
-  <div class="card">
-    <h2 style="margin-top:0">Final board</h2>
-    <div class="final-list" id="finalBoardList"></div>
-  </div>
+  <div class="board" id="endedBoard"></div>
   <button class="secondary" onclick="cnBackToStart()">Back to start</button>
 </div>
 
@@ -767,10 +762,18 @@ function renderEnded() {
   document.getElementById("cnWinnerSub").textContent = "";
 
   const board = gameData.board || [];
-  document.getElementById("finalBoardList").innerHTML = board.map((c, idx) => {
-    const color = cardColorsData[idx] || "?";
-    return `<div class="final-row"><span>${escapeHtml(c.word)}</span><span style="color:var(--${color === 'yellow' ? 'yellow' : color === 'black' ? 'muted' : color})">${color.toUpperCase()}</span></div>`;
-  }).join("");
+  const boardEl = document.getElementById("endedBoard");
+  boardEl.innerHTML = "";
+  board.forEach((card, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "cn-card";
+    btn.textContent = card.word;
+    const color = cardColorsData[idx];
+    if (color) btn.classList.add("color-" + color);
+    if (card.revealed) btn.classList.add("revealed");
+    btn.disabled = true;
+    boardEl.appendChild(btn);
+  });
 }
 
 function cnBackToStart() {
