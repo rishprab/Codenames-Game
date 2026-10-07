@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Play — Codenames</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1e2127;
+    --panel2: #23262c;
+    --line: #2c3037;
+    --text: #e9e7e2;
+    --muted: #8b8f98;
+    --gold: #c9a24b;
+    --red: #b5504f;
+    --blue: #4f7fb5;
+    --yellow: #c9a24b;
+    --black: #17181b;
+    --green: #4f9b6e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 20px 16px 60px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  a.back { display: inline-block; color: var(--muted); text-decoration: none; font-size: 0.85rem; margin-bottom: 14px; }
+  h1 { font-size: 1.5rem; color: var(--gold); margin: 0 0 6px 0; }
+  p.sub { color: var(--muted); font-size: 0.92rem; margin: 0 0 22px 0; line-height: 1.5; }
+  h2 { font-size: 1.1rem; color: var(--gold); margin: 30px 0 12px 0; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .card p { margin: 0 0 8px 0; font-size: 0.92rem; line-height: 1.55; }
+  .card p:last-child { margin-bottom: 0; }
+  em { color: var(--gold); font-style: normal; }
+
+  /* teams */
+  .teams { display: flex; gap: 10px; margin-bottom: 14px; }
+  .team { flex: 1; border-radius: 12px; padding: 14px; border: 1px solid var(--line); }
+  .team.red { background: rgba(181,80,79,0.12); border-color: rgba(181,80,79,0.5); }
+  .team.blue { background: rgba(79,127,181,0.12); border-color: rgba(79,127,181,0.5); }
+  .team h3 { margin: 0 0 6px 0; font-size: 1rem; }
+  .team.red h3 { color: var(--red); }
+  .team.blue h3 { color: var(--blue); }
+  .team p { margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* roles */
+  .role { border-left: 4px solid var(--gold); background: var(--panel); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .role h3 { margin: 0 0 6px 0; font-size: 1.05rem; color: var(--gold); }
+  .role.ops { border-left-color: var(--text); }
+  .role.ops h3 { color: var(--text); }
+  .role p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+
+  /* tile legend */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tile-row { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .mini {
+    flex: 0 0 auto; width: 58px; aspect-ratio: 1.15 / 1; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 0.55rem; font-weight: 800; text-transform: uppercase; color: #14161a;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+  }
+  .mini.red { background: var(--red); }
+  .mini.blue { background: var(--blue); }
+  .mini.yellow { background: var(--yellow); }
+  .mini.black { background: var(--black); color: #fff; font-size: 1.3rem; box-shadow: 0 0 0 2px #000, 0 0 12px rgba(255,90,31,0.35); }
+  .mini.plain { background: #f2f0ea; }
+  .tile-row h4 { margin: 0 0 3px 0; font-size: 0.9rem; }
+  .tile-row p { margin: 0; font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+
+  /* numbered steps */
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .steps li { counter-increment: step; position: relative; padding-left: 38px; margin-bottom: 16px; font-size: 0.92rem; line-height: 1.5; }
+  .steps li:last-child { margin-bottom: 0; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 0;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--panel2); border: 1px solid var(--gold); color: var(--gold);
+    font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* clue example */
+  .clue-demo { text-align: center; background: var(--panel2); border-radius: 10px; padding: 14px; margin: 4px 0 12px; }
+  .clue-demo .label { font-size: 0.75rem; color: var(--muted); }
+  .clue-demo .word { font-size: 1.5rem; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
+  .clue-demo .num { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .demo-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .demo-board .mini { width: auto; }
+  .demo-board .hit { box-shadow: 0 0 0 3px var(--gold); }
+
+  /* turn enders */
+  .enders { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ender { background: var(--panel2); border-radius: 10px; padding: 10px 12px; font-size: 0.85rem; line-height: 1.4; }
+  .ender .icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+  .ender strong { color: var(--text); }
+  .ender span.d { color: var(--muted); }
+
+  .win-box { display: flex; gap: 10px; margin-bottom: 10px; }
+  .win-box:last-child { margin-bottom: 0; }
+  .win-box .icon { font-size: 1.4rem; }
+  .win-box .txt { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+  .win-box .txt strong { color: var(--text); }
+
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dos > div { border-radius: 10px; padding: 12px; font-size: 0.85rem; line-height: 1.5; }
+  .dos .ok { background: rgba(79,155,110,0.12); border: 1px solid rgba(79,155,110,0.45); }
+  .dos .no { background: rgba(181,80,79,0.12); border: 1px solid rgba(181,80,79,0.45); }
+  .dos h4 { margin: 0 0 6px 0; font-size: 0.9rem; }
+  .dos .ok h4 { color: var(--green); }
+  .dos .no h4 { color: var(--red); }
+  .dos ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .dos li { margin-bottom: 4px; }
+
+  .faq h4 { margin: 0 0 4px 0; font-size: 0.92rem; color: var(--text); }
+  .faq p { color: var(--muted); }
+  .faq > div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .faq > div:first-child { padding-top: 0; }
+  .faq > div:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .tip { font-size: 0.82rem; color: var(--muted); font-style: italic; margin-top: 10px; }
+
+  @media (max-width: 460px) {
+    .tiles, .enders, .dos { grid-template-columns: 1fr; }
+    .teams { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="javascript:window.close()">← Close this tab</a>
+  <h1>🕵️ How to Play Codenames</h1>
+  <p class="sub">Two rival spy agencies. Twenty-five secret codenames. One spymaster on each side knows exactly which words belong to their agents. The trouble is they can only talk in one-word clues. Make contact with all your agents before the other team does, and whatever you do, don't wake the assassin.</p>
+
+  <h2>The two teams</h2>
+  <div class="teams">
+    <div class="team red">
+      <h3>🔴 Red Team</h3>
+      <p>Has either 8 or 9 agents hidden on the board.</p>
+    </div>
+    <div class="team blue">
+      <h3>🔵 Blue Team</h3>
+      <p>Has either 8 or 9 agents hidden on the board.</p>
+    </div>
+  </div>
+  <div class="card">
+    <p>A coin flip decides who goes first. The team that starts gets <em>9 agents</em> to find and the other team gets <em>8</em>, which keeps things fair. Check the scoreboard at the top of the game screen to see how many each team still has left.</p>
+  </div>
+
+  <h2>Your role</h2>
+  <div class="role">
+    <h3>🧠 Spymaster</h3>
+    <p>You see the secret colour of every card. Your job is to give clues that steer your team towards your agents and away from everything else. You can't point, hint, pull faces or say anything else. Just the clue.</p>
+  </div>
+  <div class="role ops">
+    <h3>🔍 Operative</h3>
+    <p>You see a board of plain words. Your job is to talk it out with your teammates, work out what your spymaster meant and tap the right cards. Every other player on the team is an operative.</p>
+  </div>
+
+  <h2>What's hiding under the cards</h2>
+  <div class="tiles">
+    <div class="tile-row">
+      <div class="mini red">Agent</div>
+      <div><h4>Red agent</h4><p>Belongs to Red. Reveal all of them and Red wins.</p></div>
+    </div>
+    <div class="tile-row">
+      <div class="mini blue">Agent</div>
+      <div><h4>Blue agent</h4><p>Belongs to Blue. Reveal all of them and Blue wins.</p></div>
+    </div>
+    <div class="tile-row">
+      <div class="mini yellow">Bystander</div>
+      <div><h4>Innocent bystander</h4><p>7 of these. Harmless, but tapping one ends your turn.</p></div>
+    </div>
+    <div class="tile-row">
+      <div class="mini black">☠️</div>
+      <div><h4>The assassin</h4><p>Only 1. Tap it and your team loses on the spot. 💣</p></div>
+    </div>
+  </div>
+
+  <h2>Getting a game going</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><strong>One person creates a game</strong> and becomes the host. A 4-letter room code appears.</li>
+      <li><strong>Everyone else joins</strong> by entering their name and that room code.</li>
+      <li><strong>Pick a team.</strong> Tap Join Red or Join Blue. You need at least 4 players in total, with 2 or more on each team.</li>
+      <li><strong>Choose spymasters.</strong> Exactly one person per team taps Become Spymaster.</li>
+      <li><strong>The host picks a word list,</strong> either the built-in default list or a custom list of at least 25 of your own words (inside jokes highly encouraged), then taps Start Game.</li>
+    </ol>
+    <p class="tip">Dropped out mid-game? Just rejoin with the same room code on the same device and you'll slot straight back into your team and role.</p>
+  </div>
+
+  <h2>How a turn works</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><strong>The spymaster gives a clue</strong>: one word and a number from 1 to 9. The word links the cards, and the number says how many cards it points to.</li>
+      <li><strong>Operatives discuss</strong> which cards they think the clue points at. Argue, debate, second-guess everything.</li>
+      <li><strong>Tap a card to select it</strong>. It glows gold. <strong>Tap it again to confirm.</strong> This double tap saves you from fat-finger disasters.</li>
+      <li><strong>The card flips</strong> and shows its true colour to everyone.</li>
+      <li><strong>Keep going or stop.</strong> If it was yours, you can guess again, up to the clue's number. You can also tap End Turn whenever you'd rather play it safe.</li>
+    </ol>
+  </div>
+
+  <h2>Clue example</h2>
+  <div class="card">
+    <div class="clue-demo">
+      <div class="label">Clue</div>
+      <div class="word">OCEAN</div>
+      <div class="num">3 cards · 3 guesses left</div>
+    </div>
+    <div class="demo-board">
+      <div class="mini plain hit">Whale</div>
+      <div class="mini plain">Piano</div>
+      <div class="mini plain hit">Shark</div>
+      <div class="mini plain">Castle</div>
+      <div class="mini plain">Desert</div>
+      <div class="mini plain hit">Island</div>
+      <div class="mini plain">Rocket</div>
+      <div class="mini plain">Beach</div>
+    </div>
+    <p>Red's spymaster wants <em>Whale</em>, <em>Shark</em> and <em>Island</em>, so "Ocean, 3" makes sense. But careful: <em>Beach</em> fits that clue too, and if it's a bystander, or worse, a blue agent, the team could get burned. Good spymasters think about which wrong cards their clue might drag in.</p>
+  </div>
+
+  <h2>The guess limit</h2>
+  <div class="card">
+    <p>Your team gets <em>exactly as many guesses as the clue's number</em>. No more. "Ocean, 3" means 3 taps at most. The counter in the clue box shows how many you have left.</p>
+    <p>Your turn ends straight away when any of these happen:</p>
+    <div class="enders">
+      <div class="ender"><span class="icon">✋</span><strong>Out of guesses.</strong> <span class="d">You used every guess the clue allowed.</span></div>
+      <div class="ender"><span class="icon">🟡</span><strong>Bystander.</strong> <span class="d">You tapped an innocent yellow card.</span></div>
+      <div class="ender"><span class="icon">🎁</span><strong>Wrong team's agent.</strong> <span class="d">You just gave the other side a free point.</span></div>
+      <div class="ender"><span class="icon">💣</span><strong>The assassin.</strong> <span class="d">Not just your turn. Your whole game is over.</span></div>
+    </div>
+    <p class="tip">You can also tap End Turn yourself at any point.</p>
+  </div>
+
+  <h2>How you win (or lose)</h2>
+  <div class="card">
+    <div class="win-box">
+      <span class="icon">🏆</span>
+      <span class="txt"><strong>Find all your agents first.</strong> The moment your last agent is revealed, your team wins. Cue confetti. 🎉</span>
+    </div>
+    <div class="win-box">
+      <span class="icon">🎁</span>
+      <span class="txt"><strong>Win by accident.</strong> If the other team taps your final agent by mistake, you win anyway. Their loss, literally.</span>
+    </div>
+    <div class="win-box">
+      <span class="icon">💥</span>
+      <span class="txt"><strong>Hit the assassin and you lose instantly,</strong> no matter how far ahead you were. Stand well back.</span>
+    </div>
+  </div>
+
+  <h2>Fair clues vs. cheating</h2>
+  <div class="dos">
+    <div class="ok">
+      <h4>✅ Fair game</h4>
+      <ul>
+        <li>One single word</li>
+        <li>Proper nouns: <em>Titanic</em>, <em>Paris</em>, <em>Batman</em></li>
+        <li>Meanings, themes, pop culture, shared memories</li>
+        <li>Risky combos that link 4 or more cards</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h4>🚫 Not allowed</h4>
+      <ul>
+        <li>Any word showing on the board (or part of one)</li>
+        <li>Spelling or letter hints like "starts with B"</li>
+        <li>Rhymes, accents, gestures, eyebrow waggling</li>
+        <li>Reacting while your team discusses</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Tips from the field</h2>
+  <div class="card">
+    <p><strong>🧠 Spymasters:</strong> Play it safe early with a 2 and save the ambitious 4s for when the board has thinned out. Before you lock in a clue, scan for the assassin and ask yourself whether your word could possibly point at it.</p>
+    <p><strong>🔍 Operatives:</strong> Start with the card you're most confident about. Once you get past the number your spymaster is probably sure of, End Turn is often the smartest move.</p>
+    <p><strong>👀 Everyone:</strong> Pay attention to the other team's clues. They might reveal which words your opponents want, so you can avoid them.</p>
+  </div>
+
+  <h2>Quick questions</h2>
+  <div class="card faq">
+    <div>
+      <h4>Why can't I tap any cards?</h4>
+      <p>Either it's the other team's turn, your spymaster hasn't given a clue yet, you're the spymaster, or your team has used every guess for this clue.</p>
+    </div>
+    <div>
+      <h4>Why does my spymaster see colours and I don't?</h4>
+      <p>That's the whole point! Only spymasters see the secret key. Everyone sees the true colours once a card is flipped or the game ends.</p>
+    </div>
+    <div>
+      <h4>Can I give a clue of 0?</h4>
+      <p>Not in this version. Every clue needs a number from 1 to 9, since that's how many guesses your team gets.</p>
+    </div>
+    <div>
+      <h4>Where can I see what's happened so far?</h4>
+      <p>Scroll down to the Game log. It records every clue and every guess, so nobody can claim they "definitely said Shark".</p>
+    </div>
+    <div>
+      <h4>How do I play again?</h4>
+      <p>Tap Back to start on the results screen. That wipes the old game, and the host can create a fresh room.</p>
+    </div>
+  </div>
+
+  <p class="tip" style="margin-top:24px; text-align:center;">Good luck, agents. This message will not self-destruct, but the assassin will. 💣</p>
+
+</div>
+</body>
+</html>
