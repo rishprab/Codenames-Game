@@ -2,333 +2,450 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Codenames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=Share+Tech+Mono&family=Chakra+Petch:wght@500;700&family=Bungee&family=Outfit:wght@400;600;700;800&display=swap">
 <style>
-  :root {
-    --bg: #14161a;
-    --panel: #1e2127;
-    --panel2: #23262c;
-    --line: #2c3037;
-    --text: #e9e7e2;
-    --muted: #8b8f98;
-    --gold: #c9a24b;
-    --red: #b5504f;
-    --blue: #4f7fb5;
-    --yellow: #c9a24b;
-    --black: #17181b;
-    --green: #4f9b6e;
+  /* ================= THEMES =================
+     Each theme is a set of variables on #app, #bg and the reveal layer.
+     casefile = spy dossier · nightops = control room · spyreel = 60s film poster */
+  .t-casefile {
+    --base:#211c17; --bgImg: radial-gradient(circle at 30% 12%, #3d342b, #211c17 62%, #17130f);
+    --fg:#efe6d2; --mute:#b9ab8f; --panel:#352e26; --panelBd:1px solid #4d4436; --r:6px;
+    --hi:#c0392b; --onHi:#fff7e8; --red:#c0392b; --blue:#2f5d8a; --neu:#a8916a; --ass:#1a1512;
+    --redT:#ecd3c9; --blueT:#d2dde7; --neuT:#e6dabd; --assT:#c9bfae;
+    --display:"Special Elite", "Courier New", monospace; --body:"Courier Prime", "Courier New", monospace; --ls:.02em;
+    --paper:#efe3c6; --paperInk:#2b2116; --paperBd:1px solid #c9b78f;
+    --card:#efe3c6; --cardInk:#2b2116; --cardBd:1px solid #c9b78f; --cardR:3px; --cardSh:0 2px 0 #b5a27a, 0 4px 8px rgba(0,0,0,.45);
+    --inBg:#f5ecd6; --inInk:#2b2116; --inBd:1px solid #c9b78f;
   }
+  .t-nightops {
+    --base:#04090d; --bgImg: radial-gradient(circle at 50% 0%, #0f2d3e, #04090d 70%);
+    --fg:#cfeaf2; --mute:#7fa6b3; --panel:#0b1e2a; --panelBd:1px solid #1d4256; --r:4px;
+    --hi:#3ee6c4; --onHi:#04231d; --red:#ff5d6c; --blue:#4cb4ff; --neu:#c9b26b; --ass:#e9e9e9;
+    --redT:rgba(255,93,108,.16); --blueT:rgba(76,180,255,.16); --neuT:rgba(201,178,107,.13); --assT:rgba(233,233,233,.22);
+    --display:"Chakra Petch", "Arial Narrow", sans-serif; --body:"Share Tech Mono", ui-monospace, monospace; --ls:.1em;
+    --paper:#06161f; --paperInk:#cfeaf2; --paperBd:1px solid #1d4256;
+    --card:#0b1d29; --cardInk:#bfe9f5; --cardBd:1px solid #1f5368; --cardR:3px; --cardSh:inset 0 0 12px rgba(62,230,196,.08);
+    --inBg:#06161f; --inInk:#3ee6c4; --inBd:1px solid #1f5368;
+  }
+  .t-spyreel {
+    --base:#f2e8d5; --bgImg: radial-gradient(circle at 50% 112%, #ff6b35 0 18%, #f2e8d5 18.4% 25%, #e9c46a 25.4% 32%, #f2e8d5 32.4%);
+    --fg:#1d1b1a; --mute:#6b625a; --panel:#fff8ea; --panelBd:2px solid #1d1b1a; --r:14px;
+    --hi:#ff6b35; --onHi:#1d1b1a; --red:#e63946; --blue:#1d6fb8; --neu:#e9c46a; --ass:#1d1b1a;
+    --redT:#fbd5d8; --blueT:#d3e5f5; --neuT:#f8ebc4; --assT:#cfc8bd;
+    --display:"Bungee", Impact, sans-serif; --body:"Outfit", system-ui, sans-serif; --ls:0;
+    --paper:#1d1b1a; --paperInk:#f2e8d5; --paperBd:2px solid #1d1b1a;
+    --card:#fffaf0; --cardInk:#1d1b1a; --cardBd:2px solid #1d1b1a; --cardR:10px; --cardSh:3px 3px 0 #1d1b1a;
+    --inBg:#fffaf0; --inInk:#1d1b1a; --inBd:2px solid #1d1b1a;
+  }
+
+  /* ================= BASE ================= */
   * { box-sizing: border-box; }
+  html { background: #211c17; }
   body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: 16px;
+    margin: 0; min-height: 100vh;
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 32px max(14px, env(safe-area-inset-left));
+    -webkit-text-size-adjust: 100%;
   }
-  h1 { font-size: 1.4rem; color: var(--gold); margin: 0 0 4px 0; }
-  h2 { font-size: 1.05rem; color: var(--gold); margin: 16px 0 8px 0; }
-  p.sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 16px 0; }
+  #bg { position: fixed; inset: 0; z-index: -1; background: var(--bgImg); }
+  .t-nightops#bg::after, .rv.t-nightops::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);
+  }
+  #app, .app-clone { max-width: 520px; margin: 0 auto; color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.4; }
+
+  /* text that changes per theme */
+  [data-t] { display: none; }
+  .t-casefile [data-t=casefile], .t-nightops [data-t=nightops], .t-spyreel [data-t=spyreel] { display: inline; }
+
+  /* reveal layer: the new theme spreading out from the tapped button */
+  .rv { position: fixed; inset: 0; z-index: 1500; overflow: hidden; pointer-events: none; background: var(--bgImg); }
+
+  .hdr { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px; height: 46px; }
+  .hdr h1 { margin: 0; font: 400 26px/28px var(--display); height: 28px; white-space: nowrap; letter-spacing: var(--ls); color: var(--hi); }
+  .hdr .sub { margin: 2px 0 0; font-size: 12px; line-height: 16px; height: 16px; color: var(--mute); }
+  .help {
+    margin-left: auto; flex: none; width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; text-decoration: none;
+    background: var(--panel); border: var(--panelBd); color: var(--hi); font: 700 17px var(--display);
+  }
+  .t-nightops .hdr h1 { text-shadow: 0 0 14px rgba(62,230,196,.45); }
+  .t-spyreel .hdr h1 { text-shadow: 2px 2px 0 #1d1b1a; }
+  .t-spyreel .help { box-shadow: 2px 2px 0 #1d1b1a; }
+
   .screen { display: none; }
   .screen.active { display: block; }
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
-  }
-  input[type=text], textarea {
-    width: 100%;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 11px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    margin-bottom: 8px;
-    font-family: inherit;
-  }
-  textarea { min-height: 90px; resize: vertical; }
-  input[type=number] {
-    width: 70px;
-    background: var(--panel2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 1rem;
-    text-align: center;
-  }
-  button {
-    background: var(--gold);
-    border: none;
-    color: #14161a;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 7px;
-  }
-  button.secondary { background: var(--panel2); border: 1px solid var(--line); color: var(--text); font-weight: 600; }
-  button.red-btn { background: var(--red); color: white; }
-  button.blue-btn { background: var(--blue); color: white; }
-  button.green { background: var(--green); color: white; }
-  button:disabled { opacity: 0.35; }
-  .roomcode { font-size: 2rem; letter-spacing: 6px; text-align: center; color: var(--gold); font-weight: 700; margin: 6px 0; }
-  .small { font-size: 0.78rem; color: var(--muted); }
+  .card { background: var(--panel); border: var(--panelBd); border-radius: var(--r); padding: 12px; margin-bottom: 10px; }
+  .t-spyreel .card { box-shadow: 3px 3px 0 #1d1b1a; }
+  .paper { background: var(--paper); color: var(--paperInk); border: var(--paperBd); border-radius: var(--r); }
+  .lab { font-size: 11px; line-height: 14px; min-height: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin: 0 0 7px; }
+  .small { font-size: 12px; color: var(--mute); }
   .center { text-align: center; }
-  .team-col { display: flex; gap: 10px; margin-bottom: 10px; }
-  .team-box { flex: 1; border-radius: 10px; padding: 10px; border: 1px solid var(--line); }
-  .team-box.red { background: rgba(181,80,79,0.12); }
-  .team-box.blue { background: rgba(79,127,181,0.12); }
-  .team-box h3 { margin: 0 0 8px 0; font-size: 0.9rem; }
-  .team-box.red h3 { color: var(--red); }
-  .team-box.blue h3 { color: var(--blue); }
-  .player-chip { font-size: 0.82rem; padding: 4px 0; }
-  .player-chip .tag { font-size: 0.68rem; color: var(--gold); }
-  .toggle-row { display: flex; gap: 8px; }
-  .toggle-row button { flex: 1; }
-  .status-pill { display: inline-block; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--panel2); color: var(--gold); margin-bottom: 10px; }
-  .status-pill.turn-red { color: var(--red); }
-  .status-pill.turn-blue { color: var(--blue); }
-  .scoreboard { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; font-weight: 700; }
-  .scoreboard .r { color: var(--red); }
-  .scoreboard .b { color: var(--blue); }
-  .clue-display { text-align: center; padding: 10px; background: var(--panel2); border-radius: 10px; margin-bottom: 10px; }
-  .clue-display .word { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 12px;
+
+  input[type=text], textarea, input[type=number] {
+    width: 100%; background: var(--inBg); border: var(--inBd); color: var(--inInk);
+    padding: 11px; border-radius: max(3px, calc(var(--r) - 4px)); font: 16px var(--body); margin: 0 0 8px;
   }
+  input::placeholder, textarea::placeholder { color: var(--inInk); opacity: .45; }
+  input:focus, textarea:focus { outline: 2px solid var(--hi); outline-offset: 1px; }
+  textarea { min-height: 90px; resize: vertical; }
+
+  .btn {
+    display: block; width: 100%; min-height: 44px; margin: 0 0 8px; padding: 0 14px; line-height: 20px;
+    border: 0; border-radius: var(--r); background: var(--hi); color: var(--onHi);
+    font: 700 15px var(--body); letter-spacing: .02em; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .btn.sec { background: var(--panel); color: var(--fg); border: var(--panelBd); }
+  .btn.red { background: var(--red); color: #fff; }
+  .btn.blue { background: var(--blue); color: #fff; }
+  .btn.on { box-shadow: inset 0 0 0 2px var(--hi); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn:focus-visible { outline: 3px solid var(--hi); outline-offset: 2px; }
+  .t-casefile .btn:not(.sec) { text-transform: uppercase; letter-spacing: .08em; }
+  .t-nightops .btn { text-transform: uppercase; letter-spacing: .12em; }
+  .t-nightops .btn:not(.sec):not(.red):not(.blue) { box-shadow: 0 0 16px rgba(62,230,196,.35); }
+  .t-nightops .btn.red, .t-nightops .btn.blue { background: transparent; border: 1px solid currentColor; }
+  .t-nightops .btn.red { color: var(--red); } .t-nightops .btn.blue { color: var(--blue); }
+  .t-spyreel .btn { border: 2px solid #1d1b1a; box-shadow: 3px 3px 0 #1d1b1a; }
+  .t-spyreel .btn:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 1px 1px 0 #1d1b1a; }
+
+  /* ================= LOBBY ================= */
+  .code { position: relative; text-align: center; padding: 10px; margin-bottom: 14px; height: 86px; }
+  .code small { display: block; font-size: 11px; line-height: 14px; height: 14px; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .code b { display: block; font: 400 38px/48px var(--display); height: 48px; margin-top: 2px; letter-spacing: .2em; padding-left: .2em; }
+  .t-casefile .code { transform: rotate(-1deg); box-shadow: 0 4px 10px rgba(0,0,0,.4); }
+  .t-casefile .code::after {
+    content: "CONFIDENTIAL"; position: absolute; right: 10px; bottom: 9px; font: 10px "Special Elite", monospace; letter-spacing: .12em;
+    color: #c0392b; border: 1.5px solid #c0392b; padding: 0 4px; transform: rotate(6deg);
+  }
+  .t-nightops .code b { color: var(--hi); text-shadow: 0 0 14px rgba(62,230,196,.6); }
+  .t-spyreel .code { box-shadow: 4px 4px 0 var(--hi); }
+  .t-spyreel .code b { color: var(--hi); }
+
+  .themes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 6px; }
+  .th {
+    position: relative; display: flex; flex-direction: column; gap: 4px; padding: 6px; margin: 0; text-align: left; height: 112px; justify-content: flex-start;
+    border-radius: var(--r); border: var(--panelBd); background: var(--panel); color: var(--fg);
+    font-family: var(--body); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .th:disabled { cursor: default; opacity: 1; color: var(--fg); }
+  .th.on { box-shadow: 0 0 0 2px var(--hi); }
+  .t-spyreel .th { box-shadow: 3px 3px 0 #1d1b1a; }
+  .t-spyreel .th.on { box-shadow: 3px 3px 0 #1d1b1a, 0 0 0 3px var(--hi); }
+  .th .nm { font-weight: 700; font-size: 13px; line-height: 16px; height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .th .ds { font-size: 11px; line-height: 13px; height: 26px; overflow: hidden; opacity: .75; }
+  .th .tick { position: absolute; top: -8px; right: -4px; display: none; font: 700 10px var(--body); padding: 1px 6px; border-radius: 999px; background: var(--hi); color: var(--onHi); }
+  .th.on .tick { display: block; }
+  .sw { flex: none; height: 46px; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; }
+  .sw i { width: 22px; height: 16px; border-radius: 2px; display: block; }
+  .sw.casefile { background: radial-gradient(circle at 30% 20%, #3a322a, #211c17); }
+  .sw.casefile i { background: #efe3c6; transform: rotate(-4deg); box-shadow: 0 1px 0 #b5a27a; }
+  .sw.casefile i:nth-child(2) { transform: rotate(3deg); background: #e7cfc6; outline: 1px solid #c0392b; }
+  .sw.nightops { background: radial-gradient(circle at 50% 0%, #0e2b3b, #04090d); }
+  .sw.nightops i { background: #0b1d29; border: 1px solid #1f5368; }
+  .sw.nightops i:nth-child(2) { border-color: #3ee6c4; box-shadow: 0 0 6px #3ee6c4; }
+  .sw.spyreel { background: radial-gradient(circle at 50% 130%, #ff6b35 0 30%, #e9c46a 30.5% 48%, #f2e8d5 48.5%); }
+  .sw.spyreel i { background: #fffaf0; border: 1.5px solid #1d1b1a; box-shadow: 2px 2px 0 #1d1b1a; border-radius: 4px; }
+  .sw.spyreel i:nth-child(2) { background: #e63946; }
+  .note { font-size: 12px; line-height: 16px; min-height: 16px; color: var(--mute); text-align: center; margin: 0 0 14px; }
+
+  .teams { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 10px; }
+  .team { border-radius: var(--r); border: var(--panelBd); background: var(--panel); padding: 9px; display: flex; flex-direction: column; }
+  .team h3 { margin: 0 0 6px; font: 400 16px/20px var(--display); height: 20px; white-space: nowrap; overflow: hidden; letter-spacing: var(--ls); }
+  .team.red h3 { color: var(--red); } .team.blue h3 { color: var(--blue); }
+  .team .list { flex: 1; min-height: 30px; }
+  .team .btn { margin: 8px 0 0; min-height: 40px; font-size: 14px; }
+  .t-casefile .team { background: var(--paper); color: var(--paperInk); border: var(--paperBd); box-shadow: 0 3px 8px rgba(0,0,0,.35); }
+  .t-casefile .team.red { transform: rotate(-.7deg); } .t-casefile .team.blue { transform: rotate(.7deg); }
+  .t-nightops .team.red { border-color: rgba(255,93,108,.55); background: rgba(255,93,108,.06); }
+  .t-nightops .team.blue { border-color: rgba(76,180,255,.55); background: rgba(76,180,255,.06); }
+  .t-spyreel .team { box-shadow: 3px 3px 0 #1d1b1a; }
+  .pl { display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 18px; height: 26px; min-width: 0; }
+  .pl .dot { width: 20px; height: 20px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font: 700 11px var(--body); color: #fff; }
+  .red .dot { background: var(--red); } .blue .dot { background: var(--blue); }
+  .t-nightops .pl .dot { color: #04090d; }
+  .pl .pn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .pl.me .pn { font-weight: 700; }
+  .pl.me .dot { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--hi); }
+  .t-casefile .pl.me .dot { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--paperInk); }
+  .pl em { margin-left: auto; font-style: normal; font-size: 10px; opacity: .75; flex: none; }
+  .empty { font-size: 12px; line-height: 26px; height: 26px; opacity: .6; margin: 0; }
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #lobbyWarning { line-height: 16px; min-height: 64px; margin: 8px 0; }
+
+  /* ================= GAME ================= */
+  .status { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .turn { font-weight: 700; }
+  .turn.red { color: var(--red); } .turn.blue { color: var(--blue); }
+  .role { color: var(--mute); text-align: right; font-size: 12px; }
+  .score { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; align-items: center; margin-bottom: 10px; }
+  .tile { text-align: center; padding: 7px 6px; border-radius: var(--r); background: var(--panel); border: var(--panelBd); transition: box-shadow .3s; }
+  .tile.red { --tc: var(--red); } .tile.blue { --tc: var(--blue); }
+  .tile .nm { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--tc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile b { display: block; font: 400 28px/1.05 var(--display); color: var(--tc); }
+  .tile small { font-size: 10px; color: var(--mute); }
+  .tile.now { box-shadow: 0 0 0 2px var(--tc); }
+  .t-spyreel .tile { box-shadow: 3px 3px 0 #1d1b1a; }
+  .t-spyreel .tile.now { box-shadow: 3px 3px 0 #1d1b1a, 0 0 0 3px var(--tc); }
+  .t-casefile .tile { background: var(--paper); border: var(--paperBd); }
+  .t-casefile .tile small { color: #7a6a52; }
+  .t-nightops .tile.now { box-shadow: 0 0 0 1px var(--tc), 0 0 14px var(--tc); }
+  .pips { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; margin-top: 4px; color: var(--tc); }
+  .pips i { width: 7px; height: 7px; border-radius: 2px; background: currentColor; transition: opacity .4s; }
+  .pips i.gone { opacity: .16; }
+  .vs { font: 400 13px var(--display); color: var(--mute); }
+
+  .clue { position: relative; text-align: center; padding: 10px 12px; margin-bottom: 10px; min-height: 64px; }
+  .clue .lab { color: inherit; opacity: .7; margin: 0 0 2px; }
+  .clue .w { font: 400 26px/1.15 var(--display); letter-spacing: var(--ls); word-break: break-word; }
+  .clue .n { margin: 2px 0 0; font-size: 12px; opacity: .8; }
+  .clue.waiting .w { font: 400 15px/1.3 var(--body); opacity: .75; padding: 6px 0; }
+  .t-casefile .clue { transform: rotate(-1deg); box-shadow: 0 4px 10px rgba(0,0,0,.4); }
+  .t-casefile .clue:not(.waiting)::after {
+    content: "TELEGRAM"; position: absolute; right: 8px; top: 6px; font: 9px "Special Elite", monospace; letter-spacing: .15em;
+    color: #c0392b; border: 1px solid #c0392b; padding: 0 4px; transform: rotate(4deg);
+  }
+  .t-nightops .clue .w { color: var(--hi); text-shadow: 0 0 10px rgba(62,230,196,.5); }
+  .t-nightops .clue:not(.waiting) .w::after { content: "_"; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .t-spyreel .clue { box-shadow: 4px 4px 0 var(--hi); }
+  .t-spyreel .clue .w { color: var(--hi); }
+  .giverow { display: grid; grid-template-columns: minmax(0,1fr) 74px; gap: 8px; }
+  .giverow input[type=number] { text-align: center; }
+
+  .board { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; margin-bottom: 10px; perspective: 800px; }
   .cn-card {
-    aspect-ratio: 1.15 / 1;
-    border-radius: 8px;
-    border: 2px solid var(--line);
-    background: #f2f0ea;
-    color: #14161a;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 3px;
-    cursor: pointer;
-    line-height: 1.1;
+    position: relative; width: 100%; margin: 0; aspect-ratio: 1.12 / 1; padding: 3px; overflow: hidden;
+    border-radius: var(--cardR); border: var(--cardBd); background: var(--card); color: var(--cardInk); box-shadow: var(--cardSh);
+    font: 700 clamp(9px, 2.55vw, 12.5px)/1.05 var(--body); text-transform: uppercase; letter-spacing: .01em;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    cursor: pointer; transition: transform .18s, box-shadow .18s, opacity .3s; -webkit-tap-highlight-color: transparent;
   }
-  .cn-card:disabled { cursor: default; }
-  .cn-card.color-red { background: var(--red); border-color: var(--red); color: #14161a; }
-  .cn-card.color-blue { background: var(--blue); border-color: var(--blue); color: #14161a; }
-  .cn-card.color-yellow { background: var(--yellow); border-color: var(--yellow); color: #14161a; }
-  .cn-card.color-black { background: var(--black); border-color: #000; color: #ffffff; }
-  .cn-card.revealed { opacity: 0.9; box-shadow: 0 0 0 3px #ffffff; }
-  .cn-card.armed { box-shadow: 0 0 0 3px var(--gold), inset 0 0 0 2px var(--gold); transform: scale(0.96); }
-  .log-entry { font-size: 0.8rem; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .cn-card:disabled { cursor: default; color: var(--cardInk); }
+  .cn-card .tx { position: relative; z-index: 2; word-break: break-word; }
+  .cn-card .key { position: absolute; inset: 0; z-index: 1; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .k-red { --kc: var(--red); --kt: var(--redT); } .k-blue { --kc: var(--blue); --kt: var(--blueT); }
+  .k-yellow { --kc: var(--neu); --kt: var(--neuT); } .k-black { --kc: var(--ass); --kt: var(--assT); }
+  .cn-card.show-key .key { opacity: 1; box-shadow: inset 0 0 0 3px var(--kc); background: var(--kt); }
+  .cn-card.show-key.k-black .key { background: repeating-linear-gradient(45deg, var(--kt) 0 5px, transparent 5px 9px); }
+  .cn-card.armed { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 0 3px var(--hi), 0 8px 16px rgba(0,0,0,.45); z-index: 3; }
+  .cn-card.pending { opacity: .55; }
+  .cn-card .face { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 2px; opacity: 0; pointer-events: none; }
+  .cn-card.done .face { opacity: 1; }
+  .cn-card .face svg { width: 15px; height: 15px; flex: none; }
+  .cn-card .fw { font-size: .82em; line-height: 1.05; word-break: break-word; }
+
+  /* Case File: crooked index cards, rubber stamps */
+  .t-casefile .cn-card:not(.armed):nth-child(3n) { transform: rotate(-1.2deg); }
+  .t-casefile .cn-card:not(.armed):nth-child(4n) { transform: rotate(1deg); }
+  .t-casefile .cn-card.done .tx { opacity: .25; }
+  .t-casefile .cn-card.done.k-red { background: var(--redT); } .t-casefile .cn-card.done.k-red .face { color: #a52a1e; }
+  .t-casefile .cn-card.done.k-blue { background: var(--blueT); } .t-casefile .cn-card.done.k-blue .face { color: #20466d; }
+  .t-casefile .cn-card.done.k-yellow { background: var(--neuT); } .t-casefile .cn-card.done.k-yellow .face { color: #7a6542; }
+  .t-casefile .cn-card.done.k-black { background: #231d18; color: #efe3c6; } .t-casefile .cn-card.done.k-black .face { color: #e04a3a; }
+  .t-casefile .stamp {
+    font: 400 clamp(7px, 2vw, 10px)/1.05 "Special Elite", monospace; border: 2px solid currentColor; border-radius: 2px;
+    padding: 1px 3px; transform: rotate(-12deg); background: rgba(255,255,255,.18);
+  }
+  /* Night Ops: terminal tiles that decrypt */
+  .t-nightops .board.live::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 40px; top: -40px; pointer-events: none; z-index: 4;
+    background: linear-gradient(180deg, transparent, rgba(62,230,196,.12), transparent); animation: sweep 4.5s linear infinite;
+  }
+  @keyframes sweep { to { top: 100%; } }
+  .t-nightops .cn-card.done .tx { opacity: 0; }
+  .t-nightops .cn-card.done.k-red { background: rgba(255,93,108,.18); border-color: #ff5d6c; box-shadow: 0 0 12px rgba(255,93,108,.45); color: #ffd4d9; }
+  .t-nightops .cn-card.done.k-blue { background: rgba(76,180,255,.18); border-color: #4cb4ff; box-shadow: 0 0 12px rgba(76,180,255,.45); color: #d6eeff; }
+  .t-nightops .cn-card.done.k-yellow { background: rgba(201,178,107,.12); border-color: #7d6d3d; color: #cbbd8c; }
+  .t-nightops .cn-card.done.k-black { background: #e9e9e9; color: #07131c; }
+  .t-nightops .face small { font-size: 7.5px; letter-spacing: .16em; opacity: .85; }
+  /* Spy Reel: chunky cards that spin over into poster tiles */
+  .t-spyreel .cn-card { font-weight: 800; }
+  .t-spyreel .cn-card.done .tx { opacity: 0; }
+  .t-spyreel .cn-card.done { color: #fffaf0; }
+  .t-spyreel .cn-card.done.k-red { background: #e63946; } .t-spyreel .cn-card.done.k-blue { background: #1d6fb8; }
+  .t-spyreel .cn-card.done.k-yellow { background: #e9c46a; color: #1d1b1a; } .t-spyreel .cn-card.done.k-black { background: #1d1b1a; }
+
+  .hint { text-align: center; font-size: 12px; color: var(--mute); margin: -2px 0 10px; }
+  .log-entry { font-size: 12.5px; color: var(--mute); padding: 5px 0; border-bottom: 1px dashed var(--line, rgba(128,128,128,.3)); }
   .log-entry:last-child { border-bottom: none; }
-  .role-banner { text-align: center; padding: 8px; margin-bottom: 10px; font-size: 0.85rem; border-radius: 8px; background: var(--panel2); }
 
-  /* ---------- Effects: bomb + celebration ---------- */
+  /* ================= ENDED ================= */
+  .win { text-align: center; padding: 18px 14px 14px; margin-bottom: 12px; position: relative; overflow: hidden; }
+  .win.red { --wc: var(--red); } .win.blue { --wc: var(--blue); }
+  .win .stampline { display: inline-block; font: 400 24px/1.1 var(--display); color: var(--wc); }
+  .win h2 { margin: 10px 0 4px; font: 400 22px/1.15 var(--display); letter-spacing: var(--ls); }
+  .win p { margin: 0; font-size: 13px; opacity: .8; }
+  .t-casefile .win { box-shadow: 0 6px 14px rgba(0,0,0,.45); }
+  .t-casefile .win .stampline { border: 4px solid currentColor; padding: 2px 12px; transform: rotate(-6deg); text-transform: uppercase; font-size: 28px; }
+  .t-nightops .win .stampline { color: var(--hi); letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 0 14px rgba(62,230,196,.6); }
+  .t-nightops .win h2 { color: var(--wc); text-transform: uppercase; }
+  .t-spyreel .win { box-shadow: 5px 5px 0 var(--hi); }
+  .t-spyreel .win .stampline { color: var(--hi); text-transform: uppercase; font-size: 22px; }
+  .t-spyreel .win h2 { color: #f2e8d5; }
+
+  /* ================= OVERLAYS (assassin / win) ================= */
+  .ov { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; cursor: pointer; transition: opacity .5s; overflow: hidden; }
+  .ov.on { display: flex; }
+  .ov.fading { opacity: 0; }
+  .ov .big { position: relative; z-index: 2; text-transform: uppercase; }
+  .ov .osub { position: relative; z-index: 2; margin-top: 18px; font-size: 16px; max-width: 320px; }
+  .ov .skip { position: absolute; z-index: 2; bottom: max(18px, env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; opacity: .6; }
+  .t-casefile .ov { background: rgba(20,14,10,.86); color: #efe6d2; }
+  .t-casefile .ov .big { font: 400 clamp(36px, 12vw, 60px)/1 "Special Elite", monospace; color: #e04a3a; border: 6px solid currentColor; border-radius: 6px; padding: 6px 16px; transform: rotate(-12deg); background: rgba(255,240,220,.06); }
+  .t-nightops .ov { background: rgba(2,8,12,.92); color: #cfeaf2; }
+  .t-nightops .ov .big { font: 700 clamp(26px, 8.5vw, 44px)/1.15 "Chakra Petch", sans-serif; letter-spacing: .18em; color: #ff5d6c; text-shadow: 0 0 18px currentColor; }
+  .t-spyreel .ov { background: transparent; color: #f2e8d5; }
+  .t-spyreel .ov .big { font: 400 clamp(28px, 9vw, 44px)/1.05 "Bungee", sans-serif; color: #ff6b35; text-shadow: 3px 3px 0 #1d1b1a; }
+  .t-spyreel .ov .skip { color: #1d1b1a; }
+  .iris { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 0 var(--ir, 150%), #1d1b1a calc(var(--ir, 150%) + .5%)); }
+  .barrel { position: relative; z-index: 2; width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, #fff 0 7px, #ddd 7px 14px); box-shadow: 0 0 0 7px #1d1b1a; display: flex; align-items: center; justify-content: center; }
+  .t-spyreel .barrel .big { font-size: 30px; }
+  .rings { position: absolute; inset: -30%; background: repeating-radial-gradient(circle at 50% 50%, var(--wc) 0 30px, #f2e8d5 30px 60px); opacity: .95; }
+  .titlebox { position: relative; z-index: 2; background: #1d1b1a; padding: 16px 20px; border-radius: 14px; box-shadow: 6px 6px 0 #ff6b35; }
+  .titlebox .osub { margin: 10px auto 0; color: #f2e8d5; font-weight: 800; }
+
   #fxCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2001; }
-  .fx-overlay {
-    position: fixed; inset: 0; z-index: 2000; display: none;
-    flex-direction: column; align-items: center; justify-content: center;
-    opacity: 1; transition: opacity 0.7s ease;
-  }
-  .fx-overlay.fading { opacity: 0; }
-  .fx-shade { position: absolute; inset: -40px; background: radial-gradient(circle at 50% 45%, rgba(40,10,10,0.92), rgba(0,0,0,0.97)); }
-  .fx-overlay.quake { animation: quake 0.7s linear; }
-  @keyframes quake {
-    0%,100% { transform: translate(0,0); }
-    10% { transform: translate(-14px, 8px); } 20% { transform: translate(12px,-10px); }
-    30% { transform: translate(-10px,-6px); } 40% { transform: translate(9px, 9px); }
-    50% { transform: translate(-7px, 4px); } 60% { transform: translate(6px,-5px); }
-    70% { transform: translate(-4px, 3px); } 80% { transform: translate(3px,-2px); }
-  }
-  .bomb-stage { position: relative; width: min(62vw, 250px); z-index: 1; animation: bombIn 0.45s cubic-bezier(.2,1.4,.4,1) both; }
-  @keyframes bombIn { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .bomb-stage svg { width: 100%; height: auto; overflow: visible; display: block; }
-  .bomb-caption {
-    position: relative; z-index: 1; margin-top: 18px; text-align: center; padding: 0 16px;
-    font-size: 1.25rem; font-weight: 800; letter-spacing: 1px; color: #ffd23f; text-transform: uppercase;
-    text-shadow: 0 0 14px rgba(255,120,30,0.8);
-  }
-  .bomb-caption.boom { font-size: 2.4rem; color: #fff; animation: boomPop 0.5s cubic-bezier(.2,1.6,.4,1) both; }
-  @keyframes boomPop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .fx-flash { position: absolute; inset: -40px; background: #fff; opacity: 0; pointer-events: none; z-index: 2; }
-  .fx-flash.go { animation: flashGo 0.9s ease-out; }
-  @keyframes flashGo { 0% { opacity: 1; } 30% { opacity: 0.85; background: #ffd9a0; } 100% { opacity: 0; } }
 
-  .winner-card { position: relative; overflow: hidden; }
-  .winner-card.red { border-color: var(--red); box-shadow: 0 0 24px rgba(181,80,79,0.45); }
-  .winner-card.blue { border-color: var(--blue); box-shadow: 0 0 24px rgba(79,127,181,0.45); }
-  .winner-card h2 { font-size: 1.6rem; margin: 6px 0; animation: winnerPop 0.9s cubic-bezier(.2,1.5,.4,1) both; }
-  .winner-trophy { font-size: 2.6rem; animation: trophyBounce 1.4s ease-in-out infinite; display: inline-block; }
-  @keyframes winnerPop { from { transform: scale(0.2) rotate(-6deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
-  @keyframes trophyBounce { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-8px) rotate(6deg); } }
-  .winner-card::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.14) 50%, transparent 65%);
-    transform: translateX(-100%); animation: shine 2.8s ease-in-out 1s infinite;
-  }
-  @keyframes shine { to { transform: translateX(100%); } }
-  .help-fab {
-    position: fixed; top: 14px; right: 14px; z-index: 50;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: var(--panel2); border: 1px solid var(--line); color: var(--gold);
-    font-size: 1.05rem; font-weight: 800;
-    display: flex; align-items: center; justify-content: center; text-decoration: none;
+  @media (prefers-reduced-motion: reduce) {
+    .t-nightops .board.live::after, .t-nightops .clue .w::after { animation: none; }
+    .cn-card, .tile, .pips i { transition: none; }
   }
 </style>
 </head>
 <body>
+<div id="bg" class="t-casefile"></div>
+<div id="app" class="t-casefile">
 
-<a class="help-fab" href="codenames-help.html" target="_blank" rel="noopener" aria-label="How to play">?</a>
-
-<h1>🕵️ Codenames</h1>
-<p class="sub" id="topSub">Play a live game with friends.</p>
+<header class="hdr">
+  <div>
+    <h1>CODENAMES</h1>
+    <p class="sub" id="topSub">Play a live game with friends.</p>
+  </div>
+  <a class="help" href="codenames-help.html" target="_blank" rel="noopener" aria-label="How to play">?</a>
+</header>
 
 <!-- LANDING -->
-<div id="screen-landing" class="screen active">
+<section id="screen-landing" class="screen active">
   <div class="card">
-    <h2 style="margin-top:0">Your name</h2>
-    <input type="text" id="nameInput" placeholder="Enter your name" maxlength="16">
+    <p class="lab"><span data-t="casefile">Agent name</span><span data-t="nightops">Callsign</span><span data-t="spyreel">Your name</span></p>
+    <input type="text" id="nameInput" placeholder="Enter your name" maxlength="16" autocomplete="off">
+    <button class="btn" onclick="createGame()"><span data-t="casefile">Open a new case</span><span data-t="nightops">Start an operation</span><span data-t="spyreel">Start a new game</span></button>
   </div>
   <div class="card">
-    <button onclick="createGame()">Create Game</button>
-  </div>
-  <div class="card">
-    <input type="text" id="joinCodeInput" placeholder="Room code" maxlength="4" style="text-transform:uppercase">
-    <button class="secondary" onclick="joinGame()">Join Game</button>
+    <p class="lab">Have a room code?</p>
+    <input type="text" id="joinCodeInput" placeholder="Room code" maxlength="4" style="text-transform:uppercase" autocomplete="off">
+    <button class="btn sec" onclick="joinGame()">Join game</button>
   </div>
   <p class="small center" id="landingError"></p>
-</div>
+</section>
 
 <!-- LOBBY -->
-<div id="screen-lobby" class="screen">
-  <div class="card center">
-    <p class="small">Room code — share this with your friends</p>
-    <div class="roomcode" id="lobbyCode">----</div>
+<section id="screen-lobby" class="screen">
+  <div class="code paper">
+    <small><span data-t="casefile">Case number</span><span data-t="nightops">Secure channel</span><span data-t="spyreel">Now showing · room</span> · share it with your friends</small>
+    <b id="lobbyCode">----</b>
   </div>
 
-  <div class="team-col">
-    <div class="team-box red">
-      <h3>Red Team</h3>
-      <div id="redPlayerList"></div>
-      <button class="red-btn" style="margin-top:6px" onclick="joinTeam('red')">Join Red</button>
+  <p class="lab"><span data-t="casefile">Choose your case file</span><span data-t="nightops">Select operation mode</span><span data-t="spyreel">Pick tonight's feature</span></p>
+  <div class="themes">
+    <button class="th" id="th-casefile" data-k="casefile" onclick="pickTheme('casefile')"><span class="tick">Selected</span><span class="sw casefile"><i></i><i></i><i></i></span><span class="nm">Case File</span><span class="ds">Dossier &amp; stamps</span></button>
+    <button class="th" id="th-nightops" data-k="nightops" onclick="pickTheme('nightops')"><span class="tick">Selected</span><span class="sw nightops"><i></i><i></i><i></i></span><span class="nm">Night Ops</span><span class="ds">Control room</span></button>
+    <button class="th" id="th-spyreel" data-k="spyreel" onclick="pickTheme('spyreel')"><span class="tick">Selected</span><span class="sw spyreel"><i></i><i></i><i></i></span><span class="nm">Spy Reel</span><span class="ds">60s film poster</span></button>
+  </div>
+  <p class="note" id="themeNote"></p>
+
+  <div class="teams">
+    <div class="team red">
+      <h3><span data-t="casefile">Red agency</span><span data-t="nightops">RED CELL</span><span data-t="spyreel">Team Red</span></h3>
+      <div class="list" id="redPlayerList"></div>
+      <button class="btn red" id="joinRedBtn" onclick="joinTeam('red')">Join Red</button>
     </div>
-    <div class="team-box blue">
-      <h3>Blue Team</h3>
-      <div id="bluePlayerList"></div>
-      <button class="blue-btn" style="margin-top:6px" onclick="joinTeam('blue')">Join Blue</button>
+    <div class="team blue">
+      <h3><span data-t="casefile">Blue agency</span><span data-t="nightops">BLUE CELL</span><span data-t="spyreel">Team Blue</span></h3>
+      <div class="list" id="bluePlayerList"></div>
+      <button class="btn blue" id="joinBlueBtn" onclick="joinTeam('blue')">Join Blue</button>
     </div>
   </div>
 
-  <div class="card" id="spymasterToggleBox" style="display:none">
-    <button class="secondary" id="spymasterToggleBtn" onclick="toggleSpymaster()">Become Spymaster</button>
+  <div id="spymasterToggleBox" style="display:none">
+    <button class="btn sec" id="spymasterToggleBtn" onclick="toggleSpymaster()">Become Spymaster</button>
   </div>
 
   <div class="card" id="hostControlsBox" style="display:none">
-    <h2 style="margin-top:0">Word list</h2>
-    <div class="toggle-row" style="margin-bottom:8px">
-      <button class="secondary" id="defaultListBtn" onclick="setWordMode('default')">Default list</button>
-      <button class="secondary" id="customListBtn" onclick="setWordMode('custom')">Custom list</button>
+    <p class="lab">Word list</p>
+    <div class="toggle-row">
+      <button class="btn sec" id="defaultListBtn" onclick="setWordMode('default')">Default list</button>
+      <button class="btn sec" id="customListBtn" onclick="setWordMode('custom')">Custom list</button>
     </div>
     <div id="customWordsBox" style="display:none">
       <textarea id="customWordsInput" placeholder="Enter at least 25 words, separated by commas or new lines"></textarea>
-      <button class="secondary" onclick="saveCustomWords()">Save Word List</button>
+      <button class="btn sec" onclick="saveCustomWords()">Save word list</button>
       <p class="small" id="customWordsStatus"></p>
     </div>
     <p class="small" id="lobbyWarning"></p>
-    <button onclick="startGame()">Start Game</button>
+    <button class="btn" onclick="startGame()"><span data-t="casefile">Open the case</span><span data-t="nightops">Begin operation</span><span data-t="spyreel">Roll the film</span></button>
   </div>
   <div class="card center" id="lobbyWaitBox" style="display:none">
-    <p class="small">Waiting for the host to configure and start the game...</p>
+    <p class="small" style="margin:0">Waiting for the host to start the game…</p>
   </div>
-</div>
+</section>
 
 <!-- GAME -->
-<div id="screen-game" class="screen">
-  <div class="status-pill" id="turnPill">-</div>
-  <div class="scoreboard">
-    <span class="r" id="redScore">Red: 0</span>
-    <span class="b" id="blueScore">Blue: 0</span>
+<section id="screen-game" class="screen">
+  <div class="status"><span class="turn" id="turnPill"></span><span class="role" id="roleBanner"></span></div>
+  <div class="score">
+    <div class="tile red" id="redTile"><span class="nm" id="redName"></span><b id="redScore">9</b><small>agents left</small><div class="pips" id="redPips"></div></div>
+    <span class="vs">VS</span>
+    <div class="tile blue" id="blueTile"><span class="nm" id="blueName"></span><b id="blueScore">8</b><small>agents left</small><div class="pips" id="bluePips"></div></div>
   </div>
-  <div class="role-banner" id="roleBanner"></div>
 
   <div id="clueGiveBox" class="card" style="display:none">
-    <h2 style="margin-top:0">Give your team a clue</h2>
-    <input type="text" id="clueWordInput" placeholder="One word clue" maxlength="24">
-    <label class="small">Number of related cards</label>
-    <input type="number" id="clueNumberInput" min="1" max="9" value="1">
-    <button style="margin-top:8px" onclick="submitClue()">Give Clue</button>
+    <p class="lab" id="giveLab">Give your team a clue</p>
+    <div class="giverow">
+      <input type="text" id="clueWordInput" placeholder="One-word clue" maxlength="24" autocomplete="off">
+      <input type="number" id="clueNumberInput" min="1" max="9" value="1" aria-label="Number of related cards">
+    </div>
+    <button class="btn" id="giveBtn" onclick="submitClue()">Give clue</button>
   </div>
 
-  <div id="clueDisplayBox" class="clue-display" style="display:none">
-    <p class="small" style="margin:0">Clue</p>
-    <div class="word" id="clueWordDisplay">-</div>
-    <p class="small" id="clueNumberDisplay" style="margin:4px 0 0 0"></p>
+  <div id="clueDisplayBox" class="clue paper" style="display:none">
+    <p class="lab" id="clueLab">Clue</p>
+    <div class="w" id="clueWordDisplay">-</div>
+    <p class="n" id="clueNumberDisplay"></p>
   </div>
 
-  <div class="board" id="board"></div>
-  <p class="small center" id="armHint" style="display:none">Tap the highlighted card again to confirm your guess.</p>
-
+  <div class="board live" id="board"></div>
+  <p class="hint" id="armHint" style="display:none">Tap the highlighted card again to confirm your guess.</p>
   <div id="endTurnBox" style="display:none">
-    <button class="secondary" onclick="endTurnManually()">End Turn</button>
+    <button class="btn sec" onclick="endTurnManually()">End turn</button>
   </div>
 
   <div class="card">
-    <h2 style="margin-top:0">Game log</h2>
+    <p class="lab">Game log</p>
     <div id="cnLogList"></div>
   </div>
-</div>
+</section>
 
 <!-- ENDED -->
-<div id="screen-ended" class="screen">
-  <div class="card center winner-card" id="winnerCard">
-    <div class="winner-trophy">🏆</div>
-    <h2 id="cnWinnerTitle">Game Over</h2>
-    <p class="small" id="cnWinnerSub"></p>
+<section id="screen-ended" class="screen">
+  <div class="win paper" id="winnerCard">
+    <div class="stampline"><span data-t="casefile">Case closed</span><span data-t="nightops">Mission complete</span><span data-t="spyreel">Mission accomplished</span></div>
+    <h2 id="cnWinnerTitle">Game over</h2>
+    <p id="cnWinnerSub"></p>
   </div>
   <div class="board" id="endedBoard"></div>
-  <button class="secondary" onclick="cnBackToStart()">Back to start</button>
+  <button class="btn sec" onclick="cnBackToStart()">Back to start</button>
+</section>
+
+<!-- assassin / win overlay -->
+<div id="ov" class="ov" onclick="skipOverlay()"></div>
 </div>
 
-<!-- EFFECTS: bomb overlay + shared particle canvas -->
-<div id="fxOverlay" class="fx-overlay">
-  <div class="fx-shade"></div>
-  <div class="bomb-stage" id="bombStage">
-    <svg id="bombSvg" viewBox="0 0 220 240">
-      <defs>
-        <radialGradient id="bombGrad" cx="35%" cy="30%" r="75%">
-          <stop offset="0" stop-color="#5a5f69"/><stop offset="0.45" stop-color="#26292e"/><stop offset="1" stop-color="#0b0c0e"/>
-        </radialGradient>
-        <radialGradient id="bombHeat" cx="50%" cy="55%" r="55%">
-          <stop offset="0" stop-color="#ff5a1f" stop-opacity="0.9"/><stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <circle id="bombHeatGlow" cx="110" cy="150" r="105" fill="url(#bombHeat)" opacity="0"/>
-      <circle id="bombBody" cx="110" cy="150" r="70" fill="url(#bombGrad)" stroke="#000" stroke-width="2"/>
-      <ellipse cx="86" cy="120" rx="19" ry="11" fill="#fff" opacity="0.18" transform="rotate(-35 86 120)"/>
-      <text x="110" y="168" text-anchor="middle" font-size="48">☠️</text>
-      <rect x="92" y="66" width="36" height="22" rx="4" fill="#3a3d44" stroke="#000" stroke-width="2"/>
-      <path id="fusePath" d="M172 26 C 152 28, 128 40, 112 66" fill="none" stroke="#c9a24b" stroke-width="5" stroke-linecap="round"/>
-      <circle id="fuseGlow" r="15" fill="#ff9f1c" opacity="0.55" cx="172" cy="26"/>
-      <circle id="fuseSpark" r="5" fill="#fff3b0" cx="172" cy="26"/>
-    </svg>
-  </div>
-  <div class="bomb-caption" id="bombCaption"></div>
-  <div class="fx-flash" id="fxFlash"></div>
-</div>
 <canvas id="fxCanvas"></canvas>
-
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
@@ -357,6 +474,80 @@ let gameData = null;
 let gameRef = null;
 let cardColorsData = {};
 let armedCardIdx = null;
+
+// ---------- THEMES ----------
+// The host picks a theme in the lobby; it's saved on the room as `theme` so every phone follows it.
+const THEMES = ["casefile", "nightops", "spyreel"];
+const THEME_BASE = { casefile: "#211c17", nightops: "#04090d", spyreel: "#f2e8d5" };
+const REVEAL_MS = 1800;
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TX = {
+  casefile: { red: "Red agency", blue: "Blue agency", clue: t => `Telegram from ${capitalize(t)}'s spymaster`, wait: t => `Awaiting ${capitalize(t)}'s telegram…`, give: "Send your team a telegram", send: "Send telegram" },
+  nightops: { red: "Red cell", blue: "Blue cell", clue: t => `Transmission · ${capitalize(t)} spymaster`, wait: t => `Awaiting ${capitalize(t)} transmission…`, give: "Transmit a clue", send: "Transmit" },
+  spyreel:  { red: "Team Red", blue: "Team Blue", clue: t => `${capitalize(t)}'s clue`, wait: t => `Waiting for ${capitalize(t)}'s spymaster…`, give: "Give your team a clue", send: "Give clue" }
+};
+let curTheme = null, rv = null;
+const themeOK = k => THEMES.includes(k) ? k : "casefile";
+const tx = () => TX[curTheme || "casefile"];
+
+function markThemeBtns(root, k) {
+  root.querySelectorAll(".th").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+}
+function setThemeClass(k) {
+  ["app", "bg"].forEach(id => {
+    const el = document.getElementById(id);
+    THEMES.forEach(t => el.classList.remove("t-" + t));
+    el.classList.add("t-" + k);
+  });
+  document.documentElement.style.background = THEME_BASE[k];
+  document.documentElement.style.colorScheme = k === "spyreel" ? "light" : "dark";
+  markThemeBtns(document.getElementById("app"), k);
+}
+// Switch theme. With an origin element, the new theme spreads out in a circle from it:
+// a copy of the page wearing the new theme sits on top and is uncovered from that point.
+function applyTheme(k, origin) {
+  k = themeOK(k);
+  if (rv) finishReveal();
+  if (k === curTheme) return;
+  const prev = curTheme;
+  curTheme = k;
+  try { localStorage.setItem("cnTheme", k); } catch (e) {}
+  if (!origin || prev === null || reduceMotion || !origin.getClientRects().length) { setThemeClass(k); return; }
+
+  const app = document.getElementById("app");
+  const r = app.getBoundingClientRect(), o = origin.getBoundingClientRect();
+  const x = o.left + o.width / 2, y = o.top + o.height / 2;
+  const W = window.innerWidth, H = window.innerHeight;
+  const R = Math.hypot(Math.max(x, W - x), Math.max(y, H - y)) + 4;
+
+  const layer = document.createElement("div");
+  layer.className = "rv t-" + k;
+  const cl = app.cloneNode(true);
+  cl.removeAttribute("id");
+  cl.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+  cl.className = "app-clone t-" + k;
+  cl.style.cssText = `position:absolute;left:${r.left}px;top:${r.top}px;width:${r.width}px;margin:0`;
+  markThemeBtns(cl, k);
+  layer.appendChild(cl);
+  document.body.appendChild(layer);
+  const anim = layer.animate(
+    [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${R}px at ${x}px ${y}px)` }],
+    { duration: REVEAL_MS, easing: "cubic-bezier(.45,0,.35,1)" });
+  rv = { layer, anim, k };
+  anim.onfinish = finishReveal;
+}
+function finishReveal() {
+  if (!rv) return;
+  const { layer, anim, k } = rv;
+  rv = null;
+  anim.onfinish = null;
+  setThemeClass(k);
+  layer.remove();
+}
+function pickTheme(k) {
+  if (!isHost || !gameData || gameData.status !== "lobby") return;
+  gameRef.update({ theme: themeOK(k) }).catch(e => console.warn("Could not change theme:", e));
+}
 
 const DEFAULT_WORDS = [
   "DOG","CAT","HORSE","LION","TIGER","BEAR","ELEPHANT","MONKEY","RABBIT","MOUSE",
@@ -392,6 +583,14 @@ function escapeHtml(str) { const d = document.createElement("div"); d.textConten
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
+// Load every theme's fonts up front so a theme change never shows blank text.
+if (document.fonts && document.fonts.load) {
+  ["400 16px 'Special Elite'", "400 16px 'Courier Prime'", "700 16px 'Courier Prime'", "400 16px 'Share Tech Mono'",
+   "500 16px 'Chakra Petch'", "700 16px 'Chakra Petch'", "400 16px Bungee", "400 16px Outfit", "700 16px Outfit", "800 16px Outfit"]
+    .forEach(f => document.fonts.load(f).catch(() => {}));
+}
+(function () { let k = null; try { k = localStorage.getItem("cnTheme"); } catch (e) {} applyTheme(themeOK(k), null); })();
+
 auth.onAuthStateChanged(user => { if (user) uid = user.uid; });
 auth.signInAnonymously().catch(e => showError("Connection error: " + e.message));
 
@@ -414,6 +613,7 @@ function createGame() {
     hostUid: uid,
     status: "lobby",
     wordListMode: "default",
+    theme: curTheme || "casefile",
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     players: {
       [uid]: { name: playerName, team: null, isSpymaster: false }
@@ -495,35 +695,40 @@ function refreshCardColors() {
 }
 
 // ---------- MAIN ROUTER ----------
+let lastStatus = null;
 function render() {
   if (!gameData) return;
+  const wasLobby = lastStatus === "lobby";
+  lastStatus = gameData.status;
   document.getElementById("topSub").textContent = "Room " + gameCode;
-  if (gameData.status === "lobby") renderLobby();
+  if (gameData.status === "lobby") renderLobby(wasLobby);
   else if (gameData.status === "playing") renderGame();
   else if (gameData.status === "ended") renderEnded();
 }
 
 // ---------- LOBBY ----------
-function renderLobby() {
+function renderLobby(wasLobby) {
   showScreen("screen-lobby");
   document.getElementById("lobbyCode").textContent = gameCode;
   const players = gameData.players || {};
   const me = players[uid];
+  const entries = Object.entries(players);
+  const redList = entries.filter(([, p]) => p.team === "red");
+  const blueList = entries.filter(([, p]) => p.team === "blue");
 
-  const redList = Object.values(players).filter(p => p.team === "red");
-  const blueList = Object.values(players).filter(p => p.team === "blue");
-
-  document.getElementById("redPlayerList").innerHTML = redList.map(p =>
-    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
-  ).join("") || `<p class="small">No one yet.</p>`;
-  document.getElementById("bluePlayerList").innerHTML = blueList.map(p =>
-    `<div class="player-chip">${escapeHtml(p.name)} ${p.isSpymaster ? '<span class="tag">Spymaster</span>' : ""}</div>`
-  ).join("") || `<p class="small">No one yet.</p>`;
+  const chip = ([id, p]) => `<div class="pl${id === uid ? " me" : ""}"><span class="dot">${escapeHtml((p.name || "?").charAt(0).toUpperCase())}</span><span class="pn">${escapeHtml(p.name)}</span>${p.isSpymaster ? "<em>Spymaster</em>" : ""}</div>`;
+  document.getElementById("redPlayerList").innerHTML = redList.map(chip).join("") || `<p class="empty">No one yet.</p>`;
+  document.getElementById("bluePlayerList").innerHTML = blueList.map(chip).join("") || `<p class="empty">No one yet.</p>`;
+  document.getElementById("joinRedBtn").disabled = !!(me && me.team === "red");
+  document.getElementById("joinBlueBtn").disabled = !!(me && me.team === "blue");
 
   document.getElementById("spymasterToggleBox").style.display = me && me.team ? "block" : "none";
   if (me && me.team) {
     document.getElementById("spymasterToggleBtn").textContent = me.isSpymaster ? "Give up Spymaster" : "Become Spymaster";
   }
+
+  document.querySelectorAll("#app .th").forEach(b => { b.disabled = !isHost; });
+  document.getElementById("themeNote").textContent = isHost ? "Everyone in the room sees the theme you pick." : "The host picks the theme.";
 
   document.getElementById("hostControlsBox").style.display = isHost ? "block" : "none";
   document.getElementById("lobbyWaitBox").style.display = isHost ? "none" : "block";
@@ -531,19 +736,23 @@ function renderLobby() {
   if (isHost) {
     const mode = gameData.wordListMode || "default";
     document.getElementById("customWordsBox").style.display = mode === "custom" ? "block" : "none";
-    document.getElementById("defaultListBtn").style.opacity = mode === "default" ? "1" : "0.5";
-    document.getElementById("customListBtn").style.opacity = mode === "custom" ? "1" : "0.5";
+    document.getElementById("defaultListBtn").classList.toggle("on", mode === "default");
+    document.getElementById("customListBtn").classList.toggle("on", mode === "custom");
 
-    const total = Object.keys(players).length;
-    const redSpy = redList.filter(p => p.isSpymaster).length;
-    const blueSpy = blueList.filter(p => p.isSpymaster).length;
-    let warning = `${total} players — Red: ${redList.length}, Blue: ${blueList.length}.`;
+    const total = entries.length;
+    const redSpy = redList.filter(([, p]) => p.isSpymaster).length;
+    const blueSpy = blueList.filter(([, p]) => p.isSpymaster).length;
+    let warning = `${total} players · Red: ${redList.length}, Blue: ${blueList.length}.`;
     if (total < 4) warning += " Need at least 4 total.";
     if (redList.length < 2 || blueList.length < 2) warning += " Each team needs 1 Spymaster + 1 Operative.";
     if (redSpy !== 1 || blueSpy !== 1) warning += " Each team needs exactly 1 Spymaster.";
     if (mode === "custom" && (!gameData.customWords || gameData.customWords.length < 25)) warning += " Custom word list needs at least 25 words saved.";
     document.getElementById("lobbyWarning").textContent = warning;
   }
+
+  // Theme last, so the copy that spreads over the screen already shows the latest lobby.
+  const k = themeOK(gameData.theme);
+  applyTheme(k, wasLobby ? document.getElementById("th-" + k) : null);
 }
 
 function joinTeam(team) {
@@ -631,38 +840,72 @@ function startGame() {
 }
 
 // ---------- GAME ----------
+let lastScores = null, lastClueKey = null;
+
 function renderGame() {
   showScreen("screen-game");
+  applyTheme(themeOK(gameData.theme), null);
+  const L = tx();
   const players = gameData.players || {};
   const me = players[uid];
   const currentTurn = gameData.currentTurn;
-
-  document.getElementById("turnPill").textContent = capitalize(currentTurn) + "'s turn";
-  document.getElementById("turnPill").className = "status-pill turn-" + currentTurn;
-  document.getElementById("redScore").textContent = "Red: " + (gameData.redRemaining ?? startingCount("red"));
-  document.getElementById("blueScore").textContent = "Blue: " + (gameData.blueRemaining ?? startingCount("blue"));
-
-  const roleBanner = document.getElementById("roleBanner");
-  if (!me || !me.team) {
-    roleBanner.textContent = "You're spectating this game.";
-  } else {
-    roleBanner.textContent = `You are on ${capitalize(me.team)} Team${me.isSpymaster ? " — Spymaster" : " — Operative"}.`;
-  }
-
   const clue = gameData.clue;
+
+  const scores = {};
+  ["red", "blue"].forEach(t => {
+    const tot = startingCount(t);
+    const left = Math.max(0, gameData[t + "Remaining"] ?? tot);
+    scores[t] = left;
+    document.getElementById(t + "Name").textContent = L[t];
+    document.getElementById(t + "Score").textContent = left;
+    document.getElementById(t + "Pips").innerHTML = Array.from({ length: tot }, (_, i) => `<i class="${i < tot - left ? "gone" : ""}"></i>`).join("");
+    const tile = document.getElementById(t + "Tile");
+    tile.classList.toggle("now", t === currentTurn);
+    if (lastScores && lastScores[t] !== left && !reduceMotion)
+      tile.animate([{ transform: "scale(1)" }, { transform: "scale(1.1)" }, { transform: "scale(1)" }], { duration: 420, easing: "ease-out" });
+  });
+  lastScores = scores;
+
+  const turnEl = document.getElementById("turnPill");
+  turnEl.textContent = `${L[currentTurn]}'s turn · ${clue ? "guessing" : "waiting for a clue"}`;
+  turnEl.className = "turn " + currentTurn;
+  document.getElementById("roleBanner").textContent = (!me || !me.team)
+    ? "Spectating"
+    : `You: ${L[me.team]} · ${me.isSpymaster ? "Spymaster" : "Operative"}`;
+
   const isMyTurnTeam = me && me.team === currentTurn;
   const iAmSpymasterGivingClue = me && me.isSpymaster && isMyTurnTeam && !clue;
-
   document.getElementById("clueGiveBox").style.display = iAmSpymasterGivingClue ? "block" : "none";
+  document.getElementById("giveLab").textContent = L.give;
+  document.getElementById("giveBtn").textContent = L.send;
 
+  const box = document.getElementById("clueDisplayBox");
+  const wordEl = document.getElementById("clueWordDisplay");
   if (clue) {
-    document.getElementById("clueDisplayBox").style.display = "block";
-    document.getElementById("clueWordDisplay").textContent = clue.word;
+    box.style.display = "block";
+    box.classList.remove("waiting");
+    document.getElementById("clueLab").textContent = L.clue(clue.team || currentTurn);
     const left = Math.max(0, clue.number - (clue.guessesMade || 0));
     document.getElementById("clueNumberDisplay").textContent =
       `${clue.number} card${clue.number === 1 ? "" : "s"} · ${left} guess${left === 1 ? "" : "es"} left`;
+    const key = (clue.team || currentTurn) + "|" + clue.word + "|" + clue.number;
+    if (key !== lastClueKey) {
+      const fresh = lastClueKey !== null;
+      lastClueKey = key;
+      wordEl.textContent = clue.word;
+      if (fresh) clueIntro(box, wordEl, clue.word);
+    }
   } else {
-    document.getElementById("clueDisplayBox").style.display = "none";
+    lastClueKey = lastClueKey === null ? null : "";
+    if (iAmSpymasterGivingClue) {
+      box.style.display = "none";
+    } else {
+      box.style.display = "block";
+      box.classList.add("waiting");
+      document.getElementById("clueLab").textContent = "";
+      wordEl.textContent = L.wait(currentTurn);
+      document.getElementById("clueNumberDisplay").textContent = "";
+    }
   }
 
   const canGuess = !!(me && !me.isSpymaster && isMyTurnTeam && clue && (clue.guessesMade || 0) < clue.number);
@@ -672,37 +915,113 @@ function renderGame() {
   renderCNLog();
 }
 
+// A new clue arrives in the theme's own way.
+let typeTimer = null;
+function clueIntro(box, wordEl, word) {
+  if (reduceMotion) return;
+  if (curTheme === "nightops") {
+    clearInterval(typeTimer);
+    let i = 0;
+    wordEl.textContent = "";
+    typeTimer = setInterval(() => {
+      i++;
+      wordEl.textContent = word.slice(0, i);
+      if (i >= word.length) clearInterval(typeTimer);
+    }, 90);
+  } else if (curTheme === "casefile") {
+    box.animate([{ transform: "translateY(-24px) rotate(-6deg)", opacity: 0 }, { transform: "translateY(0) rotate(-1deg)", opacity: 1 }],
+      { duration: 450, easing: "cubic-bezier(.3,1.4,.5,1)" });
+  } else {
+    box.animate([{ transform: "scale(.6)", opacity: 0 }, { transform: "scale(1.06)", opacity: 1, offset: .7 }, { transform: "scale(1)" }],
+      { duration: 420, easing: "ease-out" });
+  }
+}
+
+// The board is built once per game and then updated in place, so a card's reveal
+// animation isn't wiped out by the next Firebase update.
+const AGENT_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-2-4H8z" fill="currentColor"/><circle cx="12" cy="10" r="4" fill="currentColor"/><path d="M4 22c1-6 4-8 8-8s7 2 8 8z" fill="currentColor"/></svg>`;
+const STAMP = { red: "Red<br>agent", blue: "Blue<br>agent", yellow: "Bystander", black: "Terminated" };
+const SIGNAL = { red: "RED", blue: "BLUE", yellow: "BYSTANDER", black: "ASSASSIN" };
+
+function buildBoard(el, board, allPre) {
+  const sig = board.map(c => c.word).join("|");
+  if (el.dataset.sig === sig) return;
+  el.dataset.sig = sig;
+  el.innerHTML = board.map((c, i) =>
+    `<button class="cn-card" data-i="${i}" data-pre="${allPre || c.revealed ? 1 : 0}"><span class="key"></span><span class="tx">${escapeHtml(c.word)}</span><span class="face"></span></button>`
+  ).join("");
+}
+
+function setFace(btn, color) {
+  const word = btn.querySelector(".tx").textContent;
+  const face = btn.querySelector(".face");
+  if (curTheme === "casefile") {
+    face.innerHTML = `${color === "red" || color === "blue" ? AGENT_SVG : ""}<span class="stamp">${STAMP[color] || ""}</span>`;
+  } else if (curTheme === "nightops") {
+    face.innerHTML = `<span class="fw">${escapeHtml(word)}</span><small>${SIGNAL[color] || ""}</small>`;
+  } else {
+    face.innerHTML = `${AGENT_SVG}<span class="fw">${escapeHtml(word)}</span>`;
+  }
+}
+
+function revealFx(btn) {
+  if (reduceMotion) { btn.classList.add("done"); return; }
+  const face = btn.querySelector(".face");
+  if (curTheme === "casefile") {
+    btn.classList.add("done");
+    face.animate([{ transform: "scale(2.6) rotate(-20deg)", opacity: 0 }, { transform: "scale(.92)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }],
+      { duration: 380, easing: "cubic-bezier(.3,1.4,.5,1)" });
+    btn.parentElement.animate([{ transform: "none" }, { transform: "translate(-2px,1px)" }, { transform: "translate(2px,-1px)" }, { transform: "none" }],
+      { duration: 220, delay: 250 });
+  } else if (curTheme === "nightops") {
+    const tx = btn.querySelector(".tx"), word = tx.textContent, chars = "#$%&@*?!<>/\\01ABCDEFXZ";
+    let f = 0;
+    const t = setInterval(() => {
+      if (++f > 12) {
+        clearInterval(t);
+        tx.textContent = word;
+        btn.classList.add("done");
+        btn.animate([{ filter: "brightness(2.2)" }, { filter: "brightness(1)" }], { duration: 500 });
+        return;
+      }
+      tx.textContent = Array.from(word, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    }, 45);
+  } else {
+    btn.animate([{ transform: "rotateY(0)" }, { transform: "rotateY(90deg) scale(1.08)" }], { duration: 220, easing: "ease-in" }).onfinish = () => {
+      btn.classList.add("done");
+      btn.animate([{ transform: "rotateY(-90deg) scale(1.08)" }, { transform: "rotateY(0) scale(1)" }], { duration: 280, easing: "cubic-bezier(.3,1.4,.5,1)" });
+    };
+  }
+}
+
+function updateCards(el, board, opts) {
+  board.forEach((card, idx) => {
+    const btn = el.children[idx];
+    if (!btn) return;
+    const color = cardColorsData[idx]; // only known if revealed, we're a spymaster, or the game ended
+    ["red", "blue", "yellow", "black"].forEach(c => btn.classList.toggle("k-" + c, color === c));
+    btn.classList.toggle("show-key", !card.revealed && !!color);
+    btn.classList.toggle("pending", !!card.revealed && !color);
+    if (card.revealed && color && btn.dataset.shown !== "1") {
+      btn.dataset.shown = "1";
+      setFace(btn, color);
+      if (btn.dataset.pre === "1") btn.classList.add("done");
+      else revealFx(btn);
+    }
+    const clickable = !card.revealed && opts.canGuess;
+    btn.disabled = !clickable;
+    btn.classList.toggle("armed", clickable && armedCardIdx === idx);
+    btn.onclick = clickable ? () => handleCardClick(idx) : null;
+  });
+}
+
 function renderBoard(me, canGuess) {
   const board = gameData.board || [];
   const boardEl = document.getElementById("board");
   if (!canGuess) armedCardIdx = null; // clear any stale highlight if it's no longer our turn to guess
   document.getElementById("armHint").style.display = (canGuess && armedCardIdx !== null) ? "block" : "none";
-  boardEl.innerHTML = "";
-  board.forEach((card, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "cn-card";
-    const color = cardColorsData[idx]; // only present for us if revealed, we're a spymaster, or game ended
-    if (card.revealed) {
-      if (color) btn.classList.add("color-" + color);
-      btn.classList.add("revealed");
-      btn.disabled = true;
-      btn.textContent = card.word;
-    } else if (color) {
-      btn.classList.add("color-" + color);
-      btn.textContent = card.word;
-    } else {
-      btn.textContent = card.word;
-    }
-    if (!card.revealed && canGuess) {
-      if (armedCardIdx === idx) {
-        btn.classList.add("armed");
-      }
-      btn.onclick = () => handleCardClick(idx);
-    } else {
-      btn.disabled = true;
-    }
-    boardEl.appendChild(btn);
-  });
+  buildBoard(boardEl, board, false);
+  updateCards(boardEl, board, { canGuess });
 }
 
 function submitClue() {
@@ -859,41 +1178,119 @@ let endedFxStarted = false;
 
 function renderEnded() {
   showScreen("screen-ended");
+  applyTheme(themeOK(gameData.theme), null);
+  const L = tx();
   const winner = gameData.winner;
   const me = (gameData.players || {})[uid];
   const log = Object.values(gameData.log || {});
   const assassinEntry = log.find(e => e.text && e.text.indexOf(" was the ASSASSIN!") !== -1);
   const loser = winner === "red" ? "blue" : "red";
 
-  document.getElementById("cnWinnerTitle").textContent =
-    winner === "red" ? "🔴 Red Team Wins!" : "🔵 Blue Team Wins!";
-  document.getElementById("winnerCard").className = "card center winner-card " + winner;
-  let sub = assassinEntry ? `💀 ${capitalize(loser)} Team hit the assassin!` : "All their words were found!";
-  if (me && me.team) sub += me.team === winner ? "  🎉 Your team won!" : "  Better luck next time.";
+  document.getElementById("cnWinnerTitle").textContent = `${L[winner]} wins!`;
+  document.getElementById("winnerCard").className = "win paper " + winner;
+  let sub = assassinEntry ? `${L[loser]} hit the assassin.` : "Every one of their agents was found.";
+  if (me && me.team) sub += me.team === winner ? " Your team won!" : " Better luck next time.";
   document.getElementById("cnWinnerSub").textContent = sub;
 
   const board = gameData.board || [];
   const boardEl = document.getElementById("endedBoard");
-  boardEl.innerHTML = "";
-  board.forEach((card, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "cn-card";
-    btn.textContent = card.word;
-    const color = cardColorsData[idx];
-    if (color) btn.classList.add("color-" + color);
-    if (card.revealed) btn.classList.add("revealed"); // only cards actually guessed during play keep the outline
-    btn.disabled = true;
-    boardEl.appendChild(btn);
-  });
+  buildBoard(boardEl, board, true);
+  updateCards(boardEl, board, { canGuess: false });
 
   if (!endedFxStarted) {
     endedFxStarted = true;
-    if (assassinEntry) {
-      const word = assassinEntry.text.split(" was the ASSASSIN!")[0];
-      playBomb(word, () => playCelebration(winner));
+    const word = assassinEntry ? assassinEntry.text.split(" was the ASSASSIN!")[0] : null;
+    playEnding(word, winner, loser);
+  }
+}
+
+// ---------- THEMED ASSASSIN / WIN SCREENS ----------
+let ovTimer = null, ovDone = null;
+function runOverlay(build, ms, then) {
+  const ov = document.getElementById("ov");
+  clearTimeout(ovTimer);
+  ov.className = "ov on";
+  ov.innerHTML = "";
+  build(ov);
+  ov.insertAdjacentHTML("beforeend", `<div class="skip">Tap to continue</div>`);
+  ovDone = () => {
+    ovDone = null;
+    clearTimeout(ovTimer);
+    ov.classList.add("fading");
+    setTimeout(() => { ov.className = "ov"; ov.innerHTML = ""; }, 500);
+    if (then) then();
+  };
+  ovTimer = setTimeout(() => ovDone && ovDone(), reduceMotion ? Math.min(ms, 1800) : ms);
+}
+function skipOverlay() { if (ovDone) ovDone(); }
+
+const slam = (el, rot) => !reduceMotion && el.animate(
+  [{ transform: `rotate(${rot}deg) scale(3)`, opacity: 0 }, { transform: `rotate(${rot}deg) scale(.95)`, opacity: 1, offset: .7 }, { transform: `rotate(${rot}deg) scale(1)`, opacity: 1 }],
+  { duration: 440, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "both" });
+const shakeApp = delay => !reduceMotion && document.getElementById("app").animate(
+  [{ transform: "none" }, { transform: "translate(-8px,4px)" }, { transform: "translate(7px,-5px)" }, { transform: "translate(-4px,2px)" }, { transform: "none" }],
+  { duration: 420, delay });
+
+function playEnding(word, winner, loser) {
+  const L = tx(), W = escapeHtml(L[winner]), Lo = escapeHtml(L[loser]);
+  const celebrate = () => playCelebration(winner);
+  if (word) {
+    const w = escapeHtml(word);
+    if (curTheme === "casefile") {
+      runOverlay(ov => {
+        ov.innerHTML = `<div class="big">Terminated</div><div class="osub">${w} was the assassin. ${Lo} is out of the game.</div>`;
+        slam(ov.querySelector(".big"), -12); shakeApp(300);
+      }, 2800, celebrate);
+    } else if (curTheme === "nightops") {
+      runOverlay(ov => {
+        ov.innerHTML = `<div class="big">Signal lost</div><div class="osub">${w} was the assassin. ${Lo} is compromised.</div>`;
+        if (reduceMotion) return;
+        ov.animate([{ background: "rgba(2,8,12,0)" }, { background: "rgba(2,8,12,.92)" }], { duration: 450, fill: "both" });
+        const app = document.getElementById("app");
+        app.animate([
+          { filter: "none", transform: "none" }, { filter: "hue-rotate(90deg) contrast(1.8)", transform: "translateX(5px)" },
+          { filter: "hue-rotate(200deg)", transform: "translateX(-6px)" }, { filter: "contrast(2) brightness(1.5)", transform: "translateX(3px)" },
+          { filter: "none", transform: "none" }], { duration: 450 });
+        ov.querySelector(".big").animate([{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1, offset: .6 }, { opacity: .2, offset: .7 }, { opacity: 1 }], { duration: 1000, fill: "both" });
+      }, 2800, celebrate);
     } else {
-      playCelebration(winner);
+      runOverlay(ov => {
+        ov.innerHTML = `<div class="iris"></div><div class="barrel"><div class="big">The End</div></div><div class="osub" style="color:#f2e8d5">${w} was the assassin. ${Lo} is out.</div>`;
+        const iris = ov.querySelector(".iris"), barrel = ov.querySelector(".barrel"), sub = ov.querySelector(".osub");
+        if (reduceMotion) { iris.style.setProperty("--ir", "0%"); return; }
+        barrel.style.opacity = sub.style.opacity = 0;
+        const t0 = performance.now();
+        const step = now => {
+          const p = Math.min(1, (now - t0) / 700);
+          iris.style.setProperty("--ir", (150 - 150 * p * p) + "%");
+          if (p < 1) return requestAnimationFrame(step);
+          barrel.style.opacity = sub.style.opacity = 1;
+          barrel.animate([{ transform: "scale(.3) rotate(-90deg)" }, { transform: "scale(1) rotate(0)" }], { duration: 500, easing: "cubic-bezier(.3,1.4,.5,1)" });
+        };
+        requestAnimationFrame(step);
+      }, 3000, celebrate);
     }
+    return;
+  }
+  if (curTheme === "casefile") {
+    runOverlay(ov => {
+      ov.innerHTML = `<div class="big" style="color:var(--${winner === "red" ? "red" : "blue"});background:#efe3c6">Case closed</div><div class="osub">${W} found every agent.</div>`;
+      slam(ov.querySelector(".big"), -12); shakeApp(300);
+    }, 2400, celebrate);
+  } else if (curTheme === "nightops") {
+    runOverlay(ov => {
+      ov.innerHTML = `<div class="big" style="color:#3ee6c4">Mission complete</div><div class="osub">${W} found every agent.</div>`;
+      if (!reduceMotion) ov.querySelector(".big").animate([{ letterSpacing: ".6em", opacity: 0 }, { letterSpacing: ".18em", opacity: 1 }], { duration: 700, easing: "ease-out" });
+    }, 2400, celebrate);
+  } else {
+    runOverlay(ov => {
+      ov.style.setProperty("--wc", winner === "red" ? "#e63946" : "#1d6fb8");
+      ov.innerHTML = `<div class="rings"></div><div class="titlebox"><div class="big">Mission<br>accomplished</div><div class="osub">${W} found every agent.</div></div>`;
+      if (!reduceMotion) {
+        ov.querySelector(".rings").animate([{ transform: "scale(0)" }, { transform: "scale(1)" }], { duration: 700, easing: "cubic-bezier(.3,1.2,.5,1)" });
+        ov.querySelector(".titlebox").animate([{ transform: "scale(.4) rotate(-8deg)", opacity: 0 }, { transform: "scale(1) rotate(0)", opacity: 1 }], { duration: 500, delay: 250, easing: "cubic-bezier(.3,1.4,.5,1)", fill: "both" });
+      }
+    }, 2600, celebrate);
   }
 }
 
@@ -978,112 +1375,14 @@ function fxLoop(now) {
   else { fxRunning = false; fxCtx.clearRect(0, 0, fxW, fxH); }
 }
 
-// ---------- BOMB ----------
-function playBomb(word, onDone) {
-  const ov = document.getElementById("fxOverlay");
-  const stage = document.getElementById("bombStage");
-  const path = document.getElementById("fusePath");
-  const spark = document.getElementById("fuseSpark");
-  const glow = document.getElementById("fuseGlow");
-  const heat = document.getElementById("bombHeatGlow");
-  const body = document.getElementById("bombBody");
-  const cap = document.getElementById("bombCaption");
-  const flash = document.getElementById("fxFlash");
-
-  ov.classList.remove("fading", "quake");
-  ov.style.display = "flex";
-  stage.style.visibility = "visible";
-  cap.className = "bomb-caption";
-  cap.textContent = `☠️ ${word} — the assassin!`;
-  flash.classList.remove("go");
-
-  const L = path.getTotalLength();
-  path.style.strokeDasharray = L + " " + L;
-  path.style.strokeDashoffset = 0;
-  spark.style.display = glow.style.display = "";
-  const FUSE_MS = 2300;
-  const t0 = performance.now();
-  let boomed = false;
-
-  function frame(now) {
-    const e = now - t0;
-    if (e < FUSE_MS) {
-      const p = e / FUSE_MS, s = L * p;
-      path.style.strokeDashoffset = -s;
-      const pt = path.getPointAtLength(s);
-      spark.setAttribute("cx", pt.x); spark.setAttribute("cy", pt.y);
-      glow.setAttribute("cx", pt.x); glow.setAttribute("cy", pt.y);
-      glow.setAttribute("r", 13 + Math.random() * 6);
-      const m = path.getScreenCTM();
-      if (m) {
-        const sx = m.a * pt.x + m.c * pt.y + m.e, sy = m.b * pt.x + m.d * pt.y + m.f;
-        for (let i = 0; i < 3; i++) fxAdd({
-          kind: "spark", x: sx, y: sy, vx: rand(-90, 90), vy: rand(-170, -30), g: 280,
-          max: rand(0.3, 0.7), size: rand(1.5, 3.6), color: pick(["#fff3b0", "#ffd23f", "#ff9f1c"])
-        });
-      }
-      const amp = 0.5 + p * p * 7;
-      stage.style.transform = `translate(${rand(-amp, amp)}px, ${rand(-amp, amp)}px) scale(${1 + p * 0.1})`;
-      heat.setAttribute("opacity", ((0.15 + 0.85 * p) * (0.65 + 0.35 * Math.sin(e / (130 - 90 * p)))).toFixed(3));
-      requestAnimationFrame(frame);
-    } else if (!boomed) {
-      boomed = true;
-      boom();
-    }
-  }
-
-  function boom() {
-    const r = body.getBoundingClientRect();
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    stage.style.visibility = "hidden";
-    stage.style.transform = "";
-    heat.setAttribute("opacity", 0);
-    flash.classList.add("go");
-    ov.classList.add("quake");
-    cap.className = "bomb-caption boom";
-    cap.textContent = "💥 BOOM! 💥";
-
-    ["#ffffff", "#ffd23f", "#ff5a1f"].forEach((color, i) =>
-      fxRings.push({ x: cx, y: cy, t: -i * 0.08, dur: 0.9 + i * 0.15, max: Math.max(fxW, fxH) * (0.55 - i * 0.1), color }));
-    fxStart();
-    for (let i = 0; i < 90; i++) {
-      const a = rand(0, Math.PI * 2), v = rand(80, 560);
-      fxAdd({ kind: "fire", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 60, drag: 1.6,
-        max: rand(0.6, 1.3), size: rand(6, 16), color: pick(["#fff3b0", "#ffd23f", "#ff9f1c", "#ff5a1f", "#c1121f"]) });
-    }
-    for (let i = 0; i < 70; i++) {
-      const a = rand(0, Math.PI * 2), v = rand(250, 800);
-      fxAdd({ kind: "spark", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 400, drag: 0.8,
-        max: rand(0.6, 1.4), size: rand(1.5, 3.5), color: pick(["#ffffff", "#ffd23f", "#ff9f1c"]) });
-    }
-    for (let i = 0; i < 28; i++) {
-      const a = rand(0, Math.PI * 2), v = rand(40, 220);
-      fxAdd({ kind: "smoke", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, drag: 1.4,
-        max: rand(1.2, 2.2), size: rand(18, 34), color: "#555" });
-    }
-    for (let i = 0; i < 34; i++) {
-      const a = rand(0, Math.PI * 2), v = rand(200, 650);
-      fxAdd({ kind: "debris", x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, g: 900, drag: 0.4,
-        rot: rand(0, 6), vr: rand(-14, 14), max: rand(1.0, 1.8), size: rand(5, 12), color: pick(["#1b1c1f", "#3a3d44", "#ff5a1f"]) });
-    }
-
-    setTimeout(() => ov.classList.remove("quake"), 750);
-    setTimeout(() => ov.classList.add("fading"), 2300);
-    setTimeout(() => {
-      ov.style.display = "none";
-      ov.classList.remove("fading");
-      if (onDone) onDone();
-    }, 3050);
-  }
-
-  requestAnimationFrame(frame);
-}
-
 // ---------- CELEBRATION ----------
 function playCelebration(winner) {
-  const palette = winner === "red"
-    ? ["#e0605e", "#b5504f", "#ff9f9f", "#c9a24b", "#ffd23f", "#ffffff"]
-    : ["#6fa0d8", "#4f7fb5", "#a5c8ee", "#c9a24b", "#ffd23f", "#ffffff"];
+  const cs = getComputedStyle(document.getElementById("app"));
+  const v = n => cs.getPropertyValue(n).trim();
+  const team = v(winner === "red" ? "--red" : "--blue");
+  const palette = curTheme === "casefile" ? [team, team, "#efe3c6", "#e6dabd", "#c9b78f", "#ffffff"]
+    : curTheme === "nightops" ? [team, team, "#3ee6c4", "#3ee6c4", "#cfeaf2", "#ffffff"]
+    : [team, team, "#ff6b35", "#e9c46a", "#1d1b1a", "#fffaf0"];
 
   const confetti = (x, y, vx, vy, g) => fxAdd({
     kind: "confetti", x, y, vx, vy, g, drag: 1.8, rot: rand(0, 6), vr: rand(-8, 8),
