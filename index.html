@@ -42,6 +42,29 @@
     --inBg:#fffaf0; --inInk:#1d1b1a; --inBd:2px solid #1d1b1a;
   }
 
+  /* home = the neutral front door, before anyone is in a room */
+  .t-home {
+    --base:#151821; --bgImg: radial-gradient(circle at -10% -5%, rgba(225,72,62,.42), transparent 48%), radial-gradient(circle at 110% 105%, rgba(52,124,214,.42), transparent 48%), #151821;
+    --fg:#eef0f6; --mute:#9ba4b8; --panel:rgba(255,255,255,.06); --panelBd:1px solid rgba(255,255,255,.12); --r:14px;
+    --hi:#f4f5f8; --onHi:#151821; --red:#e1483e; --blue:#347cd6; --neu:#c9b98f; --ass:#0c0d12;
+    --redT:#f6d3cf; --blueT:#d1e1f5; --neuT:#ece4cf; --assT:#c8c8c8;
+    --display:"Outfit", system-ui, sans-serif; --body:"Outfit", system-ui, sans-serif; --ls:.04em;
+    --paper:#f4f5f8; --paperInk:#151821; --paperBd:1px solid #d6d9e2;
+    --card:#f4f5f8; --cardInk:#151821; --cardBd:1px solid #d6d9e2; --cardR:8px; --cardSh:0 3px 0 #c3c7d2;
+    --inBg:rgba(0,0,0,.25); --inInk:#eef0f6; --inBd:1px solid rgba(255,255,255,.18);
+  }
+  .t-home .hdr h1 { font-weight: 800; background: linear-gradient(90deg, #ff6a5e, #f4f5f8 50%, #5c9cf0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .t-home .card { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .t-home .btn { font-weight: 800; letter-spacing: .03em; }
+  .home-only { display: none; }
+  .t-home .home-only { display: block; }
+  .home-art { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 250px; margin: 4px auto 16px; }
+  .home-art i { aspect-ratio: 1.45; border-radius: 6px; background: #f4f5f8; box-shadow: 0 3px 0 #b9bfcc; opacity: 0; animation: homeDeal .5s cubic-bezier(.3,1.4,.5,1) forwards; }
+  .home-art i.r { background: #e1483e; box-shadow: 0 3px 0 #9c2a22; } .home-art i.b { background: #347cd6; box-shadow: 0 3px 0 #1f4f8e; }
+  .home-art i.n { background: #d9ccaa; box-shadow: 0 3px 0 #a8996f; } .home-art i.k { background: #0c0d12; box-shadow: 0 3px 0 #000; }
+  @keyframes homeDeal { from { opacity: 0; transform: translateY(-10px) scale(.8); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .home-art i { animation: none; opacity: 1; } }
+
   /* ================= BASE ================= */
   * { box-sizing: border-box; }
   html { background: #211c17; }
@@ -59,7 +82,7 @@
 
   /* text that changes per theme */
   [data-t] { display: none; }
-  .t-casefile [data-t=casefile], .t-nightops [data-t=nightops], .t-spyreel [data-t=spyreel] { display: inline; }
+  .t-home [data-t=home], .t-casefile [data-t=casefile], .t-nightops [data-t=nightops], .t-spyreel [data-t=spyreel] { display: inline; }
 
   /* reveal layer: the new theme spreading out from the tapped button */
   .rv { position: fixed; inset: 0; z-index: 1500; overflow: hidden; pointer-events: none; background: var(--bgImg); }
@@ -125,7 +148,7 @@
   .t-spyreel .code { box-shadow: 4px 4px 0 var(--hi); }
   .t-spyreel .code b { color: var(--hi); }
 
-  .themes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 6px; }
+  .themes { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; margin-bottom: 6px; }
   .th {
     position: relative; display: flex; flex-direction: column; gap: 4px; padding: 6px; margin: 0; text-align: left; height: 112px; justify-content: flex-start;
     border-radius: var(--r); border: var(--panelBd); background: var(--panel); color: var(--fg);
@@ -135,12 +158,15 @@
   .th.on { box-shadow: 0 0 0 2px var(--hi); }
   .t-spyreel .th { box-shadow: 3px 3px 0 #1d1b1a; }
   .t-spyreel .th.on { box-shadow: 3px 3px 0 #1d1b1a, 0 0 0 3px var(--hi); }
-  .th .nm { font-weight: 700; font-size: 13px; line-height: 16px; height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .th .ds { font-size: 11px; line-height: 13px; height: 26px; overflow: hidden; opacity: .75; }
+  .th .nm { font-weight: 700; font-size: 12px; letter-spacing: 0; line-height: 16px; height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .th .ds { font-size: 10.5px; line-height: 13px; height: 26px; overflow: hidden; opacity: .75; }
   .th .tick { position: absolute; top: -8px; right: -4px; display: none; font: 700 10px var(--body); padding: 1px 6px; border-radius: 999px; background: var(--hi); color: var(--onHi); }
   .th.on .tick { display: block; }
   .sw { flex: none; height: 46px; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; }
-  .sw i { width: 22px; height: 16px; border-radius: 2px; display: block; }
+  .sw i { width: 18px; height: 14px; border-radius: 2px; display: block; }
+  .sw.home { background: radial-gradient(circle at 0% 0%, rgba(225,72,62,.6), transparent 60%), radial-gradient(circle at 100% 100%, rgba(52,124,214,.6), transparent 60%), #151821; }
+  .sw.home i { background: #f4f5f8; border-radius: 3px; box-shadow: 0 2px 0 #b9bfcc; }
+  .sw.home i:nth-child(1) { background: #e1483e; box-shadow: 0 2px 0 #9c2a22; } .sw.home i:nth-child(3) { background: #347cd6; box-shadow: 0 2px 0 #1f4f8e; }
   .sw.casefile { background: radial-gradient(circle at 30% 20%, #3a322a, #211c17); }
   .sw.casefile i { background: #efe3c6; transform: rotate(-4deg); box-shadow: 0 1px 0 #b5a27a; }
   .sw.casefile i:nth-child(2) { transform: rotate(3deg); background: #e7cfc6; outline: 1px solid #c0392b; }
@@ -238,6 +264,18 @@
   .cn-card .face svg { width: 15px; height: 15px; flex: none; }
   .cn-card .fw { font-size: .82em; line-height: 1.05; word-break: break-word; }
 
+  /* Classic: clean cards that flip to solid team colours */
+  .t-home .cn-card { font-weight: 700; }
+  .t-home .cn-card.done .tx { opacity: 0; }
+  .t-home .cn-card.done { color: #fff; }
+  .t-home .cn-card.done.k-red { background: var(--red); border-color: #9c2a22; } .t-home .cn-card.done.k-blue { background: var(--blue); border-color: #1f4f8e; }
+  .t-home .cn-card.done.k-yellow { background: #d9ccaa; color: #151821; } .t-home .cn-card.done.k-black { background: #0c0d12; border-color: #000; }
+  .t-home .win { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .t-home .win .stampline { color: var(--wc); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+  .t-home .ov { background: rgba(12,14,20,.9); color: #eef0f6; }
+  .t-home .ov .big { font: 800 clamp(34px, 11vw, 56px)/1.05 "Outfit", sans-serif; letter-spacing: .02em; color: #fff; }
+  .t-home .ov .big.red { color: #ff6a5e; } .t-home .ov .big.blue { color: #5c9cf0; }
+
   /* Case File: crooked index cards, rubber stamps */
   .t-casefile .cn-card:not(.armed):nth-child(3n) { transform: rotate(-1.2deg); }
   .t-casefile .cn-card:not(.armed):nth-child(4n) { transform: rotate(1deg); }
@@ -317,8 +355,8 @@
 </style>
 </head>
 <body>
-<div id="bg" class="t-casefile"></div>
-<div id="app" class="t-casefile">
+<div id="bg" class="t-home"></div>
+<div id="app" class="t-home">
 
 <header class="hdr">
   <div>
@@ -330,10 +368,11 @@
 
 <!-- LANDING -->
 <section id="screen-landing" class="screen active">
+  <div class="home-only"><div class="home-art" id="homeArt" aria-hidden="true"></div></div>
   <div class="card">
-    <p class="lab"><span data-t="casefile">Agent name</span><span data-t="nightops">Callsign</span><span data-t="spyreel">Your name</span></p>
+    <p class="lab"><span data-t="home">Your name</span><span data-t="casefile">Agent name</span><span data-t="nightops">Callsign</span><span data-t="spyreel">Your name</span></p>
     <input type="text" id="nameInput" placeholder="Enter your name" maxlength="16" autocomplete="off">
-    <button class="btn" onclick="createGame()"><span data-t="casefile">Open a new case</span><span data-t="nightops">Start an operation</span><span data-t="spyreel">Start a new game</span></button>
+    <button class="btn" onclick="createGame()"><span data-t="home">Create a game</span><span data-t="casefile">Open a new case</span><span data-t="nightops">Start an operation</span><span data-t="spyreel">Start a new game</span></button>
   </div>
   <div class="card">
     <p class="lab">Have a room code?</p>
@@ -346,12 +385,13 @@
 <!-- LOBBY -->
 <section id="screen-lobby" class="screen">
   <div class="code paper">
-    <small><span data-t="casefile">Case number</span><span data-t="nightops">Secure channel</span><span data-t="spyreel">Now showing · room</span> · share it with your friends</small>
+    <small><span data-t="home">Room code</span><span data-t="casefile">Case number</span><span data-t="nightops">Secure channel</span><span data-t="spyreel">Now showing · room</span> · share it with your friends</small>
     <b id="lobbyCode">----</b>
   </div>
 
-  <p class="lab"><span data-t="casefile">Choose your case file</span><span data-t="nightops">Select operation mode</span><span data-t="spyreel">Pick tonight's feature</span></p>
+  <p class="lab"><span data-t="home">Pick a theme</span><span data-t="casefile">Choose your case file</span><span data-t="nightops">Select operation mode</span><span data-t="spyreel">Pick tonight's feature</span></p>
   <div class="themes">
+    <button class="th" id="th-home" data-k="home" onclick="pickTheme('home')"><span class="tick">Selected</span><span class="sw home"><i></i><i></i><i></i></span><span class="nm">Classic</span><span class="ds">Clean &amp; simple</span></button>
     <button class="th" id="th-casefile" data-k="casefile" onclick="pickTheme('casefile')"><span class="tick">Selected</span><span class="sw casefile"><i></i><i></i><i></i></span><span class="nm">Case File</span><span class="ds">Dossier &amp; stamps</span></button>
     <button class="th" id="th-nightops" data-k="nightops" onclick="pickTheme('nightops')"><span class="tick">Selected</span><span class="sw nightops"><i></i><i></i><i></i></span><span class="nm">Night Ops</span><span class="ds">Control room</span></button>
     <button class="th" id="th-spyreel" data-k="spyreel" onclick="pickTheme('spyreel')"><span class="tick">Selected</span><span class="sw spyreel"><i></i><i></i><i></i></span><span class="nm">Spy Reel</span><span class="ds">60s film poster</span></button>
@@ -360,12 +400,12 @@
 
   <div class="teams">
     <div class="team red">
-      <h3><span data-t="casefile">Red agency</span><span data-t="nightops">RED CELL</span><span data-t="spyreel">Team Red</span></h3>
+      <h3><span data-t="home">Red team</span><span data-t="casefile">Red agency</span><span data-t="nightops">RED CELL</span><span data-t="spyreel">Team Red</span></h3>
       <div class="list" id="redPlayerList"></div>
       <button class="btn red" id="joinRedBtn" onclick="joinTeam('red')">Join Red</button>
     </div>
     <div class="team blue">
-      <h3><span data-t="casefile">Blue agency</span><span data-t="nightops">BLUE CELL</span><span data-t="spyreel">Team Blue</span></h3>
+      <h3><span data-t="home">Blue team</span><span data-t="casefile">Blue agency</span><span data-t="nightops">BLUE CELL</span><span data-t="spyreel">Team Blue</span></h3>
       <div class="list" id="bluePlayerList"></div>
       <button class="btn blue" id="joinBlueBtn" onclick="joinTeam('blue')">Join Blue</button>
     </div>
@@ -387,7 +427,7 @@
       <p class="small" id="customWordsStatus"></p>
     </div>
     <p class="small" id="lobbyWarning"></p>
-    <button class="btn" onclick="startGame()"><span data-t="casefile">Open the case</span><span data-t="nightops">Begin operation</span><span data-t="spyreel">Roll the film</span></button>
+    <button class="btn" onclick="startGame()"><span data-t="home">Start the game</span><span data-t="casefile">Open the case</span><span data-t="nightops">Begin operation</span><span data-t="spyreel">Roll the film</span></button>
   </div>
   <div class="card center" id="lobbyWaitBox" style="display:none">
     <p class="small" style="margin:0">Waiting for the host to start the game…</p>
@@ -433,7 +473,7 @@
 <!-- ENDED -->
 <section id="screen-ended" class="screen">
   <div class="win paper" id="winnerCard">
-    <div class="stampline"><span data-t="casefile">Case closed</span><span data-t="nightops">Mission complete</span><span data-t="spyreel">Mission accomplished</span></div>
+    <div class="stampline"><span data-t="home">Game over</span><span data-t="casefile">Case closed</span><span data-t="nightops">Mission complete</span><span data-t="spyreel">Mission accomplished</span></div>
     <h2 id="cnWinnerTitle">Game over</h2>
     <p id="cnWinnerSub"></p>
   </div>
@@ -477,18 +517,19 @@ let armedCardIdx = null;
 
 // ---------- THEMES ----------
 // The host picks a theme in the lobby; it's saved on the room as `theme` so every phone follows it.
-const THEMES = ["casefile", "nightops", "spyreel"];
-const THEME_BASE = { casefile: "#211c17", nightops: "#04090d", spyreel: "#f2e8d5" };
+const THEMES = ["home", "casefile", "nightops", "spyreel"];
+const THEME_BASE = { home: "#151821", casefile: "#211c17", nightops: "#04090d", spyreel: "#f2e8d5" };
 const REVEAL_MS = 1800;
 const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TX = {
+  home:     { red: "Red team", blue: "Blue team", clue: t => `${capitalize(t)}'s clue`, wait: t => `Waiting for ${capitalize(t)}'s spymaster…`, give: "Give your team a clue", send: "Give clue" },
   casefile: { red: "Red agency", blue: "Blue agency", clue: t => `Telegram from ${capitalize(t)}'s spymaster`, wait: t => `Awaiting ${capitalize(t)}'s telegram…`, give: "Send your team a telegram", send: "Send telegram" },
   nightops: { red: "Red cell", blue: "Blue cell", clue: t => `Transmission · ${capitalize(t)} spymaster`, wait: t => `Awaiting ${capitalize(t)} transmission…`, give: "Transmit a clue", send: "Transmit" },
   spyreel:  { red: "Team Red", blue: "Team Blue", clue: t => `${capitalize(t)}'s clue`, wait: t => `Waiting for ${capitalize(t)}'s spymaster…`, give: "Give your team a clue", send: "Give clue" }
 };
 let curTheme = null, rv = null;
-const themeOK = k => THEMES.includes(k) ? k : "casefile";
-const tx = () => TX[curTheme || "casefile"];
+const themeOK = k => THEMES.includes(k) ? k : "home";
+const tx = () => TX[curTheme] || TX.casefile;
 
 function markThemeBtns(root, k) {
   root.querySelectorAll(".th").forEach(b => b.classList.toggle("on", b.dataset.k === k));
@@ -511,7 +552,6 @@ function applyTheme(k, origin) {
   if (k === curTheme) return;
   const prev = curTheme;
   curTheme = k;
-  try { localStorage.setItem("cnTheme", k); } catch (e) {}
   if (!origin || prev === null || reduceMotion || !origin.getClientRects().length) { setThemeClass(k); return; }
 
   const app = document.getElementById("app");
@@ -589,7 +629,12 @@ if (document.fonts && document.fonts.load) {
    "500 16px 'Chakra Petch'", "700 16px 'Chakra Petch'", "400 16px Bungee", "400 16px Outfit", "700 16px Outfit", "800 16px Outfit"]
     .forEach(f => document.fonts.load(f).catch(() => {}));
 }
-(function () { let k = null; try { k = localStorage.getItem("cnTheme"); } catch (e) {} applyTheme(themeOK(k), null); })();
+// The front door and every new room start on the Classic look; the host can switch in the lobby.
+applyTheme("home", null);
+(function dealHomeCards() {
+  const mix = ["r","b","n","r","b","n","b","r","k","n","r","b","n","b","r","n","r","b","n","b","r","n","b","r","n"];
+  document.getElementById("homeArt").innerHTML = mix.map((c, i) => `<i class="${c}" style="animation-delay:${i * 35}ms"></i>`).join("");
+})();
 
 auth.onAuthStateChanged(user => { if (user) uid = user.uid; });
 auth.signInAnonymously().catch(e => showError("Connection error: " + e.message));
@@ -613,7 +658,7 @@ function createGame() {
     hostUid: uid,
     status: "lobby",
     wordListMode: "default",
-    theme: curTheme || "casefile",
+    theme: "home",
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     players: {
       [uid]: { name: playerName, team: null, isSpymaster: false }
@@ -1236,7 +1281,13 @@ function playEnding(word, winner, loser) {
   const celebrate = () => playCelebration(winner);
   if (word) {
     const w = escapeHtml(word);
-    if (curTheme === "casefile") {
+    if (curTheme === "home") {
+      runOverlay(ov => {
+        ov.innerHTML = `<div class="big red">Assassin!</div><div class="osub">${w} was the assassin. ${Lo} is out of the game.</div>`;
+        if (!reduceMotion) ov.querySelector(".big").animate([{ transform: "scale(2.2)", opacity: 0 }, { transform: "scale(.94)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 480, easing: "ease-out", fill: "both" });
+        shakeApp(300);
+      }, 2800, celebrate);
+    } else if (curTheme === "casefile") {
       runOverlay(ov => {
         ov.innerHTML = `<div class="big">Terminated</div><div class="osub">${w} was the assassin. ${Lo} is out of the game.</div>`;
         slam(ov.querySelector(".big"), -12); shakeApp(300);
@@ -1272,7 +1323,12 @@ function playEnding(word, winner, loser) {
     }
     return;
   }
-  if (curTheme === "casefile") {
+  if (curTheme === "home") {
+    runOverlay(ov => {
+      ov.innerHTML = `<div class="big ${winner}">${W} wins!</div><div class="osub">They found every agent.</div>`;
+      if (!reduceMotion) ov.querySelector(".big").animate([{ transform: "translateY(30px) scale(.6)", opacity: 0 }, { transform: "translateY(-6px) scale(1.06)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }], { duration: 520, easing: "ease-out", fill: "both" });
+    }, 2400, celebrate);
+  } else if (curTheme === "casefile") {
     runOverlay(ov => {
       ov.innerHTML = `<div class="big" style="color:var(--${winner === "red" ? "red" : "blue"});background:#efe3c6">Case closed</div><div class="osub">${W} found every agent.</div>`;
       slam(ov.querySelector(".big"), -12); shakeApp(300);
@@ -1382,6 +1438,7 @@ function playCelebration(winner) {
   const team = v(winner === "red" ? "--red" : "--blue");
   const palette = curTheme === "casefile" ? [team, team, "#efe3c6", "#e6dabd", "#c9b78f", "#ffffff"]
     : curTheme === "nightops" ? [team, team, "#3ee6c4", "#3ee6c4", "#cfeaf2", "#ffffff"]
+    : curTheme === "home" ? [team, team, team, "#f4f5f8", "#d9ccaa", "#ffffff"]
     : [team, team, "#ff6b35", "#e9c46a", "#1d1b1a", "#fffaf0"];
 
   const confetti = (x, y, vx, vy, g) => fxAdd({
